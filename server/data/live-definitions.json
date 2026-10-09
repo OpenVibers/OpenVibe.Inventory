@@ -1,0 +1,1056 @@
+{
+  "_about": "Live's cosmetics catalog (OpenVibe.Live server/monetization/cosmetics.js COSMETICS, 2026-10-09) as definitions issued by service:live; alias is Live's item id. Tier maps to rarity: 0 and 1 common, 2 uncommon, 3 rare, 4 epic, 5 and 6 legendary.",
+  "definitions": [
+    {
+      "alias": "fx_rainbow",
+      "kind": "live.name_effect",
+      "name": "Rainbow Name",
+      "description": "Rainbow cycling colors",
+      "art": {
+        "emoji": "🌈",
+        "token": "name-fx-rainbow"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "name-fx-rainbow"
+      }
+    },
+    {
+      "alias": "fx_fire",
+      "kind": "live.name_effect",
+      "name": "Fire Name",
+      "description": "Blazing flames",
+      "art": {
+        "emoji": "🔥",
+        "token": "name-fx-fire"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "name-fx-fire"
+      }
+    },
+    {
+      "alias": "fx_ice",
+      "kind": "live.name_effect",
+      "name": "Ice Name",
+      "description": "Frosty glow",
+      "art": {
+        "emoji": "❄️",
+        "token": "name-fx-ice"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "name-fx-ice"
+      }
+    },
+    {
+      "alias": "fx_golden",
+      "kind": "live.name_effect",
+      "name": "Golden Name",
+      "description": "Golden shine",
+      "art": {
+        "emoji": "👑",
+        "token": "name-fx-golden"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "css_class": "name-fx-golden"
+      }
+    },
+    {
+      "alias": "fx_neon",
+      "kind": "live.name_effect",
+      "name": "Neon Name",
+      "description": "Neon pulse",
+      "art": {
+        "emoji": "💡",
+        "token": "name-fx-neon"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "css_class": "name-fx-neon"
+      }
+    },
+    {
+      "alias": "fx_galaxy",
+      "kind": "live.name_effect",
+      "name": "Galaxy Name",
+      "description": "Cosmic swirl",
+      "art": {
+        "emoji": "🌌",
+        "token": "name-fx-galaxy"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "css_class": "name-fx-galaxy"
+      }
+    },
+    {
+      "alias": "fx_void",
+      "kind": "live.name_effect",
+      "name": "Void Name",
+      "description": "Warps spacetime",
+      "art": {
+        "emoji": "🕳️",
+        "token": "name-fx-void"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "css_class": "name-fx-void"
+      }
+    },
+    {
+      "alias": "fx_toxic",
+      "kind": "live.name_effect",
+      "name": "Toxic Name",
+      "description": "Toxic drip",
+      "art": {
+        "emoji": "☠️",
+        "token": "name-fx-toxic"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "name-fx-toxic"
+      }
+    },
+    {
+      "alias": "fx_blood",
+      "kind": "live.name_effect",
+      "name": "Blood Name",
+      "description": "Dripping blood",
+      "art": {
+        "emoji": "🩸",
+        "token": "name-fx-blood"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "css_class": "name-fx-blood"
+      }
+    },
+    {
+      "alias": "fx_shadow",
+      "kind": "live.name_effect",
+      "name": "Shadow Name",
+      "description": "Dark shadow",
+      "art": {
+        "emoji": "🌑",
+        "token": "name-fx-shadow"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "css_class": "name-fx-shadow"
+      }
+    },
+    {
+      "alias": "fx_glitch",
+      "kind": "live.name_effect",
+      "name": "Glitch Name",
+      "description": "Digital glitch",
+      "art": {
+        "emoji": "📟",
+        "token": "name-fx-glitch"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "css_class": "name-fx-glitch"
+      }
+    },
+    {
+      "alias": "fx_hologram",
+      "kind": "live.name_effect",
+      "name": "Hologram Name",
+      "description": "Holographic shimmer",
+      "art": {
+        "emoji": "🔮",
+        "token": "name-fx-hologram"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "css_class": "name-fx-hologram"
+      }
+    },
+    {
+      "alias": "fx_divine",
+      "kind": "live.name_effect",
+      "name": "Divine Name",
+      "description": "Divine radiance",
+      "art": {
+        "emoji": "✝️",
+        "token": "name-fx-divine"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 5,
+        "css_class": "name-fx-divine"
+      }
+    },
+    {
+      "alias": "px_sparkle",
+      "kind": "live.particle",
+      "name": "Sparkle",
+      "description": "Sparkle particles",
+      "art": {
+        "emoji": "✨",
+        "token": "px-sparkle"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "px-sparkle",
+        "chars": "✦✧⋆"
+      }
+    },
+    {
+      "alias": "px_hearts",
+      "kind": "live.particle",
+      "name": "Hearts",
+      "description": "Heart particles",
+      "art": {
+        "emoji": "💖",
+        "token": "px-hearts"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "css_class": "px-hearts",
+        "chars": "♥♡❤"
+      }
+    },
+    {
+      "alias": "px_flames",
+      "kind": "live.particle",
+      "name": "Flames",
+      "description": "Flame embers",
+      "art": {
+        "emoji": "🔥",
+        "token": "px-flames"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "css_class": "px-flames",
+        "chars": "🔥🔸⚡"
+      }
+    },
+    {
+      "alias": "px_stars",
+      "kind": "live.particle",
+      "name": "Stars",
+      "description": "Orbiting stars",
+      "art": {
+        "emoji": "⭐",
+        "token": "px-stars"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "css_class": "px-stars",
+        "chars": "★☆✩"
+      }
+    },
+    {
+      "alias": "px_void",
+      "kind": "live.particle",
+      "name": "Void",
+      "description": "Dark matter",
+      "art": {
+        "emoji": "🕳️",
+        "token": "px-void"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "css_class": "px-void",
+        "chars": "◉◎⊙"
+      }
+    },
+    {
+      "alias": "hat_basic_cap",
+      "kind": "live.hat",
+      "name": "Basic Cap",
+      "description": "Simple cap",
+      "art": {
+        "emoji": "🧢"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "hat_char": "🧢"
+      }
+    },
+    {
+      "alias": "hat_cowboy",
+      "kind": "live.hat",
+      "name": "Cowboy Hat",
+      "description": "Yeehaw",
+      "art": {
+        "emoji": "🤠"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "hat_char": "🤠"
+      }
+    },
+    {
+      "alias": "hat_wizard",
+      "kind": "live.hat",
+      "name": "Wizard Hat",
+      "description": "Magical",
+      "art": {
+        "emoji": "🧙"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "hat_char": "🧙",
+        "animated": "float"
+      }
+    },
+    {
+      "alias": "hat_crown",
+      "kind": "live.hat",
+      "name": "Royal Crown",
+      "description": "Royalty",
+      "art": {
+        "emoji": "👑"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "hat_char": "👑",
+        "animated": "pulse"
+      }
+    },
+    {
+      "alias": "hat_halo",
+      "kind": "live.hat",
+      "name": "Halo",
+      "description": "Angelic",
+      "art": {
+        "emoji": "😇"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 5,
+        "hat_char": "😇",
+        "animated": "float"
+      }
+    },
+    {
+      "alias": "hat_void_crown",
+      "kind": "live.hat",
+      "name": "Void Crown",
+      "description": "From the dungeon depths",
+      "art": {
+        "emoji": "🕳️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "hat_char": "🕳️",
+        "animated": "warp"
+      }
+    },
+    {
+      "alias": "voice_default",
+      "kind": "live.voice",
+      "name": "Default Voice",
+      "description": "Standard TTS",
+      "art": {
+        "emoji": "🔊"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 0
+      }
+    },
+    {
+      "alias": "voice_deep",
+      "kind": "live.voice",
+      "name": "Deep Voice",
+      "description": "Low and rumbly",
+      "art": {
+        "emoji": "🎵"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 0.6,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "voice_chipmunk",
+      "kind": "live.voice",
+      "name": "Chipmunk Voice",
+      "description": "Squeaky and fast",
+      "art": {
+        "emoji": "🐿️"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.8,
+        "rate": 1.3
+      }
+    },
+    {
+      "alias": "voice_robot",
+      "kind": "live.voice",
+      "name": "Robot Voice",
+      "description": "Monotone machine",
+      "art": {
+        "emoji": "🤖"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 0.8,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "voice_whisper",
+      "kind": "live.voice",
+      "name": "Whisper Voice",
+      "description": "Quiet and eerie",
+      "art": {
+        "emoji": "🤫"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1.1,
+        "rate": 0.7
+      }
+    },
+    {
+      "alias": "voice_demon",
+      "kind": "live.voice",
+      "name": "Demon Voice",
+      "description": "From the underworld",
+      "art": {
+        "emoji": "😈"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.3,
+        "rate": 0.6
+      }
+    },
+    {
+      "alias": "gary",
+      "kind": "live.voice",
+      "name": "Gary",
+      "description": "Standard voice",
+      "art": {
+        "emoji": "🔊"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "brenda",
+      "kind": "live.voice",
+      "name": "Brenda",
+      "description": "Friendly female",
+      "art": {
+        "emoji": "👩"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.2,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "chadbot",
+      "kind": "live.voice",
+      "name": "ChadBot",
+      "description": "Deep bro voice",
+      "art": {
+        "emoji": "💪"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 0.5,
+        "rate": 0.8
+      }
+    },
+    {
+      "alias": "karen",
+      "kind": "live.voice",
+      "name": "Karen",
+      "description": "Manager-seeking",
+      "art": {
+        "emoji": "💅"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.3,
+        "rate": 1.1
+      }
+    },
+    {
+      "alias": "squeakmaster",
+      "kind": "live.voice",
+      "name": "SqueakMaster",
+      "description": "Ultra-squeaky",
+      "art": {
+        "emoji": "🐭"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.9,
+        "rate": 1.4
+      }
+    },
+    {
+      "alias": "bigchungus",
+      "kind": "live.voice",
+      "name": "BigChungus",
+      "description": "Absolute unit",
+      "art": {
+        "emoji": "🐰"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 0.3,
+        "rate": 0.7
+      }
+    },
+    {
+      "alias": "tweaker",
+      "kind": "live.voice",
+      "name": "Tweaker",
+      "description": "Fast & nervous",
+      "art": {
+        "emoji": "⚡"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.4,
+        "rate": 1.8
+      }
+    },
+    {
+      "alias": "grandpa",
+      "kind": "live.voice",
+      "name": "Grandpa",
+      "description": "Old & wise",
+      "art": {
+        "emoji": "👴"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 0.7,
+        "rate": 0.7
+      }
+    },
+    {
+      "alias": "crackhead",
+      "kind": "live.voice",
+      "name": "CrackheadCarl",
+      "description": "Manic energy",
+      "art": {
+        "emoji": "💊"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1.5,
+        "rate": 1.6
+      }
+    },
+    {
+      "alias": "ghostgirl",
+      "kind": "live.voice",
+      "name": "GhostGirl",
+      "description": "Eerie whisper",
+      "art": {
+        "emoji": "👻"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1.6,
+        "rate": 0.8
+      }
+    },
+    {
+      "alias": "robotoverlord",
+      "kind": "live.voice",
+      "name": "RobotOverlord",
+      "description": "Machine overlord",
+      "art": {
+        "emoji": "🤖"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 0.4,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "sassybitch",
+      "kind": "live.voice",
+      "name": "SassyBitch",
+      "description": "Sassy attitude",
+      "art": {
+        "emoji": "💁"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1.3,
+        "rate": 1.2
+      }
+    },
+    {
+      "alias": "demon",
+      "kind": "live.voice",
+      "name": "Demon (Legacy)",
+      "description": "Demonic (espeak)",
+      "art": {
+        "emoji": "👹"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 0.2,
+        "rate": 0.5
+      }
+    },
+    {
+      "alias": "helium",
+      "kind": "live.voice",
+      "name": "Helium",
+      "description": "Squeaky helium",
+      "art": {
+        "emoji": "🎈"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 2,
+        "rate": 1.5
+      }
+    },
+    {
+      "alias": "britbong",
+      "kind": "live.voice",
+      "name": "BritBong",
+      "description": "British accent",
+      "art": {
+        "emoji": "🇬🇧"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "yeehaw",
+      "kind": "live.voice",
+      "name": "YeeHaw",
+      "description": "Southern drawl",
+      "art": {
+        "emoji": "🤠"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 0.8,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "nyc",
+      "kind": "live.voice",
+      "name": "NYC",
+      "description": "New York accent",
+      "art": {
+        "emoji": "🗽"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.1,
+        "rate": 1.3
+      }
+    },
+    {
+      "alias": "french",
+      "kind": "live.voice",
+      "name": "French",
+      "description": "French accent",
+      "art": {
+        "emoji": "🇫🇷"
+      },
+      "rarity": "common",
+      "attributes": {
+        "tier": 1,
+        "pitch": 1.1,
+        "rate": 0.8
+      }
+    },
+    {
+      "alias": "chatterbox",
+      "kind": "live.voice",
+      "name": "Chatterbox",
+      "description": "Achievement voice",
+      "art": {
+        "emoji": "💬"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.2,
+        "rate": 1.4
+      }
+    },
+    {
+      "alias": "fisherman",
+      "kind": "live.voice",
+      "name": "Fisherman",
+      "description": "Achievement voice",
+      "art": {
+        "emoji": "🎣"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.9,
+        "rate": 0.85
+      }
+    },
+    {
+      "alias": "gc_smooth_operator",
+      "kind": "live.voice",
+      "name": "Smooth Operator",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.9,
+        "rate": 0.95
+      }
+    },
+    {
+      "alias": "gc_silicon_sally",
+      "kind": "live.voice",
+      "name": "Silicon Sally",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.2,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_brit_butler",
+      "kind": "live.voice",
+      "name": "British Butler",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.85,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "gc_lady_london",
+      "kind": "live.voice",
+      "name": "Lady London",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.15,
+        "rate": 0.95
+      }
+    },
+    {
+      "alias": "gc_mumbai_mike",
+      "kind": "live.voice",
+      "name": "Mumbai Mike",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1.05
+      }
+    },
+    {
+      "alias": "gc_down_under",
+      "kind": "live.voice",
+      "name": "Down Under",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.95,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_sheila",
+      "kind": "live.voice",
+      "name": "Sheila",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.25,
+        "rate": 1.05
+      }
+    },
+    {
+      "alias": "gc_studio_f",
+      "kind": "live.voice",
+      "name": "Studio Female",
+      "description": "Google Studio",
+      "art": {
+        "emoji": "🎙️"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1.1,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "gc_studio_m",
+      "kind": "live.voice",
+      "name": "Studio Male",
+      "description": "Google Studio",
+      "art": {
+        "emoji": "🎙️"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 0.85,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "pl_joanna_std",
+      "kind": "live.voice",
+      "name": "Joanna",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_matthew_std",
+      "kind": "live.voice",
+      "name": "Matthew",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.9,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_amy_std",
+      "kind": "live.voice",
+      "name": "Amy",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.15,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_brian_std",
+      "kind": "live.voice",
+      "name": "Brian",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 0.85,
+        "rate": 0.95
+      }
+    },
+    {
+      "alias": "pl_olivia_std",
+      "kind": "live.voice",
+      "name": "Olivia",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1.2,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_danielle_long",
+      "kind": "live.voice",
+      "name": "Danielle",
+      "description": "Polly Long-form",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1.1,
+        "rate": 0.85
+      }
+    },
+    {
+      "alias": "pl_gregory_long",
+      "kind": "live.voice",
+      "name": "Gregory",
+      "description": "Polly Long-form",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 0.8,
+        "rate": 0.85
+      }
+    },
+    {
+      "alias": "pl_gregory_neural",
+      "kind": "live.voice",
+      "name": "Gregory Neural",
+      "description": "Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 0.85,
+        "rate": 0.9
+      }
+    },
+    {
+      "alias": "pl_ruth_long",
+      "kind": "live.voice",
+      "name": "Ruth",
+      "description": "Polly Long-form",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 0.85
+      }
+    },
+    {
+      "alias": "pl_arthur_neural",
+      "kind": "live.voice",
+      "name": "Arthur Neural",
+      "description": "Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 5,
+        "pitch": 0.9,
+        "rate": 0.85
+      }
+    },
+    {
+      "alias": "vs_mine_dwarf_lord",
+      "kind": "live.voice",
+      "name": "Dwarf Lord",
+      "description": "Skill mastery",
+      "art": {
+        "emoji": "⛏️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 5,
+        "pitch": 0.5,
+        "rate": 0.7
+      }
+    }
+  ]
+}

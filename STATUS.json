@@ -1,0 +1,50 @@
+{
+  "stage": "alpha",
+  "code": true,
+  "wave": "W20",
+  "plan": "Plan track T21 (the OpenVibe inventory), ADR-054: step 2, the authority with Live's cosmetics as the first kinds",
+  "runtime": "node 22, express 4, PostgreSQL 18 (openvibe-sdk/db, async) + Valkey 9",
+  "port": "5030",
+  "domain": "inventory.openvibe.network",
+  "contracts": "openvibe-contracts v0.121.0",
+  "sdk": "openvibe-sdk v0.37.0",
+  "shared": "openvibe-shared v2.15.0",
+  "packages": [
+    "openvibe-contracts v0.121.0",
+    "openvibe-sdk v0.37.0",
+    "openvibe-shared v2.15.0"
+  ],
+  "summary": "OpenVibe.Inventory — one inventory for an OpenVibe account (ADR-054). Item kinds (a contract plus a renderer per surface), definitions, instances, the equipped set and an append-only ledger in its own PostgreSQL database. Issuers (services, apps) grant only within their namespace; people see and equip what they own; every movement is a ledger row and an inventory.* event. Nothing is sold, bought, traded or converted. Live's name effects, particles, hats and voices are the first kinds (70 definitions seeded at boot), and scripts/import-live.js moves Live's unlocks and equipped slots here, row for row.",
+  "works": [
+    "Kinds and definitions seeded at boot from data/kinds.json and data/live-definitions.json (Live's catalog, its item ids kept as aliases)",
+    "Grants by an issuer within its namespace: idempotent per key, supply caps with serial numbers, a non-stackable item answers the one already owned; consume and revoke",
+    "Equip one item per slot (a person, or a service acting for them with X-OV-Subject); a batch read of up to 100 equipped sets in one query",
+    "Public reads (kinds, definitions, a person's inventory and equipped set) and the person's own full inventory",
+    "Definitions created and edited by their issuer; rarity, attributes and supply fixed once published; attributes validated against the kind's schema",
+    "Pages: home, every item by kind, one item, your inventory with plain equip forms, a person's public inventory, /updates",
+    "Events (inventory.item.granted/consumed/revoked/equipped/unequipped, inventory.definition.published) through the openvibe-sdk outbox",
+    "Account export and deletion (ADR-033) at the loopback POST /internal/events, subscriptions created at boot",
+    "scripts/import-live.js: dry run, --apply (origin migrated, unlock times kept, idempotent) and --verify (row for row)"
+  ],
+  "notYet": [
+    "Live reading and writing through Inventory (INVENTORY_AUTHORITY), then Live's tables dropped (ADR-054 §8)",
+    "Profiles on Network showing the showcase; equip in Chat, Community and Games",
+    "Creator submissions and staff review (the Workshop, ADR-054 §6)",
+    "Trading and a market: not before a money ADR (ADR-054 §5)",
+    "Account merge (ADR-029): instances moving to the surviving subject"
+  ],
+  "capabilitiesRegistered": true,
+  "serviceManifestRegistered": true,
+  "deployed": false,
+  "placeholderInSites": false,
+  "features": [
+    "item kinds",
+    "definitions",
+    "grants",
+    "equip",
+    "public inventory",
+    "Live migration",
+    "account export and deletion"
+  ],
+  "updated": "2026-10-09"
+}

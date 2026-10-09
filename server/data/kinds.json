@@ -1,0 +1,211 @@
+{
+  "_about": "The kinds OpenVibe.Inventory registers at boot (ADR-054 §8). Live's cosmetics are the first.",
+  "kinds": [
+    {
+      "id": "live.name_effect",
+      "name": "Name effect",
+      "description": "How your name looks in chat, on overlays and on your profile.",
+      "slots": [
+        "name_effect"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "live.name_effect.css@1"
+        },
+        {
+          "surface": "overlay",
+          "renderer": "live.name_effect.css@1"
+        },
+        {
+          "surface": "profile",
+          "renderer": "live.name_effect.css@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "required": [
+          "tier"
+        ],
+        "properties": {
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "css_class": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,40}$"
+          }
+        }
+      },
+      "stackable": false,
+      "issuer": "service:live"
+    },
+    {
+      "id": "live.particle",
+      "name": "Particle effect",
+      "description": "Particles that drift around your name and messages.",
+      "slots": [
+        "particle"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "live.particle.css@1"
+        },
+        {
+          "surface": "overlay",
+          "renderer": "live.particle.css@1"
+        },
+        {
+          "surface": "profile",
+          "renderer": "live.particle.css@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "required": [
+          "tier"
+        ],
+        "properties": {
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "css_class": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,40}$"
+          },
+          "chars": {
+            "type": "string",
+            "maxLength": 16
+          }
+        }
+      },
+      "stackable": false,
+      "issuer": "service:live"
+    },
+    {
+      "id": "live.hat",
+      "name": "Hat",
+      "description": "A hat on your avatar and next to your name.",
+      "slots": [
+        "hat"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "live.hat.glyph@1"
+        },
+        {
+          "surface": "overlay",
+          "renderer": "live.hat.glyph@1"
+        },
+        {
+          "surface": "profile",
+          "renderer": "live.hat.glyph@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "required": [
+          "tier"
+        ],
+        "properties": {
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "hat_char": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "animated": {
+            "enum": [
+              "float",
+              "pulse",
+              "warp"
+            ]
+          }
+        }
+      },
+      "stackable": false,
+      "issuer": "service:live"
+    },
+    {
+      "id": "live.voice",
+      "name": "Voice",
+      "description": "The voice your text-to-speech messages are read in.",
+      "slots": [
+        "voice"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "live.voice.speech@1"
+        },
+        {
+          "surface": "overlay",
+          "renderer": "live.voice.speech@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "required": [
+          "tier"
+        ],
+        "properties": {
+          "tier": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "pitch": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "rate": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 3
+          }
+        }
+      },
+      "stackable": false,
+      "issuer": "service:live"
+    },
+    {
+      "id": "live.chat_tag",
+      "name": "Chat tag",
+      "description": "A short tag shown before your name in chat.",
+      "slots": [
+        "chat_tag"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "live.chat_tag.text@1"
+        },
+        {
+          "surface": "profile",
+          "renderer": "live.chat_tag.text@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 24
+          }
+        }
+      },
+      "stackable": false,
+      "issuer": "service:live"
+    }
+  ]
+}

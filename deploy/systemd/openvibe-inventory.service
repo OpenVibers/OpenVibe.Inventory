@@ -1,0 +1,30 @@
+[Unit]
+Description=OpenVibe.Inventory — Your items, on every OpenVibe site.
+# Network (sign-in, JWKS) should be up first, but OpenVibe.Inventory degrades honestly without it: the pages and the API's
+# public routes serve; sign-in and the guarded routes wait for the signing key (see /api/ready).
+After=network.target postgresql.service pgbouncer.service valkey-server.service
+Wants=openvibe-network.service postgresql.service pgbouncer.service valkey-server.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/inventory.openvibe.network
+EnvironmentFile=/etc/openvibe/inventory.env
+Environment=NODE_ENV=production
+Environment=PORT=5030
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env node /opt/inventory.openvibe.network/server/index.js
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+# In-flight requests get the 10 s drain.
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# OpenVibe.Inventory's own database is PostgreSQL on the host's data role; the code tree stays read-only.
+
+[Install]
+WantedBy=multi-user.target
