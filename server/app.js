@@ -28,6 +28,9 @@ const { createSso } = require('./auth/sso');
 const { createPrincipal } = require('./http/principal');
 const { createApi } = require('./http/api');
 const { createPageRoutes } = require('./http/pages');
+const { createWorkshopRoutes } = require('./workshop/pages');
+const { createWorkshopMedia } = require('./workshop/media');
+const { createPeople } = require('./workshop/people');
 const { createServiceReadiness } = require('./observability');
 const { createCallerLimits } = require('./http/caller-limits');
 const { createServiceOutbox } = require('openvibe-sdk/events');
@@ -70,6 +73,9 @@ async function createApp(opts = {}) {
         ? createNetworkSender({ networkInternalUrl: config.networkInternalUrl, clientId: config.oauth.clientId, clientSecret: config.oauth.clientSecret, fetch: fetchImpl })
         : async () => { throw new Error('OV_OAUTH_CLIENT_SECRET is not set: Inventory cannot answer account events'); });
     const ctx = { config, s, keys, sso, principal, log, outbox, inv, accountData };
+    // The Workshop (ADR-054 §6): images in this service's own Media tenant, recipients by @name through the Network.
+    ctx.workshopMedia = opts.workshopMedia || createWorkshopMedia({ config, fetchImpl: opts.fetchImpl, log });
+    ctx.people = opts.people || createPeople({ config, fetchImpl: opts.fetchImpl });
 
     const app = express();
     app.disable('x-powered-by');
@@ -159,6 +165,7 @@ async function createApp(opts = {}) {
 
     // ── Pages ───────────────────────────────────────────────
     app.use(rateLimit({ windowMs: 60_000, limit: Number(process.env.INVENTORY_RATE_LIMIT_PER_MIN) || 300, standardHeaders: true, legacyHeaders: false }));
+    app.use(createWorkshopRoutes(ctx));
     app.use(createPageRoutes(ctx));
     app.use((req, res) => send(res, 404, { viewer: req.viewer, config, path: req.originalUrl, title: 'Not found', body: html`<h1>Not found</h1><p>No page here. Try <a href="/">the home page</a> or <a href="/updates">the update log</a>.</p>` }));
 

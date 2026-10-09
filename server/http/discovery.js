@@ -26,6 +26,7 @@ const PAGE_TEXT = {
     '/': ['OpenVibe.Inventory home', 'OpenVibe.Inventory: Your items, on every OpenVibe site.'],
     '/updates': ['What shipped on OpenVibe.Inventory', 'This site\'s update log, from the network changelog feed.'],
     '/items': ['Every item', 'Every published item on OpenVibe.Inventory, by kind, with its rarity.'],
+    '/workshop': ['The Workshop', 'Badges made by people in the community, reviewed by staff before anyone sees them, given free by their makers.'],
 };
 
 function dayOf(ts) {
@@ -48,6 +49,7 @@ function homeJsonLd(config) {
 const publicPages = () => [
     { path: '/', changefreq: 'weekly', priority: 1.0 },
     { path: '/updates', changefreq: 'daily', priority: 0.5 },
+    { path: '/workshop', changefreq: 'daily', priority: 0.6 },
 ];
 
 const CATALOG_PAGE = { path: '/items', changefreq: 'daily', priority: 0.7 };

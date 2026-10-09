@@ -18,6 +18,9 @@ const Ajv = require('ajv/dist/2020');
 
 const SUBJECT_RE = /^usr_[0-9A-HJKMNP-TV-Z]{26}$/;
 const DEF_RE = /^itd_[0-9A-HJKMNP-TV-Z]{26}$/;
+// The Workshop (ADR-054 §6): what a person may submit and give.
+const WORKSHOP = Object.freeze({ inReview: 5, perDay: 20, giftsPerDay: 100, maxCap: 10000 });
+const PERSON_RE = /^user:usr_[0-9A-HJKMNP-TV-Z]{26}$/;
 // Who an issuer may name as a grantor of one of its items (ADR-054 §3): a service or an app, never a person.
 const GRANTOR_RE = /^(service:[a-z][a-z0-9-]*|app:app_[0-9A-HJKMNP-TV-Z]{26})$/;
 const INST_RE = /^inv_[0-9A-HJKMNP-TV-Z]{26}$/;
@@ -35,7 +38,7 @@ function actorOf(requester) {
 }
 
 function kindRow(r) {
-    return { id: r.id, name: r.name, description: r.description || undefined, slots: r.slots, surfaces: r.surfaces, attributes: r.attribute_schema, stackable: r.stackable, issuer: r.issuer };
+    return { id: r.id, name: r.name, description: r.description || undefined, slots: r.slots, surfaces: r.surfaces, attributes: r.attribute_schema, stackable: r.stackable, issuer: r.issuer, ...(r.workshop ? { workshop: true } : {}) };
 }
 
 function definitionRow(r, aliases = []) {
@@ -88,13 +91,13 @@ function createInventory({ s, outbox, log = console }) {
     async function listKinds() { return (await db.many('SELECT * FROM inventory_kinds ORDER BY id')).map(kindRow); }
     async function upsertKind(k) {
         const now = s.iso();
-        await db.exec(`INSERT INTO inventory_kinds (id, name, description, slots, surfaces, attribute_schema, stackable, issuer, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
+        await db.exec(`INSERT INTO inventory_kinds (id, name, description, slots, surfaces, attribute_schema, stackable, issuer, created_at, updated_at, workshop)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, $10)
             ON CONFLICT (id) DO UPDATE SET name = excluded.name, description = excluded.description, slots = excluded.slots, surfaces = excluded.surfaces,
-                attribute_schema = excluded.attribute_schema, stackable = excluded.stackable, issuer = excluded.issuer, updated_at = excluded.updated_at
-            WHERE (inventory_kinds.name, inventory_kinds.description, inventory_kinds.slots, inventory_kinds.surfaces, inventory_kinds.attribute_schema, inventory_kinds.stackable, inventory_kinds.issuer)
-                IS DISTINCT FROM (excluded.name, excluded.description, excluded.slots, excluded.surfaces, excluded.attribute_schema, excluded.stackable, excluded.issuer)`,
-        [k.id, k.name, k.description || null, JSON.stringify(k.slots || []), JSON.stringify(k.surfaces || []), JSON.stringify(k.attribute_schema || { type: 'object' }), !!k.stackable, k.issuer, now]);
+                attribute_schema = excluded.attribute_schema, stackable = excluded.stackable, issuer = excluded.issuer, updated_at = excluded.updated_at, workshop = excluded.workshop
+            WHERE (inventory_kinds.name, inventory_kinds.description, inventory_kinds.slots, inventory_kinds.surfaces, inventory_kinds.attribute_schema, inventory_kinds.stackable, inventory_kinds.issuer, inventory_kinds.workshop)
+                IS DISTINCT FROM (excluded.name, excluded.description, excluded.slots, excluded.surfaces, excluded.attribute_schema, excluded.stackable, excluded.issuer, excluded.workshop)`,
+        [k.id, k.name, k.description || null, JSON.stringify(k.slots || []), JSON.stringify(k.surfaces || []), JSON.stringify(k.attribute_schema || { type: 'object' }), !!k.stackable, k.issuer, now, !!k.workshop]);
     }
     async function checkAttributes(kind, attributes) {
         const row = await db.maybe('SELECT attribute_schema, updated_at FROM inventory_kinds WHERE id = $1', [kind]);
@@ -149,20 +152,34 @@ function createInventory({ s, outbox, log = console }) {
     }
 
     /** A definition in the kind's namespace, by the kind's issuer (services and apps; creators open with the Workshop). */
-    async function createDefinition(requester, b, { status = null } = {}) {
+    async function createDefinition(requester, b, { status = null, creditName = null } = {}) {
         if (!b || typeof b !== 'object') fail(400, 'request.bad_body', 'send inventory.definition-request@1');
         const kind = await getKind(b.kind);
         if (!kind) fail(422, 'inventory.unknown_kind', `no kind ${b.kind}`);
-        if (kind.issuer !== requester) fail(403, 'inventory.not_issuer', `only ${kind.issuer} defines ${kind.id} items (community items open with the Workshop, ADR-054 §6)`);
+        // The Workshop (ADR-054 §6): any person submits a definition of a Workshop kind, issued by and credited to them,
+        // in review until staff publish it: an image, common, with a cap they choose.
+        const workshop = !!kind.workshop && PERSON_RE.test(requester);
+        if (kind.issuer !== requester && !workshop) fail(403, 'inventory.not_issuer', `only ${kind.issuer} defines ${kind.id} items${kind.workshop ? '' : ' (community items open with the Workshop, ADR-054 §6)'}`);
+        if (workshop) {
+            if (!b.art || typeof b.art !== 'object' || !/^med_[0-9A-HJKMNP-TV-Z]{26}$/.test(String(b.art.media_id || '')) || Object.keys(b.art).length !== 1) fail(422, 'inventory.bad_art', 'a Workshop item is one reviewed image: art is { media_id }');
+            if (!(Number.isInteger(b.supply_cap) && b.supply_cap >= 1 && b.supply_cap <= WORKSHOP.maxCap)) fail(422, 'inventory.bad_supply', `a Workshop item has a cap from 1 to ${WORKSHOP.maxCap}`);
+            if (b.grantors !== undefined || b.aliases !== undefined || b.publish) fail(422, 'request.bad_body', 'a Workshop item is submitted for review, with no grantors or aliases');
+            const waiting = Number(await db.value("SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND status = 'in_review'", [requester]));
+            if (waiting >= WORKSHOP.inReview) fail(429, 'inventory.review_queue_full', `at most ${WORKSHOP.inReview} items in review at once`);
+            const today = Number(await db.value('SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND left(created_at, 10) = $2::text', [requester, s.iso().slice(0, 10)]));
+            if (today >= WORKSHOP.perDay) fail(429, 'inventory.submissions_today', `at most ${WORKSHOP.perDay} submissions a day`);
+            b = { ...b, rarity: 'common' };
+        }
         checkDefinitionBody(b);
         await checkAttributes(kind.id, b.attributes || {});
         const id = s.newId('itd');
         const now = s.iso();
-        const st = status || (b.publish ? 'published' : 'draft');
+        const st = workshop ? 'in_review' : (status || (b.publish ? 'published' : 'draft'));
         return await s.tx(async () => {
-            await db.exec(`INSERT INTO inventory_definitions (id, kind, name, description, art, rarity, attributes, issuer, supply_cap, status, created_at, updated_at, published_at, grantors)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12, $13)`,
-            [id, kind.id, b.name.trim(), b.description || null, JSON.stringify(b.art), b.rarity, JSON.stringify(b.attributes || {}), requester, b.supply_cap || null, st, now, st === 'published' ? now : null, JSON.stringify(b.grantors || [])]);
+            await db.exec(`INSERT INTO inventory_definitions (id, kind, name, description, art, rarity, attributes, issuer, supply_cap, status, created_at, updated_at, published_at, grantors, credit_subject, credit_name)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12, $13, $14, $15)`,
+            [id, kind.id, b.name.trim(), b.description || null, JSON.stringify(b.art), b.rarity, JSON.stringify(b.attributes || {}), requester, b.supply_cap || null, st, now, st === 'published' ? now : null, JSON.stringify(b.grantors || []),
+                workshop ? requester.slice('user:'.length) : null, workshop && creditName ? String(creditName).slice(0, 64) : null]);
             for (const alias of b.aliases || []) {
                 const taken = await db.maybe('SELECT definition_id FROM inventory_definition_aliases WHERE issuer = $1 AND alias = $2', [requester, alias]);
                 if (taken) fail(409, 'inventory.alias_taken', `${alias} already names ${taken.definition_id}`);
@@ -228,6 +245,12 @@ function createInventory({ s, outbox, log = console }) {
             const isGrantor = Array.isArray(def.grantors) && def.grantors.includes(requester);
             if (def.issuer !== requester && !isGrantor) fail(403, 'inventory.not_issuer', `only ${def.issuer}${(def.grantors || []).length ? ' and the grantors it names' : ''} grant this item`);
             if (def.status !== 'published') fail(409, 'inventory.not_published', `the item is ${def.status}`);
+            // A creator gives their Workshop item (ADR-054 §6): granted, never earned, at most 100 gifts a day.
+            if (PERSON_RE.test(requester)) {
+                if (origin !== 'granted') fail(422, 'inventory.bad_origin', 'a creator gives an item: origin granted');
+                const today = Number(await db.value('SELECT count(*) FROM inventory_grants WHERE issuer = $1 AND left(created_at, 10) = $2::text', [requester, s.iso().slice(0, 10)]));
+                if (today >= WORKSHOP.giftsPerDay) fail(429, 'inventory.gifts_today', `at most ${WORKSHOP.giftsPerDay} gifts a day`);
+            }
             const kind = await getKind(def.kind);
             if (b.attributes !== undefined) await checkAttributes(kind.id, { ...def.attributes, ...b.attributes });
             if (!kind.stackable) {
@@ -299,13 +322,13 @@ function createInventory({ s, outbox, log = console }) {
     async function equipped(subjects) {
         const list = [...new Set((subjects || []).map(String))].filter((x) => SUBJECT_RE.test(x)).slice(0, 100);
         if (!list.length) return [];
-        const rows = await db.many(`SELECT e.owner_subject, e.kind, e.slot, e.instance_id, e.updated_at, i.definition_id, d.art->>'token' AS token
+        const rows = await db.many(`SELECT e.owner_subject, e.kind, e.slot, e.instance_id, e.updated_at, i.definition_id, d.art->>'token' AS token, d.art->>'media_id' AS media_id
             FROM inventory_equipped e JOIN inventory_instances i ON i.id = e.instance_id JOIN inventory_definitions d ON d.id = i.definition_id
             WHERE e.owner_subject = ANY($1::text[]) AND i.state = 'owned' ORDER BY e.owner_subject, e.kind, e.slot`, [list]);
         const by = new Map(list.map((x) => [x, { subject: x, slots: {}, updated_at: null }]));
         for (const r of rows) {
             const e = by.get(r.owner_subject);
-            e.slots[`${r.kind}:${r.slot}`] = { instance_id: r.instance_id, definition_id: r.definition_id, ...(r.token ? { token: r.token } : {}) };
+            e.slots[`${r.kind}:${r.slot}`] = { instance_id: r.instance_id, definition_id: r.definition_id, ...(r.token ? { token: r.token } : {}), ...(r.media_id ? { media_id: r.media_id } : {}) };
             if (!e.updated_at || r.updated_at > e.updated_at) e.updated_at = r.updated_at;
         }
         const fallback = s.iso();
@@ -341,10 +364,43 @@ function createInventory({ s, outbox, log = console }) {
         return (await equipped([subject]))[0];
     }
 
+    // ── The Workshop (ADR-054 §6) ─────────────────────────
+    /**
+     * Staff decide on a Workshop item in review: publish it (common unless they choose a rarity) or reject it with a
+     * reason. A rejected item goes back to draft with the note, which only its creator sees.
+     */
+    async function review(reviewer, id, b) {
+        if (!b || !['publish', 'reject'].includes(b.decision)) fail(422, 'inventory.bad_review', 'decision is publish or reject');
+        if (b.decision === 'reject' && !(typeof b.reason === 'string' && b.reason.trim() && b.reason.length <= 300)) fail(422, 'inventory.bad_review', 'a rejection says why, in at most 300 characters');
+        if (b.rarity !== undefined && !RARITY.includes(b.rarity)) fail(422, 'inventory.bad_rarity', `rarity is one of ${RARITY.join(', ')}`);
+        return await s.tx(async () => {
+            const cur = await db.maybe('SELECT * FROM inventory_definitions WHERE id = $1 FOR UPDATE', [String(id || '')]);
+            if (!cur) fail(404, 'inventory.definition_not_found', 'no such definition');
+            if (cur.status !== 'in_review') fail(409, 'inventory.not_in_review', `the item is ${cur.status}`);
+            const now = s.iso();
+            const publish = b.decision === 'publish';
+            await db.exec(`UPDATE inventory_definitions SET status = $2, rarity = $3, review_note = $4, reviewed_by = $5, reviewed_at = $6, updated_at = $6,
+                published_at = CASE WHEN $2 = 'published' THEN $6 ELSE published_at END WHERE id = $1`,
+            [cur.id, publish ? 'published' : 'draft', publish && b.rarity ? b.rarity : cur.rarity, publish ? null : b.reason.trim(), reviewer, now]);
+            await ledger(publish ? 'published' : 'rejected', { definition: cur.id, actor: reviewer, reason: publish ? null : b.reason.trim() });
+            if (publish) await emit('inventory.definition.published', { subject: { type: 'item_definition', id: cur.id }, visibility: 'public', actor: reviewer, payload: { definition_id: cur.id, kind: cur.kind, name: cur.name, rarity: b.rarity || cur.rarity, issuer: cur.issuer } });
+            return await getDefinition(cur.id);
+        });
+    }
+
+    /** Workshop items: the review queue (staff), a creator's own (any status, with the review note), or the published ones. */
+    async function workshopItems({ status = null, issuer = null, limit = 100 } = {}) {
+        const rows = await db.many(`SELECT d.* FROM inventory_definitions d JOIN inventory_kinds k ON k.id = d.kind
+            WHERE k.workshop AND ($1::text IS NULL OR d.status = $1) AND ($2::text IS NULL OR d.issuer = $2)
+            ORDER BY CASE WHEN d.status = 'in_review' THEN d.created_at END ASC, d.updated_at DESC LIMIT $3`,
+        [status, issuer, Math.max(1, Math.min(500, Number(limit) || 100))]);
+        return rows.map((r) => ({ ...definitionRow(r), ...(r.review_note ? { review_note: r.review_note } : {}) }));
+    }
+
     return {
         listKinds, getKind, upsertKind, listDefinitions, getDefinition, byAlias, createDefinition, updateDefinition,
-        grant, consume, inventory, equipped, equip, ledger,
+        grant, consume, inventory, equipped, equip, ledger, review, workshopItems,
     };
 }
 
-module.exports = { createInventory, InventoryError, actorOf, SUBJECT_RE, DEF_RE, INST_RE, RARITY };
+module.exports = { createInventory, InventoryError, actorOf, SUBJECT_RE, DEF_RE, INST_RE, RARITY, WORKSHOP };

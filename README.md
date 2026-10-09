@@ -60,6 +60,18 @@ token that is presented must hold `inventory.item.read`.
 items, equipped set and history. The deletion removes their items and equipped set and keeps the ledger rows without
 them, so supply counts stay true.
 
+## The Workshop (ADR-054 §6)
+
+Community badges, free. A signed-in person makes one at `/workshop/new`: a square PNG or WebP image (64 to 512 px, at
+most 200 KB, checked by its own bytes and stored in OpenVibe.Media under this service's tenant), a name and a cap of
+at most 10 000. They also confirm that they made the image or may use it. It is `in_review`, credited to them and
+shown to nobody else until staff publish it at `/workshop/review` (or `POST /api/v1/definitions/:id/review`), with a
+rarity, or reject it with a reason the creator reads on `/workshop/mine`. A published badge is given by its creator,
+by `@name`, as `granted`, within its cap and 100 gifts a day. People wear it before their name in chat and on their
+profile (`network.badge.image@1`; the equipped read carries the image's `media_id`). Limits: 5 in review and 20
+submissions a day per person. On account deletion a creator's badges pass to the kind's issuer, retired, without
+them.
+
 ## Pages
 
 `/` (what it is), `/items` (every item by kind), `/items/:id` (one item: where it shows, who gives it, how many exist),
@@ -123,7 +135,7 @@ Reporting a vulnerability: [SECURITY.md](SECURITY.md).
 Part of the [OpenVibe network](https://openvibe.network). Built in the open by [OpenVibers](https://github.com/OpenVibers).
 
 <!-- versions:start -->
-- openvibe-contracts: v0.123.0
+- openvibe-contracts: v0.124.0
 - openvibe-sdk: v0.37.0
 - openvibe-shared: v2.17.0
 <!-- versions:end -->

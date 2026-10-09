@@ -24,9 +24,9 @@ const { boot, check, done } = require('./helpers/boot');
     let granted;
 
     try {
-        await check('boot registers Live\'s five kinds and 70 cosmetics, published, found by Live\'s ids', async () => {
+        await check('boot registers Live\'s five kinds, the Workshop\'s badge and Live\'s 70 cosmetics, published, found by Live\'s ids', async () => {
             const kinds = (await api('/kinds')).json().kinds;
-            assert.deepStrictEqual(kinds.map((k) => k.id), ['live.chat_tag', 'live.hat', 'live.name_effect', 'live.particle', 'live.voice']);
+            assert.deepStrictEqual(kinds.map((k) => k.id), ['live.chat_tag', 'live.hat', 'live.name_effect', 'live.particle', 'live.voice', 'network.badge'], 'Live\'s five and the Workshop\'s badge');
             for (const k of kinds) valid('inventory.kind@1', k);
             const defs = (await api('/definitions?limit=500')).json().definitions;
             assert.strictEqual(defs.length, 70);
@@ -37,7 +37,7 @@ const { boot, check, done } = require('./helpers/boot');
             assert.strictEqual(crown.rarity, 'epic');
             // A second boot on the same database seeds nothing again.
             const { seed } = require('../server/inventory/seed');
-            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 5, definitions: 0, grantors: 0 });
+            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 6, definitions: 0, grantors: 0 });
         });
 
         await check('an issuer grants within its namespace, idempotently; a non-stackable item already owned answers the one held', async () => {

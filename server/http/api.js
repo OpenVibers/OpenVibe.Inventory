@@ -103,6 +103,12 @@ function createApi(ctx) {
         instance: await inv.consume(issuerOf(req), req.params.id, { revoke: true, reason: req.body && typeof req.body.reason === 'string' ? req.body.reason.slice(0, 200) : null }),
     })));
     r.post('/definitions', principal.requireCapability('inventory.definition.manage'), limits.budget('inventory.define'), wrap(async (req, res) => res.status(201).json({ definition: await inv.createDefinition(issuerOf(req), req.body) })));
+    // Staff decide on a Workshop item in review (ADR-054 §6): a person whose Network role is staff, nobody else.
+    r.post('/definitions/:id/review', limits.budget('inventory.define'), wrap(async (req, res) => {
+        const staff = req.principal.kind === 'user' && req.viewer && req.viewer.kind === 'user' && ['admin', 'global_mod'].includes(req.viewer.role);
+        if (!staff) return http.sendProblem(res, 403, 'inventory.staff_only', { detail: 'Only OpenVibe staff review Workshop items', ctx: req.ov });
+        return res.json({ definition: await inv.review(req.principal.requester, req.params.id, req.body || {}) });
+    }));
     r.patch('/definitions/:id', principal.requireCapability('inventory.definition.manage'), limits.budget('inventory.define'), wrap(async (req, res) => res.json({ definition: await inv.updateDefinition(issuerOf(req), req.params.id, req.body) })));
 
     return r;

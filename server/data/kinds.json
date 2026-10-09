@@ -206,6 +206,32 @@
       },
       "stackable": false,
       "issuer": "service:live"
+    },
+    {
+      "id": "network.badge",
+      "name": "Badge",
+      "description": "A small image made by someone in the community, shown just before a person's name. Every one is reviewed by staff before anyone sees it.",
+      "slots": [
+        "badge"
+      ],
+      "surfaces": [
+        {
+          "surface": "chat",
+          "renderer": "network.badge.image@1"
+        },
+        {
+          "surface": "profile",
+          "renderer": "network.badge.image@1"
+        }
+      ],
+      "attribute_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "stackable": false,
+      "issuer": "service:inventory",
+      "workshop": true
     }
   ]
 }
