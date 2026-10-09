@@ -37,7 +37,7 @@ const { boot, check, done } = require('./helpers/boot');
             assert.strictEqual(crown.rarity, 'epic');
             // A second boot on the same database seeds nothing again.
             const { seed } = require('../server/inventory/seed');
-            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 5, definitions: 0 });
+            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 5, definitions: 0, grantors: 0 });
         });
 
         await check('an issuer grants within its namespace, idempotently; a non-stackable item already owned answers the one held', async () => {
@@ -57,7 +57,9 @@ const { boot, check, done } = require('./helpers/boot');
         });
 
         await check('only the kind\'s issuer defines or grants its items; people and missing capabilities are refused', async () => {
-            const wrong = await api('/grants', { bearer: QUEST, json: { definition_id: rainbow.id, subject: bob.subject, idempotency_key: 'quest-0000-0001' } });
+            // Golden Name names no grantors (Rainbow does: Quest gives it, test/grantors.test.js).
+            const golden = await t.ctx.inv.byAlias('service:live', 'fx_golden');
+            const wrong = await api('/grants', { bearer: QUEST, json: { definition_id: golden.id, subject: bob.subject, idempotency_key: 'quest-0000-0001' } });
             assert.deepStrictEqual([wrong.status, wrong.json().code], [403, 'inventory.not_issuer']);
             const def = await api('/definitions', { bearer: QUEST, json: { kind: 'live.hat', name: 'Quest hat', art: { emoji: '🎩' }, rarity: 'rare', attributes: { tier: 3 } } });
             assert.deepStrictEqual([def.status, def.json().code], [403, 'inventory.not_issuer']);

@@ -1,0 +1,11 @@
+{
+  "_about": "Live's items that other services may grant (ADR-054 §3 grantors), by Live's item id. OpenVibe.Quest gives these as quest rewards: Sparkle for saying hello in chat, Hearts for a first follow, the Basic Cap for going live, Fire Name for streaming three times, Ice Name for starting a thread, Rainbow Name for improving a wiki page.",
+  "grantors": {
+    "px_sparkle": ["service:quest"],
+    "px_hearts": ["service:quest"],
+    "hat_basic_cap": ["service:quest"],
+    "fx_fire": ["service:quest"],
+    "fx_ice": ["service:quest"],
+    "fx_rainbow": ["service:quest"]
+  }
+}

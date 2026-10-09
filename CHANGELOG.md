@@ -2,6 +2,16 @@
 
 What changed in OpenVibe.Inventory, newest first. Each site also publishes its patch notes at /updates.
 
+## 0.3.0 — 2026-10-09
+
+- **Grantors** (ADR-054 §3 amendment, openvibe-contracts 0.123.0): a definition may name the services or apps that may
+  grant it. A grantor only grants (earned or granted, idempotent per its own key, within the cap), and the ledger and
+  the `inventory.item.granted` event record it as the actor with the issuer kept. The issuer sets and clears the list
+  with `PATCH /definitions/:id`; a person is never a grantor (`migrations/0002_grantors.sql`).
+- Live lets OpenVibe.Quest give six common items as quest rewards: Sparkle, Hearts, Basic Cap, Fire Name, Ice Name
+  and Rainbow Name (`server/data/live-grantors.json`, set at boot). Their item pages say how to get them.
+- The public reads answer every origin (#4), and the sitemap and llms.txt list every item, kind and the public API (#3).
+
 ## 0.2.0 — 2026-10-09
 
 - **The inventory (ADR-054, plan T21 step 2).**

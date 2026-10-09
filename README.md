@@ -23,7 +23,11 @@ people do; people keep them in one place and wear them on every site that shows 
 - **Equipped:** one instance per kind and slot.
 - **Ledger:** an append-only row for every movement, with who did it and why.
 
-Only a kind's issuer defines and grants its items: `service:live` for `live.*`. **Nothing is sold, bought, traded or
+Only a kind's issuer defines and grants its items: `service:live` for `live.*`. An issuer may name **grantors** on
+one of its items (ADR-054 §3 amendment): other services or apps that may grant that item and nothing more (no edit,
+no revoke), recorded in the ledger as the actor. Live names OpenVibe.Quest on six common items, so they are earned as
+quest rewards ([server/data/live-grantors.json](server/data/live-grantors.json), applied at boot); their pages say
+where to earn them. **Nothing is sold, bought, traded or
 converted into OpenCoins or Vibes**, and there are no paid random rewards, until a later ADR covers the legal basis and
 Billing (ADR-054 §5). A test fails if a route or a column for that appears.
 
@@ -119,7 +123,7 @@ Reporting a vulnerability: [SECURITY.md](SECURITY.md).
 Part of the [OpenVibe network](https://openvibe.network). Built in the open by [OpenVibers](https://github.com/OpenVibers).
 
 <!-- versions:start -->
-- openvibe-contracts: v0.122.1
+- openvibe-contracts: v0.123.0
 - openvibe-sdk: v0.37.0
 - openvibe-shared: v2.17.0
 <!-- versions:end -->
