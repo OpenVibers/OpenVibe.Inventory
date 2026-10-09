@@ -8,7 +8,7 @@
   "domain": "inventory.openvibe.network",
   "contracts": "openvibe-contracts v0.122.0",
   "sdk": "openvibe-sdk v0.37.0",
-  "shared": "openvibe-shared v2.15.0",
+  "shared": "openvibe-shared v2.17.0",
   "packages": [
     "openvibe-contracts v0.122.0",
     "openvibe-sdk v0.37.0",
