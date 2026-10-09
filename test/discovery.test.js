@@ -34,6 +34,14 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.match(r.headers.get('content-type'), /^application\/xml/);
             assert.match(r.headers.get('cache-control') || '', /public, max-age=\d+/);
             for (const p of ['/', '/updates']) assert.ok(r.text.includes(`<loc>https://inventory.openvibe.network${p}</loc>`), `no ${p} entry`);
+            // The catalog: /items, each kind with items, and every published item.
+            assert.ok(r.text.includes('<loc>https://inventory.openvibe.network/items</loc>'), 'no /items entry');
+            // This kind's URL has no '&', so it must appear exactly, unescaped — and with no stray '&amp;'.
+            assert.ok(r.text.includes('<loc>https://inventory.openvibe.network/items?kind=live.hat</loc>'), 'no /items?kind=live.hat entry');
+            assert.ok(!r.text.includes('items?kind=live.hat&amp;'), 'that URL must not gain an entity');
+            const items = [...r.text.matchAll(/<loc>https:\/\/inventory\.openvibe\.network\/items\/itd_/g)];
+            assert.strictEqual(items.length, 70, `expected 70 item entries, got ${items.length}`);
+            for (const p of ['/me', '/u/', '/api/']) assert.ok(!r.text.includes(`<loc>https://inventory.openvibe.network${p}`), `private path in sitemap: ${p}`);
             for (const p of ['/auth/login', '/api/v1/ping']) assert.ok(!r.text.includes(`<loc>https://inventory.openvibe.network${p}</loc>`), `${p} is not a public page`);
             const lastmods = [...r.text.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
             assert.ok(lastmods.length > 0, 'no lastmod anywhere');
@@ -52,6 +60,10 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.ok(r.text.includes('(https://openvibe.services)'), 'no pointer to the developer platform');
             assert.ok(r.text.includes('https://inventory.openvibe.network/sitemap.xml'), 'sitemap not listed');
             assert.ok(r.text.includes('(https://inventory.openvibe.network/llms-full.txt)'), 'llms-full.txt not listed');
+            // The catalog and the public read API are named for language models on purpose.
+            assert.ok(r.text.includes('(https://inventory.openvibe.network/items)'), 'no /items link');
+            assert.ok(r.text.includes('https://inventory.openvibe.network/items?kind=live.hat'), 'no kind link');
+            assert.ok(r.text.includes('GET /api/v1/kinds'), 'the API section is missing');
             for (const p of ['/auth/']) assert.ok(!r.text.includes(`https://inventory.openvibe.network${p}`), `private path in llms.txt: ${p}`);
         });
 
@@ -66,6 +78,11 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.ok(locs.length >= 2, `sitemap too small: ${locs.length}`);
             for (const loc of locs) assert.ok(r.text.includes(loc), `llms-full.txt is missing ${loc}`);
             assert.ok(r.text.includes('URL: https://inventory.openvibe.network/updates\n'), 'no /updates entry');
+            // Every published item: its name, rarity, kind and URL, grouped by kind.
+            assert.ok(r.text.includes('Royal Crown'), 'no item names');
+            assert.ok(/### Royal Crown\n\nURL: https:\/\/inventory\.openvibe\.network\/items\/itd_[0-9A-HJKMNP-TV-Z]{26}\n/.test(r.text), 'no Royal Crown item line');
+            assert.ok(r.text.includes('\n## Hat\n'), 'items are not grouped by kind');
+            assert.ok(r.text.includes('Epic Hat'), 'the item line lacks its rarity and kind');
             for (const p of PRIVATE) assert.ok(!r.text.includes(`https://inventory.openvibe.network${p}`), `private path in llms-full.txt: ${p}`);
         });
 
