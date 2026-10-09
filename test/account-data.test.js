@@ -81,6 +81,25 @@ async function startNetworkStub() {
             assert.strictEqual(stub.calls.filter((c) => c.url.includes('/confirmations')).length, 1);
         });
 
+        await check('a Workshop creator: what they made is exported; on deletion it passes to the kind, retired, without them', async () => {
+            const erin = t.network.addUser('erin');
+            const inv = t.ctx.inv;
+            const made = await inv.createDefinition(`user:${erin.subject}`, { kind: 'network.badge', name: 'Erin Badge', art: { media_id: 'med_01JZ0000000000000000000077' }, rarity: 'common', attributes: {}, supply_cap: 5 }, { creditName: 'erin' });
+            await inv.review('user:usr_01JZ00000000000000000000ST', made.id, { decision: 'publish' });
+            await inv.grant(`user:${erin.subject}`, { definition_id: made.id, subject: bob.subject, idempotency_key: `ws:${made.id}:${bob.subject}`, origin: 'granted' });
+            const exp = await deliver(ev('evt_01JZ0000000000000000000E02', 'network.account.export_requested', { export_id: 'exp_01JZ0000000000000000000EX2', subject: erin.subject }));
+            assert.strictEqual(exp.status, 200);
+            const part = stub.calls.find((c) => c.url === '/internal/account-exports/exp_01JZ0000000000000000000EX2/parts');
+            const file = part.body.files.find((f) => f.name === 'made.json');
+            assert.ok(file && file.content.length === 1 && file.content[0].name === 'Erin Badge', 'what she made is in her export');
+            const del = await deliver(ev('evt_01JZ0000000000000000000D02', 'network.account.deleted', { deletion_id: 'del_01JZ0000000000000000000DE2', subject: erin.subject }));
+            assert.strictEqual(del.json.outcome, 'erased', JSON.stringify(del.json));
+            const after = await t.ctx.s.db.maybe('SELECT issuer, status, credit_subject, credit_name FROM inventory_definitions WHERE id = $1', [made.id]);
+            assert.deepStrictEqual(after, { issuer: 'service:inventory', status: 'retired', credit_subject: null, credit_name: null });
+            assert.strictEqual(await count('SELECT count(*) FROM inventory_grants WHERE issuer = $1', [`user:${erin.subject}`]), 0, 'her gift receipts lose her name');
+            assert.strictEqual(await count('SELECT count(*) FROM inventory_instances WHERE definition_id = $1 AND owner_subject = $2', [made.id, bob.subject]), 1, 'bob keeps the badge she gave him');
+        });
+
         await check('the route refuses a bad signature and a request that came through a proxy', async () => {
             const event = ev('evt_01JZ0000000000000000000E02', 'network.account.export_requested', { export_id: 'exp_01JZ0000000000000000000EX2', subject: alice.subject });
             assert.strictEqual((await deliver(event, { secret: `whsec_${'mismatch'.repeat(5)}` })).status, 401);

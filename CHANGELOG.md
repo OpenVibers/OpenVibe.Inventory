@@ -2,6 +2,18 @@
 
 What changed in OpenVibe.Inventory, newest first. Each site also publishes its patch notes at /updates.
 
+## 0.4.0 — 2026-10-09
+
+- **The Workshop** (ADR-054 §6 amendment, openvibe-contracts 0.124.0): community badges, free.
+  - **The kind:** `network.badge`, the first Workshop kind (`migrations/0003_workshop.sql`).
+  - **Making one:** `/workshop/new` takes the image as a no-JavaScript multipart upload, checked by its header bytes
+    and stored in OpenVibe.Media (`INVENTORY_MEDIA_APP_KEY`).
+  - **Review:** staff review at `/workshop/review` and `POST /api/v1/definitions/:id/review` (publish with a rarity, or
+    reject with a reason).
+  - **Giving:** creators give their badges by `@name` from `/workshop/mine`, through the Network's username lookup.
+  - **Rendering:** the equipped read carries `media_id`.
+  - **Account data:** export includes `made.json`; on deletion a creator's badges pass to the kind's issuer, retired.
+
 ## 0.3.0 — 2026-10-09
 
 - **Grantors** (ADR-054 §3 amendment, openvibe-contracts 0.123.0): a definition may name the services or apps that may

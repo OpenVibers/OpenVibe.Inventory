@@ -26,6 +26,7 @@ const PUBLIC_DIR = path.join(__dirname, '..', '..', 'public');
 const NAV = [
     { label: 'Every item', href: '/items' },
     { label: 'Your inventory', href: '/me' },
+    { label: 'Workshop', href: '/workshop' },
     { label: 'What shipped', href: '/updates' },
 ];
 

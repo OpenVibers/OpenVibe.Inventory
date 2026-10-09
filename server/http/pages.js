@@ -99,6 +99,7 @@ ${raw(showcase.steps({
                     { title: 'Keep them in one place', text: 'Everything you own is here, with where it came from and when.' },
                     { title: 'Wear them everywhere', text: 'Equip one item per slot. Every site that shows that kind shows what you chose.' },
                     { title: 'Never for sale', text: 'Nothing here is bought, sold, traded or turned into money. Rarity is shown as it is.' },
+                    { title: 'Or make one', text: 'In the Workshop you make a badge, staff review it, and you give it to the people you choose.', href: '/workshop' },
                 ],
             }))}
 ${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something?', text: me ? 'Your items and what you are wearing, on one page.' : 'Sign in with your OpenVibe account to see your inventory and choose what to wear.', actions: me ? [{ label: 'Your inventory', href: '/me' }] : [{ label: 'Sign in with OpenVibe', href: '/auth/login?next=%2Fme' }, { label: 'The API', href: '/api/v1/kinds' }] }))}`,
