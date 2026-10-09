@@ -41,7 +41,8 @@ Billing (ADR-054 §5). A test fails if a route or a column for that appears.
 | `POST /instances/:id/consume`, `/revoke` | `inventory.item.consume` | an issuer uses up or takes back an instance |
 | `POST /definitions`, `PATCH /definitions/:id` | `inventory.definition.manage` | an issuer's items |
 
-A person acts for themself (their token or this site's session; a cookie write must come from this site). A service
+Tokens are for audience `openvibe.inventory` (Network's rule: `openvibe.<service>`). A person acts for themself (their
+token or this site's session; a cookie write must come from this site). A service
 acting for a person sends `X-OV-Subject: usr_…` and holds the route's capability. A public read needs no token; a
 token that is presented must hold `inventory.item.read`.
 
@@ -114,7 +115,7 @@ Reporting a vulnerability: [SECURITY.md](SECURITY.md).
 Part of the [OpenVibe network](https://openvibe.network). Built in the open by [OpenVibers](https://github.com/OpenVibers).
 
 <!-- versions:start -->
-- openvibe-contracts: v0.121.0
+- openvibe-contracts: v0.122.0
 - openvibe-sdk: v0.37.0
 - openvibe-shared: v2.15.0
 <!-- versions:end -->

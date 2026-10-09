@@ -43,7 +43,8 @@ function load(env = process.env) {
         networkInternalUrl: trim(env.OV_NETWORK_INTERNAL_URL || 'http://127.0.0.1:4000'),
         networkIssuer: trim(env.OV_NETWORK_ISSUER || networkUrl),
         // The audience this service's app, agent and service tokens carry.
-        audience: env.INVENTORY_AUDIENCE || 'inventory.openvibe.network',
+        // Network's rule for every grant: the audience is openvibe.<service> (not the site's host name).
+        audience: env.INVENTORY_AUDIENCE || 'openvibe.inventory',
         oauth: {
             clientId: env.OV_OAUTH_CLIENT_ID || 'inventory',
             clientSecret: env.OV_OAUTH_CLIENT_SECRET || '',

@@ -314,7 +314,7 @@ async function startNetwork({ sandboxAudiences = ['openvibe.events', 'openvibe.m
         url: srv.url, publicPem, privatePem, state: st, requests: st.requests, tokenRequests: st.tokenRequests,
         addUser, userToken,
         /** A first-party service's token for this service's audience, holding `cap` (e.g. live with inventory.item.grant). */
-        serviceToken(slug, cap, { audience = 'inventory.openvibe.network' } = {}) {
+        serviceToken(slug, cap, { audience = 'openvibe.inventory' } = {}) {
             const now = Math.floor(Date.now() / 1000);
             return serviceAuth.signServiceToken({ iss: issuer, sub: `svc:${slug}`, actor_type: 'service', aud: [audience], cap, iat: now, exp: now + 300, jti: `tok_${crypto.randomBytes(8).toString('hex')}` }, privatePem);
         },

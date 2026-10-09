@@ -7,7 +7,7 @@
  *                                                                           or this site's session cookie
  *   { kind: 'app', requester: 'app:app_…' | 'agent:agt_…' | 'service:x', project: 'prj_…' | null, claims }
  *                                                                           a Network app, agent or service token for
- *                                                                           audience inventory.openvibe.network; each route names
+ *                                                                           audience openvibe.inventory; each route names
  *                                                                           ONE capability it needs
  *   { kind: 'anonymous' }
  *
