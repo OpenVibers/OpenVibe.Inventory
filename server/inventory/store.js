@@ -18,6 +18,8 @@ const Ajv = require('ajv/dist/2020');
 
 const SUBJECT_RE = /^usr_[0-9A-HJKMNP-TV-Z]{26}$/;
 const DEF_RE = /^itd_[0-9A-HJKMNP-TV-Z]{26}$/;
+// Who an issuer may name as a grantor of one of its items (ADR-054 §3): a service or an app, never a person.
+const GRANTOR_RE = /^(service:[a-z][a-z0-9-]*|app:app_[0-9A-HJKMNP-TV-Z]{26})$/;
 const INST_RE = /^inv_[0-9A-HJKMNP-TV-Z]{26}$/;
 const RARITY = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
 
@@ -44,6 +46,7 @@ function definitionRow(r, aliases = []) {
     };
     if (r.description) out.description = r.description;
     if (aliases.length) out.aliases = aliases;
+    if (Array.isArray(r.grantors) && r.grantors.length) out.grantors = r.grantors;
     if (r.published_at) out.published_at = r.published_at;
     if (r.credit_subject || r.credit_name) out.credit = { ...(r.credit_subject ? { subject: r.credit_subject } : {}), ...(r.credit_name ? { name: r.credit_name } : {}) };
     return out;
@@ -141,6 +144,7 @@ function createInventory({ s, outbox, log = console }) {
         }
         if (!partial || has('rarity')) if (!RARITY.includes(b.rarity)) fail(422, 'inventory.bad_rarity', `rarity is one of ${RARITY.join(', ')}`);
         if (has('supply_cap') && b.supply_cap !== null && !(Number.isInteger(b.supply_cap) && b.supply_cap > 0)) fail(422, 'inventory.bad_supply', 'supply_cap is a positive whole number or null');
+        if (has('grantors') && (!Array.isArray(b.grantors) || b.grantors.length > 8 || new Set(b.grantors).size !== b.grantors.length || b.grantors.some((x) => !GRANTOR_RE.test(String(x))))) fail(422, 'inventory.bad_grantors', 'grantors: up to 8 service:… or app:app_… subjects');
         if (has('aliases') && (!Array.isArray(b.aliases) || b.aliases.length > 8 || b.aliases.some((x) => !/^[a-z0-9][a-z0-9_.-]{0,63}$/.test(String(x))))) fail(422, 'inventory.bad_alias', 'aliases: up to 8 lower-case ids');
     }
 
@@ -156,9 +160,9 @@ function createInventory({ s, outbox, log = console }) {
         const now = s.iso();
         const st = status || (b.publish ? 'published' : 'draft');
         return await s.tx(async () => {
-            await db.exec(`INSERT INTO inventory_definitions (id, kind, name, description, art, rarity, attributes, issuer, supply_cap, status, created_at, updated_at, published_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12)`,
-            [id, kind.id, b.name.trim(), b.description || null, JSON.stringify(b.art), b.rarity, JSON.stringify(b.attributes || {}), requester, b.supply_cap || null, st, now, st === 'published' ? now : null]);
+            await db.exec(`INSERT INTO inventory_definitions (id, kind, name, description, art, rarity, attributes, issuer, supply_cap, status, created_at, updated_at, published_at, grantors)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12, $13)`,
+            [id, kind.id, b.name.trim(), b.description || null, JSON.stringify(b.art), b.rarity, JSON.stringify(b.attributes || {}), requester, b.supply_cap || null, st, now, st === 'published' ? now : null, JSON.stringify(b.grantors || [])]);
             for (const alias of b.aliases || []) {
                 const taken = await db.maybe('SELECT definition_id FROM inventory_definition_aliases WHERE issuer = $1 AND alias = $2', [requester, alias]);
                 if (taken) fail(409, 'inventory.alias_taken', `${alias} already names ${taken.definition_id}`);
@@ -186,12 +190,15 @@ function createInventory({ s, outbox, log = console }) {
             else if (b.publish && cur.status === 'draft') status = 'published';
             else if (b.status !== undefined && b.status !== cur.status && b.status !== 'retired') fail(422, 'inventory.bad_status', 'status: retired, or publish: true on a draft');
             const now = s.iso();
+            // grantors change any time, published or not: they say who may grant the item, not what it is (ADR-054 §3).
+            const grantors = b.grantors !== undefined ? b.grantors : (cur.grantors || []);
             await db.exec(`UPDATE inventory_definitions SET name = $2, description = $3, art = $4, rarity = $5, attributes = $6, supply_cap = $7, status = $8,
-                updated_at = $9, published_at = COALESCE(published_at, CASE WHEN $8 = 'published' THEN $9 END) WHERE id = $1`,
+                updated_at = $9, published_at = COALESCE(published_at, CASE WHEN $8 = 'published' THEN $9 END), grantors = $10 WHERE id = $1`,
             [cur.id, b.name !== undefined ? b.name.trim() : cur.name, b.description !== undefined ? b.description : cur.description,
                 JSON.stringify(b.art !== undefined ? b.art : cur.art), b.rarity !== undefined ? b.rarity : cur.rarity,
-                JSON.stringify(b.attributes !== undefined ? b.attributes : cur.attributes), b.supply_cap !== undefined ? b.supply_cap : cur.supply_cap, status, now]);
-            await ledger(status !== cur.status ? status : 'edited', { definition: cur.id, actor: requester });
+                JSON.stringify(b.attributes !== undefined ? b.attributes : cur.attributes), b.supply_cap !== undefined ? b.supply_cap : cur.supply_cap, status, now, JSON.stringify(grantors)]);
+            const grantorsChanged = b.grantors !== undefined && JSON.stringify(grantors) !== JSON.stringify(cur.grantors || []);
+            await ledger(status !== cur.status ? status : 'edited', { definition: cur.id, actor: requester, ...(grantorsChanged ? { detail: { grantors } } : {}) });
             if (status === 'published' && cur.status !== 'published') {
                 await emit('inventory.definition.published', { subject: { type: 'item_definition', id: cur.id }, visibility: 'public', actor: requester, payload: { definition_id: cur.id, kind: cur.kind, name: b.name !== undefined ? b.name.trim() : cur.name, rarity: b.rarity || cur.rarity, issuer: cur.issuer } });
             }
@@ -218,7 +225,8 @@ function createInventory({ s, outbox, log = console }) {
             if (prior) return { instance: instanceRow(await db.maybe('SELECT * FROM inventory_instances WHERE id = $1', [prior.instance_id])), created: false };
             const def = await db.maybe('SELECT * FROM inventory_definitions WHERE id = $1 FOR UPDATE', [b.definition_id]);
             if (!def) fail(404, 'inventory.definition_not_found', 'no such definition');
-            if (def.issuer !== requester) fail(403, 'inventory.not_issuer', `only ${def.issuer} grants this item`);
+            const isGrantor = Array.isArray(def.grantors) && def.grantors.includes(requester);
+            if (def.issuer !== requester && !isGrantor) fail(403, 'inventory.not_issuer', `only ${def.issuer}${(def.grantors || []).length ? ' and the grantors it names' : ''} grant this item`);
             if (def.status !== 'published') fail(409, 'inventory.not_published', `the item is ${def.status}`);
             const kind = await getKind(def.kind);
             if (b.attributes !== undefined) await checkAttributes(kind.id, { ...def.attributes, ...b.attributes });
@@ -239,7 +247,7 @@ function createInventory({ s, outbox, log = console }) {
             await db.exec('INSERT INTO inventory_grants (issuer, idempotency_key, instance_id, created_at) VALUES ($1, $2, $3, $4)', [requester, key, id, now]);
             await ledger(origin, { owner: b.subject, instance: id, definition: def.id, actor: requester, reason: b.reason || null });
             await emit('inventory.item.granted', { subject: { type: 'user', id: b.subject }, visibility: 'subject', actor: requester,
-                payload: { instance_id: id, definition_id: def.id, kind: def.kind, owner: b.subject, origin, issuer: requester } });
+                payload: { instance_id: id, definition_id: def.id, kind: def.kind, owner: b.subject, origin, issuer: def.issuer } });   // a grantor is the event's actor
             return { instance: instanceRow(await db.maybe('SELECT * FROM inventory_instances WHERE id = $1', [id])), created: true };
         });
     }

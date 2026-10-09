@@ -149,6 +149,8 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
   <li><b>${d.supply.cap == null ? 'Unlimited' : `${d.supply.cap - d.supply.issued} of ${d.supply.cap}`}</b> ${d.supply.cap == null ? 'supply' : 'left'}</li>
   <li><b>${k.slots.length ? 'Wearable' : 'Collectible'}</b> ${k.slots.length ? `in the ${k.slots.join(', ')} slot` : 'shown on your profile'}</li>
 </ul>
+${(d.grantors || []).includes('service:quest') && d.status === 'published' ? html`<h2>How to get it</h2>
+<p>Earn it on <a href="https://openvibe.quest/">OpenVibe.Quest</a>: it is the reward for one of the quests there, given once to everyone who completes it.</p>` : ''}
 <h2>Where it shows</h2>
 <p>${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ').replace(/^./, (c) => c.toUpperCase())}.</p>
 <h2>Who gives it</h2>

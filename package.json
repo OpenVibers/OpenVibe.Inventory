@@ -1,6 +1,6 @@
 {
   "name": "openvibe-inventory",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "OpenVibe.Inventory — Your items, on every OpenVibe site.",
   "main": "server/index.js",
@@ -23,7 +23,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "iovalkey": "^0.4.0",
-    "openvibe-contracts": "https://codeload.github.com/OpenVibers/OpenVibe.Contracts/tar.gz/refs/tags/v0.122.1",
+    "openvibe-contracts": "https://codeload.github.com/OpenVibers/OpenVibe.Contracts/tar.gz/refs/tags/v0.123.0",
     "openvibe-sdk": "https://codeload.github.com/OpenVibers/OpenVibe.SDK/tar.gz/refs/tags/v0.37.0",
     "openvibe-shared": "https://codeload.github.com/OpenVibers/OpenVibe.Shared/tar.gz/refs/tags/v2.17.0",
     "pg": "^8.23.0"
