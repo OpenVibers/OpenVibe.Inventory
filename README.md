@@ -29,6 +29,10 @@ Billing (ADR-054 §5). A test fails if a route or a column for that appears.
 
 ## API (`/api/v1`, problem+json errors)
 
+The public reads (kinds, definitions, `/people/:subject/*` and `/equipped`) answer every origin with
+`Access-Control-Allow-Origin: *` and no credentials, so any site can draw what people wear (openvibe-shared `items.js`);
+every other route stays same-site.
+
 | Route | Capability | |
 |---|---|---|
 | `GET /kinds`, `/kinds/:id` | `inventory.item.read` (public) | the kinds |
