@@ -2,6 +2,12 @@
 
 What changed in OpenVibe.Inventory, newest first. Each site also publishes its patch notes at /updates.
 
+## 0.4.1 — 2026-10-09
+
+- Workshop takedown (ADR-054 §6): `/workshop/review` lists the published community badges. Staff can retire one (nobody
+  gives it any more) or retire it and revoke every copy (taken off whoever wears it, each owner told through
+  `inventory.item.revoked`). Both need a reason, which goes to the ledger.
+
 ## 0.4.0 — 2026-10-09
 
 - **The Workshop** (ADR-054 §6 amendment, openvibe-contracts 0.124.0): community badges, free.

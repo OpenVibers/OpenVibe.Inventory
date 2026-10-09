@@ -388,6 +388,35 @@ function createInventory({ s, outbox, log = console }) {
         });
     }
 
+    /**
+     * Staff take a published Workshop item down (ADR-054 §6): retire it (nobody gives it any more; owned copies stay),
+     * or, when it breaks the rules, also revoke every copy (taken off whoever wears it). Recorded in the ledger with the
+     * reason; each revoked copy also emits inventory.item.revoked to its owner.
+     */
+    async function takedown(staff, id, { revoke = false, reason } = {}) {
+        if (!(typeof reason === 'string' && reason.trim() && reason.length <= 300)) fail(422, 'inventory.bad_review', 'a takedown says why, in at most 300 characters');
+        return await s.tx(async () => {
+            const cur = await db.maybe('SELECT d.*, k.workshop FROM inventory_definitions d JOIN inventory_kinds k ON k.id = d.kind WHERE d.id = $1 FOR UPDATE OF d', [String(id || '')]);
+            if (!cur || !cur.workshop) fail(404, 'inventory.definition_not_found', 'no such Workshop item');
+            if (cur.status !== 'published' && cur.status !== 'retired') fail(409, 'inventory.not_published', `the item is ${cur.status}`);
+            const now = s.iso();
+            await db.exec("UPDATE inventory_definitions SET status = 'retired', updated_at = $2 WHERE id = $1", [cur.id, now]);
+            await ledger('retired', { definition: cur.id, actor: staff, reason: reason.trim() });
+            let revoked = 0;
+            if (revoke) {
+                const owned = await db.many("SELECT id, owner_subject FROM inventory_instances WHERE definition_id = $1 AND state = 'owned'", [cur.id]);
+                for (const inst of owned) {
+                    await db.exec("UPDATE inventory_instances SET state = 'revoked', updated_at = $2 WHERE id = $1", [inst.id, now]);
+                    await db.exec('DELETE FROM inventory_equipped WHERE instance_id = $1', [inst.id]);
+                    await ledger('revoked', { owner: inst.owner_subject, instance: inst.id, definition: cur.id, actor: staff, reason: reason.trim() });
+                    await emit('inventory.item.revoked', { subject: { type: 'user', id: inst.owner_subject }, visibility: 'subject', actor: staff, payload: { instance_id: inst.id, definition_id: cur.id, owner: inst.owner_subject, reason: reason.trim().slice(0, 200) } });
+                    revoked++;
+                }
+            }
+            return { definition: await getDefinition(cur.id), revoked };
+        });
+    }
+
     /** Workshop items: the review queue (staff), a creator's own (any status, with the review note), or the published ones. */
     async function workshopItems({ status = null, issuer = null, limit = 100 } = {}) {
         const rows = await db.many(`SELECT d.* FROM inventory_definitions d JOIN inventory_kinds k ON k.id = d.kind
@@ -399,7 +428,7 @@ function createInventory({ s, outbox, log = console }) {
 
     return {
         listKinds, getKind, upsertKind, listDefinitions, getDefinition, byAlias, createDefinition, updateDefinition,
-        grant, consume, inventory, equipped, equip, ledger, review, workshopItems,
+        grant, consume, inventory, equipped, equip, ledger, review, workshopItems, takedown,
     };
 }
 
