@@ -140,6 +140,22 @@ function multipart(fields, file) {
             const live = await inv.createDefinition(`user:${dave.subject}`, { kind: 'live.hat', name: 'Nope', art: { emoji: '🎩' }, rarity: 'common', attributes: { tier: 1 } }).catch((e) => e);
             assert.strictEqual(live.code, 'inventory.not_issuer', 'a person defines only Workshop kinds');
         });
+
+        await check('staff take a badge down: retired, and with revoke every copy is taken off its owner', async () => {
+            assert.strictEqual((await form(alice, `/workshop/${badge.id}/takedown`, { reason: 'mine', revoke: 'yes' })).status, 403, 'not for the creator');
+            let r = await form(staff, `/workshop/${badge.id}/takedown`, { reason: '', revoke: 'yes' });
+            assert.match(decodeURIComponent(r.headers.get('location')), /says why/);
+            r = await form(staff, `/workshop/${badge.id}/takedown`, { reason: 'A rights holder asked us to remove it.', revoke: 'yes' });
+            assert.match(decodeURIComponent(r.headers.get('location')), /retired, 1 copy revoked/);
+            assert.strictEqual((await inv.getDefinition(badge.id)).status, 'retired');
+            const mine = (await inv.inventory(carol.subject, { own: true })).instances.find((i) => i.definition_id === badge.id);
+            assert.strictEqual(mine.state, 'revoked');
+            const worn = (await t.get(`/api/v1/equipped?subjects=${carol.subject}`)).json().equipped[0].slots['network.badge:badge'];
+            assert.strictEqual(worn, undefined, 'taken off');
+            assert.ok(!(await t.get('/workshop')).text.includes('Night Owl'), 'gone from the Workshop');
+            const gift = await inv.grant(`user:${alice.subject}`, { definition_id: badge.id, subject: alice.subject, idempotency_key: 'ws:after-retire', origin: 'granted' }).catch((e) => e);
+            assert.strictEqual(gift.code, 'inventory.not_published', 'nobody gives it any more');
+        });
     } finally {
         await t.close();
     }

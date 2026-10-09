@@ -6,7 +6,7 @@
  *   /workshop                 what it is, the published community badges, how to make one
  *   /workshop/new             make a badge: an image, a name, a cap, the rights you confirm (POST: multipart form)
  *   /workshop/mine            your submissions with their review state; give a published one to someone by @name
- *   /workshop/review          staff: the review queue, publish or reject with a reason
+ *   /workshop/review          staff: the review queue (publish or reject with a reason) and takedown of published badges
  *
  * A badge is shown to nobody until staff publish it: the review queue and its creator's own page are the only places
  * its image appears before that. Nothing is sold, bought or traded (ADR-054 §5).
@@ -175,6 +175,7 @@ ${mine.length ? html`<ul class="ws-mine">${mine.map((d) => html`<li class="ws-it
         if (!signedIn(req)) return login(res, '/workshop/review');
         if (!isStaff(req)) return page(req, res, { title: 'Staff only', robots: 'noindex', body: html`<h1>Staff only</h1><p>The review queue is for OpenVibe staff.</p>` }, 403);
         const queue = await inv.workshopItems({ status: 'in_review', limit: 100 });
+        const live = await inv.workshopItems({ status: 'published', limit: 200 });
         page(req, res, {
             title: 'Workshop review',
             robots: 'noindex',
@@ -194,8 +195,36 @@ ${queue.length ? html`<ul class="ws-mine">${queue.map((d) => html`<li class="ws-
       <button type="submit" name="decision" value="reject" class="inv-btn">Reject</button>
     </form>
   </div>
-</li>`)}</ul>` : html`<p class="muted">Nothing waiting.</p>`}`,
+</li>`)}</ul>` : html`<p class="muted">Nothing waiting.</p>`}
+<h2>Published <span class="muted small">${live.length}</span></h2>
+<p class="muted">Take a badge down when it breaks the rules or a rights holder asks: retiring stops anyone giving it; revoking also takes every copy off whoever has it. Both say why, in the ledger.</p>
+${live.length ? html`<ul class="ws-mine">${live.map((d) => html`<li class="ws-item">
+  <span class="inv-art inv-art-md r-${d.rarity}">${img(d)}</span>
+  <div class="ws-item-body">
+    <h2>${d.name}</h2>
+    <p class="muted">by ${d.credit && d.credit.name ? html`@${d.credit.name}` : d.issuer} · ${d.supply.issued} of ${d.supply.cap} given</p>
+    <form method="post" action="/workshop/${d.id}/takedown" class="ws-review">
+      <label class="ws-reason">Reason <input type="text" name="reason" maxlength="300" required placeholder="A rights holder asked us to remove it."></label>
+      <button type="submit" name="revoke" value="no" class="inv-btn">Retire</button>
+      <button type="submit" name="revoke" value="yes" class="inv-btn">Retire and revoke every copy</button>
+    </form>
+  </div>
+</li>`)}</ul>` : html`<p class="muted">No published community badges.</p>`}`,
         });
+    });
+
+    r.post('/workshop/:id/takedown', express.urlencoded({ extended: false, limit: '2kb' }), async (req, res) => {
+        if (!signedIn(req)) return login(res, '/workshop/review');
+        if (!isStaff(req)) return res.status(403).type('text/plain').send('Staff only.');
+        if (!sameOrigin(req, config.baseUrl)) return res.status(403).type('text/plain').send('That form must come from this site.');
+        const b = req.body || {};
+        try {
+            const out = await inv.takedown(`user:${req.viewer.subject}`, String(req.params.id || ''), { revoke: b.revoke === 'yes', reason: b.reason ? String(b.reason) : '' });
+            return back(res, '/workshop/review', 'done', `${out.definition.name}: retired${b.revoke === 'yes' ? `, ${out.revoked} ${out.revoked === 1 ? 'copy' : 'copies'} revoked` : ''}.`);
+        } catch (err) {
+            if (err instanceof InventoryError) return back(res, '/workshop/review', 'error', err.detail || err.code);
+            throw err;
+        }
     });
 
     r.post('/workshop/:id/review', express.urlencoded({ extended: false, limit: '2kb' }), async (req, res) => {
