@@ -1,7 +1,8 @@
 'use strict';
 /**
  * ADR-054 §8: Live's cosmetics move here row for row. A stand-in Live database (Live's own three columns) holds two
- * people's unlocks and equipped slots, an account without a Network subject and an item Live no longer sells. The dry
+ * people's unlocks and equipped slots (their subjects in linked_accounts, as Live keeps them), an account without a
+ * Network subject and an item Live no longer sells. The dry
  * run changes nothing; the import grants with origin `migrated` and the unlock time, equips the slots, and a second run
  * grants nothing again; verify then reports no difference.
  */
@@ -20,10 +21,10 @@ const { importLive, verifyLive, isoOf } = require('../server/inventory/import-li
     const quiet = { log() {}, warn() {} };
 
     try {
-        await live.exec(`CREATE TABLE users (id bigint PRIMARY KEY, subject_id text);
+        await live.exec(`CREATE TABLE linked_accounts (user_id bigint, service text, service_user_id text, subject_id text);
             CREATE TABLE user_cosmetics (id bigint GENERATED ALWAYS AS IDENTITY, user_id bigint, item_id text, category text, unlocked_at text);
             CREATE TABLE user_equipped (user_id bigint, slot text, item_id text);
-            INSERT INTO users VALUES (1, '${A}'), (2, '${B}'), (3, NULL);
+            INSERT INTO linked_accounts VALUES (1, 'network', '901', '${A}'), (2, 'network', '902', '${B}'), (3, 'network', '903', NULL), (2, 'tools', '77', 'x');
             INSERT INTO user_cosmetics (user_id, item_id, category, unlocked_at) VALUES
                 (1, 'fx_rainbow', 'name_effect', '2026-09-01 12:00:00'), (1, 'hat_crown', 'hat', '2026-09-02 08:30:00'), (1, 'gary', 'voice', '2026-09-03 00:00:00'),
                 (2, 'fx_fire', 'name_effect', '2026-09-04 10:00:00'), (2, 'fx_retired_thing', 'name_effect', '2026-09-05 10:00:00'),

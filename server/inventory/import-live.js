@@ -20,10 +20,11 @@ const SUBJECT_RE = /^usr_[0-9A-HJKMNP-TV-Z]{26}$/;
 
 /** Live's rows per subject: subject → { userId, items: Map(item_id → unlocked_at), slots: Map(slot → item_id) }. */
 async function liveRows(live) {
-    const items = await live.many(`SELECT u.id AS user_id, u.subject_id, c.item_id, c.unlocked_at
-        FROM user_cosmetics c JOIN users u ON u.id = c.user_id ORDER BY u.id, c.item_id`);
-    const slots = await live.many(`SELECT u.id AS user_id, u.subject_id, e.slot, e.item_id
-        FROM user_equipped e JOIN users u ON u.id = e.user_id ORDER BY u.id, e.slot`);
+    // Live learns a person's Network subject from their token and keeps it in linked_accounts (service 'network').
+    const items = await live.many(`SELECT c.user_id, la.subject_id, c.item_id, c.unlocked_at FROM user_cosmetics c
+        LEFT JOIN linked_accounts la ON la.user_id = c.user_id AND la.service = 'network' ORDER BY c.user_id, c.item_id`);
+    const slots = await live.many(`SELECT e.user_id, la.subject_id, e.slot, e.item_id FROM user_equipped e
+        LEFT JOIN linked_accounts la ON la.user_id = e.user_id AND la.service = 'network' ORDER BY e.user_id, e.slot`);
     const by = new Map();
     const noSubject = new Set();
     const of = (r) => {
