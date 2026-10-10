@@ -104,6 +104,31 @@ function multipart(fields, file) {
             assert.match((await t.get('/workshop/mine', { as: alice })).text, /Staff(&#39;|&#x27;|')s reason: Too close to a channel logo\./);
         });
 
+        await check('the creator never publishes or retires: a rejected draft is edited and resubmitted for review, and a reviewed item is locked', async () => {
+            const patch = (json) => t.get(`/api/v1/definitions/${first.id}`, { as: alice, method: 'PATCH', json, headers: origin });
+            let r = await patch({ name: 'OG Viewer II', publish: true });
+            assert.strictEqual(r.status, 200, r.text);
+            assert.strictEqual(r.json().definition.status, 'in_review', 'publish on a draft resubmits it, it never publishes');
+            assert.strictEqual((await inv.getDefinition(first.id)).name, 'OG Viewer II');
+            r = await patch({ publish: true });
+            assert.deepStrictEqual([r.status, r.json().code], [409, 'inventory.review_locked'], 'in review: locked');
+            r = await patch({ status: 'retired' });
+            assert.deepStrictEqual([r.status, r.json().code], [422, 'request.bad_body'], 'the creator never retires (takedown is staff)');
+            r = await patch({ rarity: 'legendary' });
+            assert.strictEqual(r.status, 422, 'nor sets a rarity');
+            assert.strictEqual((await inv.getDefinition(first.id)).status, 'in_review');
+            await form(staff, `/workshop/${first.id}/review`, { decision: 'reject', reason: 'Still too close.' });
+            assert.strictEqual((await inv.getDefinition(first.id)).status, 'draft');
+            // The page's button resubmits a draft (renamed), and only its creator's.
+            assert.match((await t.get('/workshop/mine', { as: alice })).text, /Send for review again/);
+            assert.match((await form(carol, `/workshop/${first.id}/resubmit`, { name: 'Mine now' })).headers.get('location') || '', /error=/);
+            r = await form(alice, `/workshop/${first.id}/resubmit`, { name: 'OG Viewer III' });
+            assert.match(r.headers.get('location') || '', /done=/);
+            const back = await inv.getDefinition(first.id);
+            assert.deepStrictEqual([back.status, back.name], ['in_review', 'OG Viewer III']);
+            await form(staff, `/workshop/${first.id}/review`, { decision: 'reject', reason: 'Still too close.' });
+        });
+
         let badge;
         await check('a published badge is public, given by @name within its cap, and worn with its image', async () => {
             await submit(alice, { name: 'Night Owl', supply_cap: '2', rights: 'yes' }, webp(256, 256));
@@ -133,6 +158,10 @@ function multipart(fields, file) {
             for (let i = 0; i < 5; i++) await inv.createDefinition(`user:${dave.subject}`, { kind: 'network.badge', name: `B${i}`, art: { media_id: 'med_01JZ0000000000000000000099' }, rarity: 'common', attributes: {}, supply_cap: 10 });
             const sixth = await inv.createDefinition(`user:${dave.subject}`, { kind: 'network.badge', name: 'B6', art: { media_id: 'med_01JZ0000000000000000000099' }, rarity: 'common', attributes: {}, supply_cap: 10 }).catch((e) => e);
             assert.strictEqual(sixth.code, 'inventory.review_queue_full');
+            const stored = uploads.length;
+            const over = await submit(dave, { name: 'B7', supply_cap: '5', rights: 'yes' }, png(64, 64));
+            assert.match(over.headers.get('location') || '', /error=/);
+            assert.strictEqual(uploads.length, stored, 'over the limit, the image is never uploaded to Media');
             const notStaff = await t.get(`/api/v1/definitions/${badge.id}/review`, { as: alice, method: 'POST', json: { decision: 'publish' }, headers: origin });
             assert.deepStrictEqual([notStaff.status, notStaff.json().code], [403, 'inventory.staff_only']);
             const earned = await inv.grant(`user:${alice.subject}`, { definition_id: badge.id, subject: dave.subject, idempotency_key: 'ws:earned-0001', origin: 'earned' }).catch((e) => e);

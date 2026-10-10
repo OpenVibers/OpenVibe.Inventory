@@ -164,10 +164,7 @@ function createInventory({ s, outbox, log = console }) {
             if (!b.art || typeof b.art !== 'object' || !/^med_[0-9A-HJKMNP-TV-Z]{26}$/.test(String(b.art.media_id || '')) || Object.keys(b.art).length !== 1) fail(422, 'inventory.bad_art', 'a Workshop item is one reviewed image: art is { media_id }');
             if (!(Number.isInteger(b.supply_cap) && b.supply_cap >= 1 && b.supply_cap <= WORKSHOP.maxCap)) fail(422, 'inventory.bad_supply', `a Workshop item has a cap from 1 to ${WORKSHOP.maxCap}`);
             if (b.grantors !== undefined || b.aliases !== undefined || b.publish) fail(422, 'request.bad_body', 'a Workshop item is submitted for review, with no grantors or aliases');
-            const waiting = Number(await db.value("SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND status = 'in_review'", [requester]));
-            if (waiting >= WORKSHOP.inReview) fail(429, 'inventory.review_queue_full', `at most ${WORKSHOP.inReview} items in review at once`);
-            const today = Number(await db.value('SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND left(created_at, 10) = $2::text', [requester, s.iso().slice(0, 10)]));
-            if (today >= WORKSHOP.perDay) fail(429, 'inventory.submissions_today', `at most ${WORKSHOP.perDay} submissions a day`);
+            await checkWorkshopQuota(requester);
             b = { ...b, rarity: 'common' };
         }
         checkDefinitionBody(b);
@@ -195,9 +192,10 @@ function createInventory({ s, outbox, log = console }) {
     async function updateDefinition(requester, id, b) {
         if (!b || typeof b !== 'object') fail(400, 'request.bad_body', 'send the fields to change');
         return await s.tx(async () => {
-            const cur = await db.maybe('SELECT * FROM inventory_definitions WHERE id = $1 FOR UPDATE', [String(id || '')]);
+            const cur = await db.maybe('SELECT d.*, k.workshop FROM inventory_definitions d JOIN inventory_kinds k ON k.id = d.kind WHERE d.id = $1 FOR UPDATE OF d', [String(id || '')]);
             if (!cur) fail(404, 'inventory.definition_not_found', 'no such definition');
             if (cur.issuer !== requester) fail(403, 'inventory.not_issuer', 'only its issuer edits a definition');
+            if (cur.workshop && PERSON_RE.test(requester)) return await updateWorkshopItem(requester, cur, b);
             checkDefinitionBody(b, { partial: true });
             const locked = cur.status === 'published' || cur.status === 'retired';
             for (const k of ['rarity', 'attributes', 'supply_cap', 'kind']) if (locked && b[k] !== undefined) fail(409, 'inventory.published', `${k} cannot change once the item is published (its owners rely on it)`);
@@ -221,6 +219,48 @@ function createInventory({ s, outbox, log = console }) {
             }
             return await getDefinition(cur.id);
         });
+    }
+
+    /**
+     * The Workshop's submission limits for a person (at most WORKSHOP.inReview waiting, WORKSHOP.perDay a day). Throws
+     * the same 429 the submission would; the submit page asks before it uploads the image, so a person over a limit
+     * stores nothing in OpenVibe.Media.
+     */
+    async function checkWorkshopQuota(requester) {
+        const waiting = Number(await db.value("SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND status = 'in_review'", [requester]));
+        if (waiting >= WORKSHOP.inReview) fail(429, 'inventory.review_queue_full', `at most ${WORKSHOP.inReview} items in review at once`);
+        const today = Number(await db.value('SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND left(created_at, 10) = $2::text', [requester, s.iso().slice(0, 10)]));
+        if (today >= WORKSHOP.perDay) fail(429, 'inventory.submissions_today', `at most ${WORKSHOP.perDay} submissions a day`);
+    }
+
+    /**
+     * A Workshop item edited by its creator (ADR-054 §6). Staff review is the only way to publish and takedown the only
+     * way to retire, so the creator never changes the status directly. They edit a draft (a rejected item), and
+     * `publish: true` on a draft resubmits it for review, within the in-review cap. In review or published, the item
+     * stays as reviewed: its name, words and image do not change.
+     */
+    async function updateWorkshopItem(requester, cur, b) {
+        const allowed = ['name', 'description', 'art', 'publish'];
+        const extra = Object.keys(b).filter((k) => !allowed.includes(k));
+        if (extra.length) fail(422, 'request.bad_body', `a Workshop item's creator changes only its name, description and image (not ${extra.join(', ')})`);
+        if (cur.status !== 'draft') fail(409, 'inventory.review_locked', `the item is ${cur.status}: staff publish and retire Workshop items, and a reviewed item does not change`);
+        checkDefinitionBody(b, { partial: true });
+        if (b.art !== undefined && (!b.art || typeof b.art !== 'object' || !/^med_[0-9A-HJKMNP-TV-Z]{26}$/.test(String(b.art.media_id || '')) || Object.keys(b.art).length !== 1)) {
+            fail(422, 'inventory.bad_art', 'a Workshop item is one reviewed image: art is { media_id }');
+        }
+        let status = 'draft';
+        if (b.publish) {
+            const waiting = Number(await db.value("SELECT count(*) FROM inventory_definitions WHERE issuer = $1 AND status = 'in_review'", [requester]));
+            if (waiting >= WORKSHOP.inReview) fail(429, 'inventory.review_queue_full', `at most ${WORKSHOP.inReview} items in review at once`);
+            status = 'in_review';
+        }
+        const now = s.iso();
+        await db.exec(`UPDATE inventory_definitions SET name = $2, description = $3, art = $4, status = $5, updated_at = $6,
+            review_note = CASE WHEN $5 = 'in_review' THEN NULL ELSE review_note END WHERE id = $1`,
+        [cur.id, b.name !== undefined ? b.name.trim() : cur.name, b.description !== undefined ? b.description : cur.description,
+            JSON.stringify(b.art !== undefined ? b.art : cur.art), status, now]);
+        await ledger(status === 'in_review' ? 'resubmitted' : 'edited', { definition: cur.id, actor: requester });
+        return await getDefinition(cur.id);
     }
 
     // ── Grants ────────────────────────────────────────────
@@ -428,7 +468,7 @@ function createInventory({ s, outbox, log = console }) {
 
     return {
         listKinds, getKind, upsertKind, listDefinitions, getDefinition, byAlias, createDefinition, updateDefinition,
-        grant, consume, inventory, equipped, equip, ledger, review, workshopItems, takedown,
+        grant, consume, inventory, equipped, equip, ledger, review, workshopItems, takedown, checkWorkshopQuota,
     };
 }
 
