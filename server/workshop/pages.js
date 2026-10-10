@@ -113,6 +113,8 @@ ${notice(req)}
         if (pic.error) return back(res, '/workshop/new', 'error', pic.error);
         const cap = Number.parseInt(f.supply_cap, 10);
         try {
+            // The limits first: a person over them stores nothing in OpenVibe.Media.
+            await inv.checkWorkshopQuota(`user:${me}`);
             const mediaId = await workshopMedia.upload({ buffer: form.file.buffer, type: pic.type, name: f.name, ownerSubject: me });
             await inv.createDefinition(`user:${me}`, {
                 kind: KIND, name: String(f.name || '').trim(), description: String(f.description || '').trim() || undefined,
@@ -142,6 +144,10 @@ ${mine.length ? html`<ul class="ws-mine">${mine.map((d) => html`<li class="ws-it
   <div class="ws-item-body">
     <h2>${d.name} <span class="ws-state ws-${d.status}">${STATUS_LABEL[d.status] || d.status}</span></h2>
     ${d.status === 'draft' && d.review_note ? html`<p class="notice bad">Staff's reason: ${d.review_note}</p>` : ''}
+    ${d.status === 'draft' ? html`<form method="post" action="/workshop/${d.id}/resubmit" class="ws-give">
+      <label>Name <input type="text" name="name" required maxlength="64" value="${d.name}"></label>
+      <button type="submit" class="inv-btn primary">Send for review again</button>
+    </form>` : ''}
     ${d.status === 'in_review' ? html`<p class="muted">Waiting for staff. Nobody else can see it yet.</p>` : ''}
     ${d.status === 'published' ? html`<p class="muted">${d.supply.issued} of ${d.supply.cap} given · <a href="/items/${d.id}">its page</a></p>
     ${d.supply.issued < d.supply.cap ? html`<form method="post" action="/workshop/${d.id}/give" class="ws-give">
@@ -164,6 +170,21 @@ ${mine.length ? html`<ul class="ws-mine">${mine.map((d) => html`<li class="ws-it
         try {
             const g = await inv.grant(`user:${me}`, { definition_id: String(req.params.id || ''), subject, idempotency_key: `ws:${req.params.id}:${subject}`, origin: 'granted', reason: 'Given in the Workshop' });
             return back(res, '/workshop/mine', 'done', g.created ? `Given to @${to}. It is in their inventory now.` : `@${to} already has it.`);
+        } catch (err) {
+            if (err instanceof InventoryError) return back(res, '/workshop/mine', 'error', err.detail || err.code);
+            throw err;
+        }
+    });
+
+    // A rejected badge goes back to staff: its creator may rename it first (the image stays the one they uploaded).
+    r.post('/workshop/:id/resubmit', express.urlencoded({ extended: false, limit: '2kb' }), async (req, res) => {
+        const me = signedIn(req);
+        if (!me) return login(res, '/workshop/mine');
+        if (!sameOrigin(req, config.baseUrl)) return res.status(403).type('text/plain').send('That form must come from this site.');
+        const name = String((req.body || {}).name || '').trim();
+        try {
+            await inv.updateDefinition(`user:${me}`, String(req.params.id || ''), { ...(name ? { name } : {}), publish: true });
+            return back(res, '/workshop/mine', 'done', 'Sent for review again.');
         } catch (err) {
             if (err instanceof InventoryError) return back(res, '/workshop/mine', 'error', err.detail || err.code);
             throw err;
