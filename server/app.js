@@ -34,6 +34,7 @@ const { createPeople } = require('./workshop/people');
 const { createServiceReadiness } = require('./observability');
 const { createCallerLimits } = require('./http/caller-limits');
 const { createServiceOutbox } = require('openvibe-sdk/events');
+const { createSearchIndex } = require('./search-index');
 const { createNetworkSender } = require('openvibe-sdk/account-data');
 const { createInventory } = require('./inventory/store');
 const { seed } = require('./inventory/seed');
@@ -66,13 +67,17 @@ async function createApp(opts = {}) {
     });
     const inv = createInventory({ s, outbox, log });
     await seed(inv, { log });
+    // Item pages in OpenVibe.Search (./search-index.js) through the same outbox: the definition writes name what they
+    // changed (watch), and a sweep runs on its own timer once server/index.js starts it.
+    const searchIndex = opts.searchIndex || createSearchIndex({ config, s, outbox, log });
+    searchIndex.watch(inv);
     // Account export and deletion (ADR-033): the table map, and the sender to Network's internal routes with this
     // service's own client-credentials token.
     const accountData = accountDataLib.create({ db: s.db, log });
     const accountSend = opts.accountSend || (config.oauth.clientSecret
         ? createNetworkSender({ networkInternalUrl: config.networkInternalUrl, clientId: config.oauth.clientId, clientSecret: config.oauth.clientSecret, fetch: fetchImpl })
         : async () => { throw new Error('OV_OAUTH_CLIENT_SECRET is not set: Inventory cannot answer account events'); });
-    const ctx = { config, s, keys, sso, principal, log, outbox, inv, accountData };
+    const ctx = { config, s, keys, sso, principal, log, outbox, inv, accountData, searchIndex };
     // The Workshop (ADR-054 §6): images in this service's own Media tenant, recipients by @name through the Network.
     ctx.workshopMedia = opts.workshopMedia || createWorkshopMedia({ config, fetchImpl: opts.fetchImpl, log });
     ctx.people = opts.people || createPeople({ config, fetchImpl: opts.fetchImpl });

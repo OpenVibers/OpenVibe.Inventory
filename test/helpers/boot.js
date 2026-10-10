@@ -69,6 +69,7 @@ async function boot(opts = {}) {
         base, network, config, ctx: built.ctx, get, signIn, dbDump,
         logs: () => captured.join('\n'),
         async close() {
+            built.ctx.searchIndex.stop();
             await new Promise((r) => server.close(r));
             built.ctx.keys.client.stop();
             await testdb.close();
