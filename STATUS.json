@@ -8,11 +8,11 @@
   "port": "5030",
   "domain": "inventory.openvibe.network",
   "contracts": "openvibe-contracts v0.128.0",
-  "sdk": "openvibe-sdk v0.37.2",
+  "sdk": "openvibe-sdk v0.38.0",
   "shared": "openvibe-shared v3.0.0",
   "packages": [
     "openvibe-contracts v0.128.0",
-    "openvibe-sdk v0.37.2",
+    "openvibe-sdk v0.38.0",
     "openvibe-shared v3.0.0",
     "openvibe-publishing v1.4.0"
   ],
