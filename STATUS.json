@@ -37,7 +37,7 @@
   ],
   "capabilitiesRegistered": true,
   "serviceManifestRegistered": true,
-  "deployed": false,
+  "deployed": true,
   "placeholderInSites": false,
   "features": [
     "item kinds",
@@ -48,5 +48,6 @@
     "Live migration",
     "account export and deletion"
   ],
-  "updated": "2026-10-10"
+  "updated": "2026-10-10",
+  "deployment": "openvibe-ovh: unit openvibe-inventory.service on 127.0.0.1:5030 (git checkout /opt/inventory.openvibe.network, env /etc/openvibe/inventory.env, database ov_inventory), deployed with `sudo ovhost deploy inventory`; public at https://inventory.openvibe.network since 2026-10-09."
 }
