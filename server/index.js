@@ -16,7 +16,7 @@ const { startSubscriptions } = require('openvibe-sdk/account-data');
 function createLifecycle({ server, ctx, exit, signals, timers = [], extra = [] }) {
     return gracefulStop({
         name: 'OpenVibe.Inventory', server, deadlineExitCode: 0, exit, signals, deadlineMs: 10_000,
-        close: [() => { for (const t of timers) clearInterval(t); }, ...extra, () => ctx.outbox.stop(), () => ctx.keys.client.stop(), () => ctx.s.close()],
+        close: [() => { for (const t of timers) clearInterval(t); }, ...extra, () => ctx.searchIndex.stop(), () => ctx.outbox.stop(), () => ctx.keys.client.stop(), () => ctx.s.close()],
     });
 }
 
@@ -30,6 +30,7 @@ async function start() {
     server.keepAliveTimeout = 65_000;
     ctx.keys.client.start();
     ctx.outbox.start();
+    ctx.searchIndex.start();
     // The two account subscriptions at OpenVibe.Events (ADR-033), created when missing; off without EVENTS_URL,
     // INVENTORY_EVENTS_SECRET or the client secret.
     const subscriptions = startSubscriptions({
