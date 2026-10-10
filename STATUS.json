@@ -9,11 +9,11 @@
   "domain": "inventory.openvibe.network",
   "contracts": "openvibe-contracts v0.128.0",
   "sdk": "openvibe-sdk v0.37.0",
-  "shared": "openvibe-shared v2.21.0",
+  "shared": "openvibe-shared v2.21.1",
   "packages": [
     "openvibe-contracts v0.128.0",
     "openvibe-sdk v0.37.0",
-    "openvibe-shared v2.21.0",
+    "openvibe-shared v2.21.1",
     "openvibe-publishing v1.4.0"
   ],
   "summary": "OpenVibe.Inventory — one inventory for an OpenVibe account (ADR-054). Item kinds (a contract plus a renderer per surface), definitions, instances, the equipped set and an append-only ledger in its own PostgreSQL database. Issuers (services, apps) grant only within their namespace; people see and equip what they own; every movement is a ledger row and an inventory.* event. Nothing is sold, bought, traded or converted. Live's name effects, particles, hats and voices are the first kinds (70 definitions seeded at boot), and scripts/import-live.js moves Live's unlocks and equipped slots here, row for row.",
