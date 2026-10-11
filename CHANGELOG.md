@@ -2,6 +2,11 @@
 
 What changed in OpenVibe.Inventory, newest first. Each site also publishes its patch notes at /updates.
 
+## Unreleased
+
+- Workshop images reach OpenVibe.Media with Inventory's Network service token (audience `openvibe.media`, grant
+  `media.object.upload` on namespace `inventory`). `INVENTORY_MEDIA_APP_KEY` is gone (compatibility register C-71).
+
 ## 0.4.1 — 2026-10-09
 
 - Workshop takedown (ADR-054 §6): `/workshop/review` lists the published community badges. Staff can retire one (nobody
