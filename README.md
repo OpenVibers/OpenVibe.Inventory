@@ -44,8 +44,9 @@ set and the ledger. Nothing written there is ever a credential, a key or a token
   `OV_OAUTH_CLIENT_SECRET`.
 - **OpenVibe.Events** — the outbox relay publishes `inventory.*` and the account-export/deletion subscriptions are
   created there: `EVENTS_URL`, `INVENTORY_EVENTS_SECRET`, `EVENTS_RELAY_INTERVAL_MS`.
-- **OpenVibe.Media** — Workshop image uploads to this service's tenant: `OV_MEDIA_INTERNAL_URL`,
-  `INVENTORY_MEDIA_APP_KEY`.
+- **OpenVibe.Media** — Workshop image uploads to this service's tenant use its Network service token
+  (`OV_OAUTH_CLIENT_SECRET`, audience `openvibe.media`): `OV_MEDIA_INTERNAL_URL`. Network grants
+  `[inventory, media.object.upload, openvibe.media]` on namespace `inventory`.
 - **PostgreSQL** (`DATABASE_URL` to serve, `DATABASE_DIRECT_URL` to migrate) and, optionally, **Valkey** for shared
   per-caller limit counters (`VALKEY_URL`).
 - **Packages** — `openvibe-contracts` and `openvibe-sdk` (auth, db, events, account-data, limits, service, valkey),

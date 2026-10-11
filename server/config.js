@@ -64,11 +64,10 @@ function load(env = process.env) {
             secrets: String(env.INVENTORY_EVENTS_SECRET || '').split(',').map((x) => x.trim()).filter(Boolean),
         },
         // The Workshop's images (server/workshop/media.js): this service's own tenant in OpenVibe.Media. Without the
-        // key, submitting an image says uploads are not set up yet; everything else works.
+        // OAuth client secret, submitting an image says uploads are not set up yet; everything else works.
         media: {
             url: trim(env.OV_MEDIA_INTERNAL_URL || 'http://127.0.0.1:4100'),
             app: env.INVENTORY_MEDIA_APP || 'inventory',
-            appKey: env.INVENTORY_MEDIA_APP_KEY || '',
             timeoutMs: Math.max(1000, int(env.INVENTORY_MEDIA_TIMEOUT_MS, 15000)),
         },
     };

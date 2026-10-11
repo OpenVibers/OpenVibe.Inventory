@@ -1,21 +1,40 @@
 'use strict';
 
 /**
- * Workshop images in OpenVibe.Media: Inventory's own tenant (`inventory`, its app key in INVENTORY_MEDIA_APP_KEY),
- * a public `asset` object per badge, served by Media at https://openvibe.media/o/<med_…>. The badge is shown to
- * nobody until staff publish it (the pages never link an image of an item in review except to its creator and to
- * staff); a rejected or retired item keeps its object so the review record stays whole.
+ * Workshop images in OpenVibe.Media: Inventory's own tenant (`inventory`), using its Network service token
+ * (OV_OAUTH_CLIENT_SECRET, audience openvibe.media). A public `asset` object per badge is served by Media at
+ * https://openvibe.media/o/<med_…>. The badge is shown to nobody until staff publish it (the pages never link an
+ * image of an item in review except to its creator and staff); a rejected or retired item keeps its object so the
+ * review record stays whole.
  *
  *   upload({ buffer, type, name, ownerSubject }) → med_… id   (init → content → complete; throws with a short reason)
  */
+const { createServiceTokenClient } = require('openvibe-sdk/auth');
+
 function createWorkshopMedia({ config, fetchImpl = globalThis.fetch, log = console }) {
     const base = () => `${String(config.media.url).replace(/\/+$/, '')}/api/v2/${encodeURIComponent(config.media.app)}/objects`;
-    const enabled = () => Boolean(config.media.appKey);
+    const enabled = () => Boolean(config.oauth.clientSecret);
+    let tokens;
 
     async function call(path, { method = 'POST', json, body, headers = {} } = {}) {
-        const h = { Accept: 'application/json', Authorization: `Bearer ${config.media.appKey}`, ...headers };
         let payload = body;
-        if (json !== undefined) { payload = JSON.stringify(json); h['Content-Type'] = 'application/json'; }
+        if (json !== undefined) payload = JSON.stringify(json);
+        let token;
+        try {
+            tokens ||= createServiceTokenClient({
+                tokenUrl: `${String(config.networkInternalUrl).replace(/\/+$/, '')}/oauth/token`,
+                clientId: config.oauth.clientId,
+                clientSecret: config.oauth.clientSecret,
+                audience: 'openvibe.media',
+                fetch: fetchImpl,
+            });
+            token = await tokens.getToken();
+        } catch (err) {
+            log.warn('[Workshop] OpenVibe.Media service token unavailable:', (err && err.name) || '');
+            throw new Error('OpenVibe.Media did not answer (service token unavailable); try again in a minute.');
+        }
+        const h = { Accept: 'application/json', ...headers, Authorization: `Bearer ${token}` };
+        if (json !== undefined) h['Content-Type'] = 'application/json';
         let res;
         try {
             res = await fetchImpl(`${base()}${path}`, { method, headers: h, body: payload, signal: AbortSignal.timeout(config.media.timeoutMs) });
@@ -32,7 +51,7 @@ function createWorkshopMedia({ config, fetchImpl = globalThis.fetch, log = conso
     }
 
     async function upload({ buffer, type, name, ownerSubject }) {
-        if (!enabled()) throw new Error('Image uploads are not set up yet (INVENTORY_MEDIA_APP_KEY).');
+        if (!enabled()) throw new Error('Image uploads are not set up yet (OV_OAUTH_CLIENT_SECRET).');
         // The same call shape as OpenVibe.MediaHub's client: the owner in X-OV-Subject, a printable-ASCII filename label.
         const filename = String(name || 'badge').replace(/[^\x20-\x7e]/g, '').replace(/["\\]/g, '').trim().slice(0, 100) || 'badge';
         const init = await call('', { headers: { 'X-OV-Subject': ownerSubject }, json: { kind: 'asset', visibility: 'public', size_bytes: buffer.length, mime_type: type, filename: `${filename}.${type === 'image/png' ? 'png' : 'webp'}` } });
