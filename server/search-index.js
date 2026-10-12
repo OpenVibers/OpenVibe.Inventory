@@ -30,6 +30,7 @@ function describe(row) {
     const rarity = RARITY_LABEL[row.rarity] || row.rarity;
     const kind = String(row.kind_name || row.kind);
     const fromQuest = listOf(row.grantors).includes('service:quest');
+    const fromGames = listOf(row.grantors).includes('service:games');
     const wearable = listOf(row.kind_slots).length > 0;
     return {
         listed: row.status === 'published' || row.status === 'retired',
@@ -37,7 +38,8 @@ function describe(row) {
         title: `${row.name} · ${rarity} ${kind.toLowerCase()}`,
         summary: row.description || `${row.name}, a ${rarity.toLowerCase()} ${kind.toLowerCase()} on OpenVibe.`,
         body: [row.name, `${rarity} ${kind}`, row.description, wearable ? 'Wearable' : 'Collectible', `Given by ${issuerName(row)}`,
-            fromQuest ? 'Earn it on OpenVibe.Quest: the reward for one of the quests there.' : ''].filter(Boolean).join('\n'),
+            fromQuest ? 'Earn it on OpenVibe.Quest: the reward for one of the quests there.' : '',
+            fromGames ? 'Earn it on OpenVibe.Games: an achievement there gives it.' : ''].filter(Boolean).join('\n'),
         facets: { kind: row.kind, rarity: row.rarity, issuer: row.issuer, wearable },
         authorship: { mode: 'human' },
         publishedAt: row.published_at || row.created_at,

@@ -33,6 +33,14 @@ const KIND_ICON = { 'live.name_effect': 'ov:text', 'live.particle': 'ov:theme', 
 const surfaceLabel = (s) => SURFACE_LABEL[s] || (s.startsWith('game:') ? `the game ${s.slice(5)}` : s);
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
+// What earns an item on another service (server/data/live-grantors.json `earn`, by Live's alias): the achievement a
+// game names, shown on the item's page.
+const EARN = (() => { try { return require('../data/live-grantors.json').earn || {}; } catch { return {}; } })();
+function earnHow(d) {
+    for (const a of (d.aliases || [])) { const alias = typeof a === 'string' ? a : a && (a.alias || a.value); if (alias && EARN[alias]) return EARN[alias].how; }
+    return null;
+}
+
 /** The item's picture: its emoji, or a Media image, in a square tile tinted by rarity. */
 function art(d, { size = 'md' } = {}) {
     const a = d.art || {};
@@ -152,10 +160,12 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
 </ul>
 ${(d.grantors || []).includes('service:quest') && d.status === 'published' ? html`<h2>How to get it</h2>
 <p>Earn it on <a href="https://openvibe.quest/">OpenVibe.Quest</a>: it is the reward for one of the quests there, given once to everyone who completes it.</p>` : ''}
+${(d.grantors || []).includes('service:games') && d.status === 'published' ? html`<h2>How to get it</h2>
+<p>Earn it on <a href="https://openvibe.games/">OpenVibe.Games</a>${earnHow(d) ? html`: ${earnHow(d)}` : ''}. Every player signed in with their OpenVibe account gets it once, the first time.</p>` : ''}
 <h2>Where it shows</h2>
 <p>${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ').replace(/^./, (c) => c.toUpperCase())}.</p>
 <h2>Who gives it</h2>
-<p>${issuer}. Only its issuer can give this item; it is never sold here.</p>
+<p>${issuer}${(d.grantors || []).length ? ', and the services it names (see How to get it)' : ''}. ${(d.grantors || []).length ? 'Nobody else' : 'Only its issuer'} can give this item; it is never sold here.</p>
 <p class="muted small">Item <code>${d.id}</code>${(d.aliases || []).length ? html` · also known as <code>${d.aliases.join(', ')}</code>` : ''} · <a href="/api/v1/definitions/${d.id}">JSON</a></p>`,
         });
     });

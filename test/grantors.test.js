@@ -17,17 +17,23 @@ const { boot, check, done } = require('./helpers/boot');
     const A = 'usr_01JZ0000000000000000000AAA';
     const inv = t.ctx.inv;
     try {
-        await check('the boot seed names Quest on the six reward items, and only those', async () => {
+        await check('the boot seed names Quest on its six reward items and Games on its six, and only those', async () => {
             const live = (await inv.listDefinitions({ issuer: 'service:live', limit: 500 }));
-            const named = live.filter((d) => (d.grantors || []).length).map((d) => d.aliases[0]).sort();
-            assert.deepStrictEqual(named, ['fx_fire', 'fx_ice', 'fx_rainbow', 'hat_basic_cap', 'px_hearts', 'px_sparkle']);
-            assert.ok(live.filter((d) => d.grantors).every((d) => JSON.stringify(d.grantors) === '["service:quest"]'));
+            const by = (who) => live.filter((d) => JSON.stringify(d.grantors || []) === JSON.stringify([who])).map((d) => d.aliases[0]).sort();
+            assert.deepStrictEqual(by('service:quest'), ['fx_fire', 'fx_ice', 'fx_rainbow', 'hat_basic_cap', 'px_hearts', 'px_sparkle']);
+            assert.deepStrictEqual(by('service:games'), ['fx_golden', 'fx_neon', 'fx_toxic', 'hat_cowboy', 'px_flames', 'px_stars']);
+            assert.strictEqual(live.filter((d) => (d.grantors || []).length).length, 12, 'no other item names a grantor');
+            const named = by('service:quest');
             const r = await api(`/definitions/${named.length && (await inv.byAlias('service:live', 'px_sparkle')).id}`);
             assert.deepStrictEqual(r.json().definition.grantors, ['service:quest'], 'the public definition says who may grant it');
             const page = await t.get(`/items/${(await inv.byAlias('service:live', 'px_sparkle')).id}`);
             assert.ok(page.text.includes('How to get it') && page.text.includes('https://openvibe.quest/'), 'its page says where to earn it');
             const golden = await t.get(`/items/${(await inv.byAlias('service:live', 'fx_golden')).id}`);
-            assert.ok(!golden.text.includes('How to get it'));
+            assert.ok(golden.text.includes('How to get it') && golden.text.includes('https://openvibe.games/'), 'a Games reward says where');
+            assert.ok(golden.text.includes('Big Haul in Scraplandia'), 'and which achievement');
+            const cap = await t.get(`/items/${(await inv.byAlias('service:live', 'hat_crown')).id}`);
+            assert.ok(!cap.text.includes('How to get it'), 'an item nobody else gives has no such section');
+            assert.ok(cap.text.includes('Only its issuer can give this item'));
             const again = await require('../server/inventory/seed').seed(inv, { log: { log() {} } });
             assert.strictEqual(again.grantors, 0, 'a second boot changes nothing');
         });
