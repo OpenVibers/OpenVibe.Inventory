@@ -47,9 +47,9 @@ function describe(row) {
     };
 }
 
-function createSearchIndex({ config, s, outbox, log = console }) {
+function createSearchIndex({ config, s, outbox, log = console, indexnow = null }) {
     const feed = createSearchFeed({
-        owner: 'inventory', db: s.db, outbox, baseUrl: config.baseUrl, now: s.now, log,
+        owner: 'inventory', db: s.db, outbox, baseUrl: config.baseUrl, now: s.now, log, indexnow,
         types: {
             definition: {
                 page: (row) => `/items/${row.id}`,

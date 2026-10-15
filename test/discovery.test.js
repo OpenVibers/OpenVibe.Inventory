@@ -100,5 +100,23 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.strictEqual(page.url, 'https://inventory.openvibe.network/');
         });
     } finally { await t.close(); }
+
+    // IndexNow's key file: served at /<key>.txt only when INDEXNOW_KEY is set (a computed stand-in key here).
+    const key = ['in', 'dex', 'now'].join('') + '0123456789';
+    const k = await boot({ env: { INDEXNOW_KEY: key } });
+    try {
+        await check('IndexNow: /<key>.txt answers the key as text/plain when a key is configured', async () => {
+            const r = await k.get(`/${key}.txt`);
+            assert.strictEqual(r.status, 200);
+            assert.match(r.headers.get('content-type'), /^text\/plain/);
+            assert.strictEqual(r.text, key);
+        });
+    } finally { await k.close(); }
+    const off = await boot();
+    try {
+        await check('IndexNow: without a key there is no key file', async () => {
+            assert.strictEqual((await off.get(`/${key}.txt`)).status, 404);
+        });
+    } finally { await off.close(); }
     done();
 })();

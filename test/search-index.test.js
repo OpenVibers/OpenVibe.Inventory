@@ -10,7 +10,9 @@ const contracts = require('openvibe-contracts');
 const { boot, check, done } = require('./helpers/boot');
 
 (async () => {
-    const t = await boot();
+    const pinged = [];
+    const indexnow = { enabled: true, keyFile: (req, res, next) => next(), pingSoon: (urls) => { pinged.push(...urls); return urls.length; } };
+    const t = await boot({ indexnow });
     const { s, searchIndex } = t.ctx;
     const docs = async () => (await s.db.many("SELECT envelope FROM event_outbox WHERE envelope->>'event_type' LIKE 'inventory.index_document.%' ORDER BY id")).map((r) => r.envelope);
     const valid = (env) => {
@@ -37,7 +39,13 @@ const { boot, check, done } = require('./helpers/boot');
             assert.strictEqual(doc.facets.rarity, published[0].rarity);
             assert.deepStrictEqual(doc.indexability, { decision: 'index', reasons: [] });
             assert.strictEqual((await t.get(`/items/${id}`)).status, 200);
+            // Search engines hear about each item page and the sitemap (IndexNow, through openvibe-publishing/search-feed).
+            const sitemap = `${t.config.baseUrl}/sitemap.xml`;
+            assert.deepStrictEqual(pinged.filter((u) => u !== sitemap).sort(), published.map((d) => `${t.config.baseUrl}/items/${d.id}`).sort());
+            assert.ok(pinged.includes(sitemap));
+            pinged.length = 0;
             assert.strictEqual((await searchIndex.sweep()).definition.sent, 0, 'a second sweep sends nothing');
+            assert.deepStrictEqual(pinged, [], 'nor pings anything');
         });
 
         await check('a retired item stays in Search marked noindex; a draft is a tombstone', async () => {
@@ -46,10 +54,12 @@ const { boot, check, done } = require('./helpers/boot');
             let env = valid((await docs()).pop());
             assert.strictEqual(env.event_type, 'inventory.index_document.upserted');
             assert.strictEqual(env.payload.indexability.decision, 'noindex');
+            assert.deepStrictEqual(pinged, [], 'a noindex page is not announced');
             await s.db.exec("UPDATE inventory_definitions SET status = 'draft' WHERE id = $1", [id]);
             await searchIndex.syncId(id);
             env = valid((await docs()).pop());
             assert.strictEqual(env.event_type, 'inventory.index_document.deleted');
+            assert.deepStrictEqual(pinged, [], 'a tombstone is not announced (the page leaves the sitemap)');
             assert.strictEqual((await t.get(`/items/${id}`)).status, 404);
             await s.db.exec("UPDATE inventory_definitions SET status = 'published' WHERE id = $1", [id]);
         });
