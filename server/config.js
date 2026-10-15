@@ -24,6 +24,9 @@ function load(env = process.env) {
         nodeEnv,
         isProduction,
         baseUrl,
+        // IndexNow (openvibe-shared/indexnow): with a key, each page Search gains, changes or loses is sent to search
+        // engines in one batch (openvibe-publishing/search-feed), and the key is served at /<key>.txt. Unset: off.
+        indexnow: { key: String(env.INDEXNOW_KEY || '').trim() },
         trustProxy: env.TRUST_PROXY != null ? Number(env.TRUST_PROXY) : 2,
         // Per-caller limits (server/http/caller-limits.js): the requests one caller (an app, a person, else an
         // address) may make per minute and per hour. The product's own routes add tighter budgets there.

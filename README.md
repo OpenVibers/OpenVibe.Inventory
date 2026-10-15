@@ -128,7 +128,8 @@ them.
 
 `/` (what it is), `/items` (every item by kind), `/items/:id` (one item: where it shows, who gives it, how many exist),
 `/me` (your items; Wear and Take off are plain forms), `/u/:subject` (a person's public inventory) and `/updates`.
-Every page works without JavaScript.
+Every page works without JavaScript. With `INDEXNOW_KEY`, each item page Search gains or changes is sent to search
+engines (IndexNow, through `openvibe-publishing/search-feed`) and the key is served at `/<key>.txt`.
 
 ## Moving Live's cosmetics (ADR-054 §8)
 

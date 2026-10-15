@@ -35,6 +35,7 @@ const { createServiceReadiness } = require('./observability');
 const { createCallerLimits } = require('./http/caller-limits');
 const { createServiceOutbox } = require('openvibe-sdk/events');
 const { createSearchIndex } = require('./search-index');
+const { createIndexNow } = require('openvibe-shared/indexnow');
 const { createNetworkSender } = require('openvibe-sdk/account-data');
 const { createInventory } = require('./inventory/store');
 const { seed } = require('./inventory/seed');
@@ -69,7 +70,15 @@ async function createApp(opts = {}) {
     await seed(inv, { log });
     // Item pages in OpenVibe.Search (./search-index.js) through the same outbox: the definition writes name what they
     // changed (watch), and a sweep runs on its own timer once server/index.js starts it.
-    const searchIndex = opts.searchIndex || createSearchIndex({ config, s, outbox, log });
+    // IndexNow: off without INDEXNOW_KEY; a malformed key warns and stays off rather than stopping the site.
+    const indexnow = opts.indexnow || (() => {
+        const warn = (...a) => (log.warn || console.warn)(...a);
+        try { return createIndexNow({ host: config.baseUrl, key: config.indexnow.key, fetch: fetchImpl, log: warn }); } catch (err) {
+            warn(`[Inventory] ${err.message} — IndexNow is off until INDEXNOW_KEY is fixed`);
+            return createIndexNow({ host: config.baseUrl, key: '', fetch: fetchImpl, log: warn });
+        }
+    })();
+    const searchIndex = opts.searchIndex || createSearchIndex({ config, s, outbox, log, indexnow });
     searchIndex.watch(inv);
     // Account export and deletion (ADR-033): the table map, and the sender to Network's internal routes with this
     // service's own client-credentials token.
@@ -140,6 +149,8 @@ async function createApp(opts = {}) {
 
     // ── Static assets (content-hashed ?v= → immutable) ──────
     app.use('/shared', require('openvibe-shared/serve').handler());
+    // GET /<key>.txt — the IndexNow key file, only when a key is configured.
+    if (indexnow.enabled) app.use(indexnow.keyFile);
     app.use(express.static(PUBLIC_DIR, {
         index: false, redirect: false,
         setHeaders(res, filePath) {
