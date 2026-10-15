@@ -96,7 +96,9 @@ function createPageRoutes(ctx) {
             body: html`${raw(hero)}
 ${raw(showcase.features({
                 title: 'What you can collect',
-                lede: `${plural(defs.length, 'item', 'items')} in ${plural(kinds.length, 'kind', 'kinds')} today. Each kind knows where it shows, so a new kind is all it takes for a new site or game to join.`,
+                // The count is of the kinds shown: an empty kind (no issuer has defined anything in it yet) is neither a card
+                // nor counted, so "in 4 kinds" sits over four cards.
+                lede: `${plural(defs.length, 'item', 'items')} in ${plural(kinds.filter((k) => (byKind.get(k.id) || []).length).length, 'kind', 'kinds')} today. Each kind knows where it shows, so a new kind is all it takes for a new site or game to join.`,
                 // Kinds that have items, the biggest first; an empty kind waits until an issuer defines something in it.
                 items: kinds.filter((k) => (byKind.get(k.id) || []).length).sort((a, b) => byKind.get(b.id).length - byKind.get(a.id).length).map((k) => ({ icon: KIND_ICON[k.id] || 'ov:ov', title: `${k.name} · ${(byKind.get(k.id) || []).length}`, text: `${k.description || ''} Shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}.`, href: `/items?kind=${encodeURIComponent(k.id)}` })),
             }))}
