@@ -26,6 +26,11 @@ Its own PostgreSQL database (`ov_inventory`) and everything in it: the tables `i
 export and deletion receipts). It is the authority for item kinds, definitions, instances, grant receipts, the equipped
 set and the ledger. Nothing written there is ever a credential, a key or a token.
 
+Requests are aggregated by route template, method and status class, never by raw URL; `/shared`, static assets, health, readiness and
+`/metrics` are excluded. Once a minute one `http.request` sample per key plus the active-requests, p95 latency and event-loop-lag gauges go
+to `telemetry_samples` (openvibe-sdk 0.46, `platform.telemetry-sample@1`, migration `0005_telemetry.sql`); rows older than 14 days are
+deleted daily. Wired in `server/app.js` (`createHttpTelemetry`, middleware) and `server/index.js` (flush each minute, on stop, retention).
+
 ## Does not own
 
 - **Identity** is OpenVibe.Network's: it issues the `usr_` subjects, usernames and Network tokens, and resolves an
