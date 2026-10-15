@@ -17,7 +17,7 @@ const { startSubscriptions } = require('openvibe-sdk/account-data');
 function createLifecycle({ server, ctx, exit, signals, timers = [], extra = [] }) {
     return gracefulStop({
         name: 'OpenVibe.Inventory', server, deadlineExitCode: 0, exit, signals, deadlineMs: 10_000,
-        close: [() => { for (const t of timers) clearInterval(t); }, ...extra, () => ctx.searchIndex.stop(), () => ctx.outbox.stop(), () => ctx.keys.client.stop(), async () => { if (ctx.retention) await ctx.retention.stop(); if (ctx.telemetry) await ctx.telemetry.stop(); }, () => ctx.s.close()],
+        close: [() => { for (const t of timers) clearInterval(t); }, ...extra, () => ctx.searchIndex.stop(), () => ctx.outbox.stop(), () => ctx.keys.client.stop(), async () => { clearInterval(ctx.telemetryTick); if (ctx.retention) await ctx.retention.stop(); if (ctx.telemetry) await ctx.telemetry.stop(); }, () => ctx.s.close()],
     });
 }
 
@@ -31,6 +31,10 @@ async function start() {
     server.keepAliveTimeout = 65_000;
     // telemetry_samples rows older than 30 days go: a minute after start, then daily (openvibe-sdk/telemetry).
     ctx.retention = startTelemetryRetention({ db: ctx.s.db, log: ctx.log || console });
+    // The request collector aggregates in memory and has no timer of its own (openvibe-sdk 0.46 createHttpTelemetry):
+    // this tick writes each 15-second interval's samples; the stop clears it and flushes once more.
+    ctx.telemetryTick = setInterval(() => { ctx.telemetry.flush().catch(() => {}); }, 15_000);
+    ctx.telemetryTick.unref();
     ctx.keys.client.start();
     ctx.outbox.start();
     ctx.searchIndex.start();
