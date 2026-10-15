@@ -63,6 +63,10 @@ const BOOST = /<script src="\/shared\/boost\.js\?v=[0-9a-f]{12}" data-main="#mai
         assert.ok(r.text.includes('OpenVibe.Inventory'), 'the service name is on the page');
         assert.ok(r.text.includes('Your items, on every OpenVibe site.'), 'the tagline is on the page');
         assert.ok(r.text.includes('/shared/showcase.css'), 'the showcase stylesheet');
+        // "N items in K kinds" counts the kinds it shows: an empty kind is neither a card nor counted.
+        const collect = (/<section class="sc-sec"[^>]*aria-labelledby="sc-what-you-can-collect"[\s\S]*?<\/section>/.exec(r.text) || [''])[0];
+        const said = /in (\d+) kinds? today/.exec(collect);
+        if (said) assert.strictEqual((collect.match(/class="sc-card"/g) || []).length, Number(said[1]), collect.slice(0, 400));
         assert.ok(!r.text.includes('/home/') && !r.text.includes('/mnt/'), 'no local filesystem path on the page');
     });
 
