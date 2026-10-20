@@ -56,6 +56,21 @@ function card(d, { href = `/items/${d.id}`, extra = '', owned = null, worn = fal
 </li>`;
 }
 
+/** An item page's meta description (≤ 160 characters): its name, rarity and kind, its own words, how many own it, how it is got. */
+function itemDescription(d, k) {
+    const what = `${d.name}, a ${RARITY_LABEL[d.rarity].toLowerCase()} ${k.name.toLowerCase()} on OpenVibe`;
+    const words = d.description ? ` "${String(d.description).replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '')}".` : '.';
+    const owned = Number(d.supply && d.supply.issued) || 0;
+    const supply = d.supply && d.supply.cap != null ? ` ${owned} of ${d.supply.cap} given.` : ` Owned by ${owned} ${owned === 1 ? 'person' : 'people'}.`;
+    const grantors = d.grantors || [];
+    const how = d.status !== 'published' ? ' No longer given.'
+        : grantors.includes('service:quest') ? ' Earned on OpenVibe.Quest.'
+        : grantors.includes('service:games') ? ' Earned on OpenVibe.Games.'
+        : ' Given by its issuer, never sold.';
+    const text = `${what}${words}${supply}${how}`;
+    return text.length <= 160 ? text : `${text.slice(0, 159).replace(/\s+\S*$/, '')}…`;
+}
+
 function createPageRoutes(ctx) {
     const { config, inv } = ctx;
     const r = asyncRouter();
@@ -145,7 +160,8 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
         page(req, res, {
             index: d.status === 'published', cache: signedIn(req) ? null : PUBLIC_CACHE,
             title: `${d.name} · ${RARITY_LABEL[d.rarity]} ${k.name.toLowerCase()}`,
-            description: d.description || `${d.name}, a ${RARITY_LABEL[d.rarity].toLowerCase()} ${k.name.toLowerCase()} on OpenVibe.`,
+            // What the item is, how many people own it and how it is got; its flavor text alone ("Angelic") said none of that.
+            description: itemDescription(d, k),
             body: html`<p class="crumbs"><a href="/items">Every item</a> › <a href="/items?kind=${encodeURIComponent(k.id)}">${k.name}</a></p>
 <div class="inv-detail r-${d.rarity}">
   ${art(d, { size: 'xl' })}
