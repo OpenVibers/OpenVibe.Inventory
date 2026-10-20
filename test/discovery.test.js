@@ -34,11 +34,12 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.match(r.headers.get('content-type'), /^application\/xml/);
             assert.match(r.headers.get('cache-control') || '', /public, max-age=\d+/);
             for (const p of ['/', '/updates']) assert.ok(r.text.includes(`<loc>https://inventory.openvibe.network${p}</loc>`), `no ${p} entry`);
-            // The catalog: /items, each kind with items, and every published item.
+            // The catalog: /items and every published item. A kind's filter is noindex with /items as canonical: not listed.
             assert.ok(r.text.includes('<loc>https://inventory.openvibe.network/items</loc>'), 'no /items entry');
-            // This kind's URL has no '&', so it must appear exactly, unescaped — and with no stray '&amp;'.
-            assert.ok(r.text.includes('<loc>https://inventory.openvibe.network/items?kind=live.hat</loc>'), 'no /items?kind=live.hat entry');
-            assert.ok(!r.text.includes('items?kind=live.hat&amp;'), 'that URL must not gain an entity');
+            assert.ok(!r.text.includes('items?kind='), 'a kind filter is no sitemap entry');
+            assert.ok(r.text.includes('<loc>https://inventory.openvibe.network/workshop</loc>'), 'the Workshop is listed');
+            const ws = await t.get('/workshop');
+            assert.match(ws.text, /<meta name="robots" content="index, follow">/, 'and indexable');
             const items = [...r.text.matchAll(/<loc>https:\/\/inventory\.openvibe\.network\/items\/itd_/g)];
             assert.strictEqual(items.length, 70, `expected 70 item entries, got ${items.length}`);
             for (const p of ['/me', '/u/', '/api/']) assert.ok(!r.text.includes(`<loc>https://inventory.openvibe.network${p}`), `private path in sitemap: ${p}`);

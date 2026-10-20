@@ -63,7 +63,8 @@ function createWorkshopRoutes(ctx) {
     r.get('/workshop', async (req, res) => {
         const published = await inv.workshopItems({ status: 'published', limit: 200 });
         page(req, res, {
-            title: 'The Workshop',
+            // A public page in search, as the sitemap says (it was noindex by default).
+            title: 'The Workshop', index: true,
             description: 'Badges made by people in the OpenVibe community, reviewed by staff, given free by their makers.',
             body: html`<h1>The Workshop</h1>
 <p class="lede">Badges made by people in the community. Make one, staff review it, then you give it to the people you choose: your viewers, your server, the friends you played with. Every badge here is free: nothing in the Workshop is sold or traded.</p>
