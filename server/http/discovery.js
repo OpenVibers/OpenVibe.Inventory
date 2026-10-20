@@ -65,12 +65,14 @@ async function catalog(inv) {
 }
 const kindsWithItems = ({ kinds, byKind }) => kinds.filter((k) => byKind.get(k.id).length);
 
-/** Every public URL: the static pages, /items, a page per kind with items, and each published item. */
-function catalogPages({ kinds, defs, byKind }) {
+/**
+ * Every indexable URL: the static pages, /items and each published item. A kind's filter (/items?kind=…) is not one:
+ * the page says noindex with /items as its canonical, so the sitemap listing it spent crawl on a duplicate.
+ */
+function catalogPages({ defs }) {
     return [
         ...publicPages(),
         CATALOG_PAGE,
-        ...kindsWithItems({ kinds, byKind }).map((k) => ({ path: kindPath(k.id), changefreq: 'weekly', priority: 0.6 })),
         ...defs.map((d) => ({ path: `/items/${d.id}`, changefreq: 'monthly', priority: 0.4 })),
     ];
 }
