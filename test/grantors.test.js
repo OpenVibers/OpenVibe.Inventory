@@ -34,6 +34,12 @@ const { boot, check, done } = require('./helpers/boot');
             const cap = await t.get(`/items/${(await inv.byAlias('service:live', 'hat_crown')).id}`);
             assert.ok(!cap.text.includes('How to get it'), 'an item nobody else gives has no such section');
             assert.ok(cap.text.includes('Only its issuer can give this item'));
+            // Each item page describes itself: name, rarity and kind, how many own it, how it is got (≤ 160 characters).
+            const descOf = (html) => ((html.match(/<meta name="description" content="([^"]*)">/) || [])[1] || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+            assert.match(descOf(page.text), /^.+, an? (common|uncommon|rare|epic|legendary) .+ on OpenVibe[.: ].* (Owned by \d+ (person|people)|\d+ of \d+ given)\. Earned on OpenVibe\.Quest\.$/);
+            assert.match(descOf(golden.text), /Earned on OpenVibe\.Games\.$/);
+            assert.match(descOf(cap.text), /Given by its issuer, never sold\.$|…$/);
+            for (const html of [page.text, golden.text, cap.text]) assert.ok(descOf(html).length <= 160, descOf(html));
             const again = await require('../server/inventory/seed').seed(inv, { log: { log() {} } });
             assert.strictEqual(again.grantors, 0, 'a second boot changes nothing');
         });
