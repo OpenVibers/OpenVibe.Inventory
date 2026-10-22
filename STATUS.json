@@ -20,18 +20,20 @@
   "works": [
     "Kinds and definitions seeded at boot from data/kinds.json and data/live-definitions.json (Live's catalog, its item ids kept as aliases)",
     "Grants by an issuer within its namespace: idempotent per key, supply caps with serial numbers, a non-stackable item answers the one already owned; consume and revoke",
+    "Grantors (ADR-054 §3 amendment): Live names OpenVibe.Quest on six of its items (quest rewards) and OpenVibe.Games on six more (achievements); a grantor may grant those and nothing more",
     "Equip one item per slot (a person, or a service acting for them with X-OV-Subject); a batch read of up to 100 equipped sets in one query",
     "Public reads (kinds, definitions, a person's inventory and equipped set) and the person's own full inventory",
     "Definitions created and edited by their issuer; rarity, attributes and supply fixed once published; attributes validated against the kind's schema",
     "Pages: home, every item by kind, one item, your inventory with plain equip forms, a person's public inventory, /updates",
     "Events (inventory.item.granted/consumed/revoked/equipped/unequipped, inventory.definition.published) through the openvibe-sdk outbox",
     "Account export and deletion (ADR-033) at the loopback POST /internal/events, subscriptions created at boot",
-    "scripts/import-live.js: dry run, --apply (origin migrated, unlock times kept, idempotent) and --verify (row for row)"
+    "scripts/import-live.js: dry run, --apply (origin migrated, unlock times kept, idempotent) and --verify (row for row)",
+    "The Workshop (ADR-054 §6): community badges anyone can make, shown only after staff publish them, with staff takedown",
+    "Live reads and writes cosmetics only here since 2026-10-09 (INVENTORY_AUTHORITY=inventory); Live's migration 0005_drop_live_cosmetics dropped its tables on 2026-10-15",
+    "Item pages in OpenVibe.Search through openvibe-publishing/search-feed, IndexNow and the sitemap"
   ],
   "notYet": [
-    "Live reading and writing through Inventory (INVENTORY_AUTHORITY), then Live's tables dropped (ADR-054 §8)",
     "Profiles on Network showing the showcase; equip in Chat, Community and Games",
-    "Creator submissions and staff review (the Workshop, ADR-054 §6)",
     "Trading and a market: not before a money ADR (ADR-054 §5)",
     "Account merge (ADR-029): instances moving to the surviving subject"
   ],
@@ -43,11 +45,14 @@
     "item kinds",
     "definitions",
     "grants",
+    "grantors",
     "equip",
     "public inventory",
+    "the Workshop (community badges, staff review)",
+    "Search feed",
     "Live migration",
     "account export and deletion"
   ],
   "deployment": "openvibe-ovh: unit openvibe-inventory.service on 127.0.0.1:5030 (git checkout /opt/inventory.openvibe.network, env /etc/openvibe/inventory.env, database ov_inventory), deployed with `sudo ovhost deploy inventory`; public at https://inventory.openvibe.network since 2026-10-09.",
-  "updated": "2026-10-20"
+  "updated": "2026-10-22"
 }

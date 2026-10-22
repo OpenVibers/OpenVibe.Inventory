@@ -83,8 +83,9 @@ and the account subscriptions) and `identity.subject.resolve` (OpenVibe.Network;
 Only a kind's issuer defines and grants its items: `service:live` for `live.*`. An issuer may name **grantors** on
 one of its items (ADR-054 §3 amendment): other services or apps that may grant that item and nothing more (no edit,
 no revoke), recorded in the ledger as the actor. Live names OpenVibe.Quest on six common items, so they are earned as
-quest rewards ([server/data/live-grantors.json](server/data/live-grantors.json), applied at boot); their pages say
-where to earn them. **Nothing is sold, bought, traded or
+quest rewards, and OpenVibe.Games on six more, earned as achievements
+([server/data/live-grantors.json](server/data/live-grantors.json), applied at boot); their pages say where to earn
+them. **Nothing is sold, bought, traded or
 converted into OpenCoins or Vibes**, and there are no paid random rewards, until a later ADR covers the legal basis and
 Billing (ADR-054 §5). A test fails if a route or a column for that appears.
 
@@ -147,8 +148,9 @@ node --env-file=/etc/openvibe/inventory.env scripts/import-live.js --live-env /e
 ```
 
 The script only reads Live's database, and never prints its URL. `--apply` keeps unlock times and grants nothing twice.
-`--verify` compares every person's items and slots, row for row. Live then reads and writes through this API
-(`INVENTORY_AUTHORITY=inventory`), and its tables are dropped after the N-1 window.
+`--verify` compares every person's items and slots, row for row. Live has read and written only through this API
+since 2026-10-09 (`INVENTORY_AUTHORITY=inventory`), and its migration `0005_drop_live_cosmetics` dropped Live's three
+cosmetics tables on 2026-10-15.
 
 ## Configuration
 
