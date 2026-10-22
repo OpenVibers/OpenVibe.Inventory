@@ -197,6 +197,21 @@
       }
     },
     {
+      "alias": "fx_vegas",
+      "kind": "live.name_effect",
+      "name": "Josh Vegas",
+      "description": "Slot reels and casino lights. One of a kind: granted to its one holder, never sold or earned",
+      "art": {
+        "emoji": "🎰",
+        "token": "name-fx-vegas"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "css_class": "name-fx-vegas"
+      }
+    },
+    {
       "alias": "px_sparkle",
       "kind": "live.particle",
       "name": "Sparkle",

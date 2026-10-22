@@ -24,12 +24,12 @@ const { boot, check, done } = require('./helpers/boot');
     let granted;
 
     try {
-        await check('boot registers Live\'s five kinds, the Workshop\'s badge and Live\'s 70 cosmetics, published, found by Live\'s ids', async () => {
+        await check('boot registers Live\'s five kinds, the Workshop\'s badge and every one of Live\'s cosmetics, published, found by Live\'s ids', async () => {
             const kinds = (await api('/kinds')).json().kinds;
             assert.deepStrictEqual(kinds.map((k) => k.id), ['live.chat_tag', 'live.hat', 'live.name_effect', 'live.particle', 'live.voice', 'network.badge'], 'Live\'s five and the Workshop\'s badge');
             for (const k of kinds) valid('inventory.kind@1', k);
             const defs = (await api('/definitions?limit=500')).json().definitions;
-            assert.strictEqual(defs.length, 70);
+            assert.strictEqual(defs.length, require('../server/data/live-definitions.json').definitions.length, 'one definition per entry of the seed file (71 since fx_vegas, 2026-10-22)');
             for (const d of defs) valid('inventory.definition@1', d);
             rainbow = defs.find((d) => (d.aliases || []).includes('fx_rainbow'));
             crown = defs.find((d) => (d.aliases || []).includes('hat_crown'));
