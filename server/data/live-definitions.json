@@ -212,6 +212,52 @@
       }
     },
     {
+      "alias": "px_vegas",
+      "kind": "live.particle",
+      "name": "Josh Vegas Chips",
+      "description": "Cards, dice and coins. One of a kind: part of the Josh Vegas set, never sold or earned",
+      "art": {
+        "emoji": "🎲",
+        "token": "px-vegas"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "css_class": "px-vegas",
+        "chars": "♠♥♦♣🎲🪙💰"
+      }
+    },
+    {
+      "alias": "hat_vegas",
+      "kind": "live.hat",
+      "name": "Josh Vegas Top Hat",
+      "description": "The showman on the Strip. One of a kind: part of the Josh Vegas set, never sold or earned",
+      "art": {
+        "emoji": "🎩"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "hat_char": "🎩",
+        "animated": "float"
+      }
+    },
+    {
+      "alias": "voice_vegas",
+      "kind": "live.voice",
+      "name": "Vegas Announcer",
+      "description": "Ladies and gentlemen… One of a kind: part of the Josh Vegas set, never sold or earned",
+      "art": {
+        "emoji": "🎙️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 0.7,
+        "rate": 0.92
+      }
+    },
+    {
       "alias": "px_sparkle",
       "kind": "live.particle",
       "name": "Sparkle",
