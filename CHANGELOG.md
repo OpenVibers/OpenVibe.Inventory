@@ -4,6 +4,10 @@ What changed in OpenVibe.Inventory, newest first. Each site also publishes its p
 
 ## Unreleased
 
+- Account merge (ADR-029, ADR-054 §7): Inventory consumes `network.subject.merged`. The folded-in account's items,
+  equipped set and Workshop credit become the survivor's in one transaction, once per merge id
+  (`inventory_subject_merges`). Where both own the same non-stackable item the oldest is kept and the other is revoked;
+  the survivor's equipped set wins; the ledger keeps the old rows and gains one `merged` row per instance.
 - Workshop images reach OpenVibe.Media with Inventory's Network service token (audience `openvibe.media`, grant
   `media.object.upload` on namespace `inventory`). `INVENTORY_MEDIA_APP_KEY` is gone (compatibility register C-71).
 

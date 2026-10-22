@@ -40,6 +40,7 @@ const { createNetworkSender } = require('openvibe-sdk/account-data');
 const { createInventory } = require('./inventory/store');
 const { seed } = require('./inventory/seed');
 const accountDataLib = require('./inventory/account-data');
+const subjectMerge = require('./inventory/subject-merge');
 const { assetVersion, send } = require('./render/layout');
 const { html } = require('./render/html');
 
@@ -138,7 +139,9 @@ async function createApp(opts = {}) {
     // ── OpenVibe.Events → Inventory (loopback only: nginx answers 404 for /internal/) ──
     // network.account.export_requested and network.account.deleted, answered by openvibe-sdk/account-data's consumer,
     // which reads the raw body itself (the v2 signature covers it) and refuses a request that came through a proxy.
-    app.post('/internal/events', accountData.consumer({ secrets: config.events.secrets, send: accountSend, log }));
+    // network.subject.merged (ADR-029) is handed to ./inventory/subject-merge.js through onEvent.
+    app.post('/internal/events', accountData.consumer({ secrets: config.events.secrets, send: accountSend, log,
+        onEvent: (ev) => (ev.event_type === subjectMerge.TOPIC ? subjectMerge.apply(ev, { s, log }) : 'ignored:type') }));
 
     // ── Machine endpoints ───────────────────────────────────
     app.get('/api/health', (_req, res, next) => outbox.status().then((events) => res.json({ status: 'ok', service: 'openvibe-inventory', version: VERSION, events }), next));
