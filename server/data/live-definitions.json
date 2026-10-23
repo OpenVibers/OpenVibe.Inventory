@@ -1112,6 +1112,636 @@
         "pitch": 0.5,
         "rate": 0.7
       }
+    },
+    {
+      "alias": "neckbeard",
+      "kind": "live.voice",
+      "name": "Neckbeard 9000",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🧔"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "crybaby",
+      "kind": "live.voice",
+      "name": "Cry Baby",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "😭"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "scotsman",
+      "kind": "live.voice",
+      "name": "McScreamy",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🏴"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "alien",
+      "kind": "live.voice",
+      "name": "Zorp",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "👽"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gigachad",
+      "kind": "live.voice",
+      "name": "Giga Chad",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🏋️"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "uwu",
+      "kind": "live.voice",
+      "name": "Uw U Bot",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🌸"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "german",
+      "kind": "live.voice",
+      "name": "Hans Get Ze Flammenwerfer",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🇩🇪"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "russian",
+      "kind": "live.voice",
+      "name": "Comrade Bot",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🇷🇺"
+      },
+      "rarity": "uncommon",
+      "attributes": {
+        "tier": 2,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "japanese",
+      "kind": "live.voice",
+      "name": "Senpai Notice",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🇯🇵"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "slowmo",
+      "kind": "live.voice",
+      "name": "Slow Mo Dave",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🐌"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "glitch",
+      "kind": "live.voice",
+      "name": "Glitch Fiend",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "📟"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "void",
+      "kind": "live.voice",
+      "name": "Void Screamer",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🕳️"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "ascended",
+      "kind": "live.voice",
+      "name": "Ascended",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "✨"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "omega",
+      "kind": "live.voice",
+      "name": "OMEGA",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "🔴"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 5,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "warlord",
+      "kind": "live.voice",
+      "name": "War Lord",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "⚔️"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "degenking",
+      "kind": "live.voice",
+      "name": "Degen King",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "👑"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "coinlord",
+      "kind": "live.voice",
+      "name": "Coin Lord",
+      "description": "Speech synth",
+      "art": {
+        "emoji": "💰"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_news_anchor",
+      "kind": "live.voice",
+      "name": "News Anchor",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_podcast_girl",
+      "kind": "live.voice",
+      "name": "Podcast Girl",
+      "description": "Google Cloud",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_wave_daddy",
+      "kind": "live.voice",
+      "name": "Wave Daddy",
+      "description": "Google Cloud Wavenet",
+      "art": {
+        "emoji": "🎵"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_wave_queen",
+      "kind": "live.voice",
+      "name": "Wave Queen",
+      "description": "Google Cloud Wavenet",
+      "art": {
+        "emoji": "🎵"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_wave_brit",
+      "kind": "live.voice",
+      "name": "Wave Brit",
+      "description": "Google Cloud Wavenet",
+      "art": {
+        "emoji": "🎵"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_wave_aussie",
+      "kind": "live.voice",
+      "name": "Wave Aussie",
+      "description": "Google Cloud Wavenet",
+      "art": {
+        "emoji": "🎵"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_neural_chad",
+      "kind": "live.voice",
+      "name": "Neural Chad",
+      "description": "Google Cloud Neural2",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_neural_diva",
+      "kind": "live.voice",
+      "name": "Neural Diva",
+      "description": "Google Cloud Neural2",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_neural_brit_f",
+      "kind": "live.voice",
+      "name": "Neural Lady",
+      "description": "Google Cloud Neural2",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_neural_aussie_f",
+      "kind": "live.voice",
+      "name": "Neural Sheila",
+      "description": "Google Cloud Neural2",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_journey_sage",
+      "kind": "live.voice",
+      "name": "Journey Sage",
+      "description": "Google Cloud Journey",
+      "art": {
+        "emoji": "🗺️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_journey_oracle",
+      "kind": "live.voice",
+      "name": "Journey Oracle",
+      "description": "Google Cloud Journey",
+      "art": {
+        "emoji": "🗺️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "gc_journey_whisper",
+      "kind": "live.voice",
+      "name": "Journey Whisper",
+      "description": "Google Cloud Journey",
+      "art": {
+        "emoji": "🗺️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_ivy_std",
+      "kind": "live.voice",
+      "name": "Polly Ivy",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_joey_std",
+      "kind": "live.voice",
+      "name": "Polly Joey",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_kendra_std",
+      "kind": "live.voice",
+      "name": "Polly Kendra",
+      "description": "Amazon Polly",
+      "art": {
+        "emoji": "🎤"
+      },
+      "rarity": "rare",
+      "attributes": {
+        "tier": 3,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_joanna_neural",
+      "kind": "live.voice",
+      "name": "Neural Joanna",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_matthew_neural",
+      "kind": "live.voice",
+      "name": "Neural Matt",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_ruth_neural",
+      "kind": "live.voice",
+      "name": "Neural Ruth",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_stephen_neural",
+      "kind": "live.voice",
+      "name": "Neural Stephen",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_amy_neural",
+      "kind": "live.voice",
+      "name": "Neural Amy",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_danielle_neural",
+      "kind": "live.voice",
+      "name": "Neural Danielle",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_kevin_neural",
+      "kind": "live.voice",
+      "name": "Neural Kevin",
+      "description": "Amazon Polly Neural",
+      "art": {
+        "emoji": "🧠"
+      },
+      "rarity": "epic",
+      "attributes": {
+        "tier": 4,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_matthew_gen",
+      "kind": "live.voice",
+      "name": "Gen Matt",
+      "description": "Amazon Polly Generative",
+      "art": {
+        "emoji": "🌟"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 1,
+        "rate": 1
+      }
+    },
+    {
+      "alias": "pl_ruth_gen",
+      "kind": "live.voice",
+      "name": "Gen Ruth",
+      "description": "Amazon Polly Generative",
+      "art": {
+        "emoji": "🌟"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 1,
+        "rate": 1
+      }
     }
   ]
 }
