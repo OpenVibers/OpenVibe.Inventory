@@ -258,6 +258,67 @@
       }
     },
     {
+      "alias": "fx_twofat",
+      "kind": "live.name_effect",
+      "name": "2fat Bass Drop",
+      "description": "The name thumps on the beat in club lights, an equalizer dancing before it. One of a kind: granted to its one holder, never sold or earned",
+      "art": {
+        "emoji": "🔊",
+        "token": "name-fx-twofat"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "css_class": "name-fx-twofat"
+      }
+    },
+    {
+      "alias": "px_twofat",
+      "kind": "live.particle",
+      "name": "2fat Bangers",
+      "description": "Notes, a CD and a tape. One of a kind: part of the 2fat set, never sold or earned",
+      "art": {
+        "emoji": "💿",
+        "token": "px-twofat"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "css_class": "px-twofat",
+        "chars": "🎵🎶💿📼🔊"
+      }
+    },
+    {
+      "alias": "hat_twofat",
+      "kind": "live.hat",
+      "name": "2fat Boombox",
+      "description": "The old classic bangers, back on the air. One of a kind: part of the 2fat set, never sold or earned",
+      "art": {
+        "emoji": "📻"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "hat_char": "📻",
+        "animated": "pulse"
+      }
+    },
+    {
+      "alias": "voice_twofat",
+      "kind": "live.voice",
+      "name": "Bass Boss",
+      "description": "Deep enough to rattle the subwoofer. One of a kind: part of the 2fat set, never sold or earned",
+      "art": {
+        "emoji": "🎛️"
+      },
+      "rarity": "legendary",
+      "attributes": {
+        "tier": 6,
+        "pitch": 0.6,
+        "rate": 1.0
+      }
+    },
+    {
       "alias": "px_sparkle",
       "kind": "live.particle",
       "name": "Sparkle",
