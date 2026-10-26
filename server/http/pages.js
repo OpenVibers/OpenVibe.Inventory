@@ -127,6 +127,7 @@ ${raw(showcase.steps({
                     { title: 'Or make one', text: 'In the Workshop you make a badge, staff review it, and you give it to the people you choose.', href: '/workshop' },
                 ],
             }))}
+${raw(showcase.network({ service: 'inventory' }))}
 ${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something?', text: me ? 'Your items and what you are wearing, on one page.' : 'Sign in with your OpenVibe account to see your inventory and choose what to wear.', actions: me ? [{ label: 'Your inventory', href: '/me' }] : [{ label: 'Sign in with OpenVibe', href: '/auth/login?next=%2Fme' }, { label: 'The API', href: '/api/v1/kinds' }] }))}`,
         });
     });
