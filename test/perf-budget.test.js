@@ -14,14 +14,14 @@ const { measure, check, format } = require('openvibe-shared/perf-budget');
 // Budgets are set from the numbers measured on 2026-10-08 (the real ones, fresh database), rounded up with about 10%
 // headroom; file counts are the measured counts and external files stay at 0.
 const BUDGETS = {
-    htmlRawKB: 27.5,   // measured 24.9 (the home page: hero, features, steps, cta, JSON-LD)
+    htmlRawKB: 32,   // 27.6 with Shared 4.13.0 (2026-10-26: account links); measured 24.9 (the home page: hero, features, steps, cta, JSON-LD)
     htmlBrotliKB: 6.9,   // 6.2
     jsFiles: 5,   // 5 (theme-loader, web-runtime, navbar, footer, boost: openvibe-shared/shell)
-    jsRawKB: 264,   // 239.8
+    jsRawKB: 269,   // 264.3 with Shared 4.13.0 (2026-10-26: account links); 239.8
     jsBrotliKB: 67,   // 65.3 Shared 4.12.0: the light/dark switch, the seasonal mark and the theme pairs; 56.5
     cssFiles: 2,   // 2 (app.css + the cached /shared/showcase.css)
-    cssRawKB: 23,   // 20.5 with the inventory's cards, rarity tiles and hero panel (2026-10-09)
-    cssBrotliKB: 5.5,   // 4.9
+    cssRawKB: 33,   // 28.7 with Shared 4.13.0 (2026-10-26: account links); 20.5 with the inventory's cards, rarity tiles and hero panel (2026-10-09)
+    cssBrotliKB: 8,   // 6.4 with Shared 4.13.0 (2026-10-26: account links); 4.9
     externalFiles: 0,   // 0
 };
 
