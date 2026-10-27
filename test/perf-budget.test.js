@@ -17,8 +17,8 @@ const BUDGETS = {
     htmlRawKB: 38,   // 33.3 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 27.6 with Shared 4.13.0 (2026-10-26: account links); measured 24.9 (the home page: hero, features, steps, cta, JSON-LD)
     htmlBrotliKB: 10,   // 8.2 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 6.2
     jsFiles: 5,   // 5 (theme-loader, web-runtime, navbar, footer, boost: openvibe-shared/shell)
-    jsRawKB: 269,   // 264.3 with Shared 4.13.0 (2026-10-26: account links); 239.8
-    jsBrotliKB: 67,   // 65.3 Shared 4.12.0: the light/dark switch, the seasonal mark and the theme pairs; 56.5
+    jsRawKB: 278,   // 273.2 openvibe-shared 4.15 footer: the compact footer opens into the whole one, and the pulse line; 264.3 with Shared 4.13.0 (2026-10-26: account links); 239.8
+    jsBrotliKB: 69,   // 67.9 openvibe-shared 4.15 footer: the compact footer opens into the whole one, and the pulse line; 65.3 Shared 4.12.0: the light/dark switch, the seasonal mark and the theme pairs; 56.5
     cssFiles: 2,   // 2 (app.css + the cached /shared/showcase.css)
     cssRawKB: 33,   // 28.7 with Shared 4.13.0 (2026-10-26: account links); 20.5 with the inventory's cards, rarity tiles and hero panel (2026-10-09)
     cssBrotliKB: 8,   // 6.4 with Shared 4.13.0 (2026-10-26: account links); 4.9
