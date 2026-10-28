@@ -22,12 +22,12 @@ const NETWORK_URL = 'https://openvibe.network';
 const SITE_NAME = 'OpenVibe.Inventory';
 const TAGLINE = 'Your items, on every OpenVibe site.';
 const PUBLIC_DIR = path.join(__dirname, '..', '..', 'public');
-// The product's own navigation: one entry per public page it serves.
+// The product's own places: the main ones carry an icon (phones get them as the bottom tab bar), the rest fold into
+// the navbar's More (Shared 4.22). Search is the navbar's magnifier and What shipped is the footer's.
 const NAV = [
-    { label: 'Every item', href: '/items' },
-    { label: 'Your inventory', href: '/me' },
-    { label: 'Workshop', href: '/workshop' },
-    { label: 'What shipped', href: '/updates' },
+    { label: 'Every item', href: '/items', icon: 'fa-tag' },
+    { label: 'Your inventory', href: '/me', icon: 'fa-shirt' },
+    { label: 'Workshop', href: '/workshop', icon: 'fa-screwdriver-wrench' },
 ];
 
 const hashes = new Map();
@@ -58,7 +58,8 @@ function renderPage(o) {
     const nav = {
         service: 'inventory',
         apiBase: NETWORK_URL,
-        links: NAV.map((l) => ({ label: l.label, href: l.href, active: pathNow === l.href || pathNow.startsWith(`${l.href}/`) })),
+        links: NAV.map((l) => ({ label: l.label, href: l.href, ...(l.icon ? { icon: l.icon } : {}), ...(l.more ? { more: true } : {}), active: pathNow === l.href || pathNow.startsWith(`${l.href}/`) })),
+        appBar: [{ label: 'Home', href: '/', icon: 'fa-house' }, { label: 'Items', href: '/items', icon: 'fa-tag' }, { label: 'Yours', href: '/me', icon: 'fa-shirt' }, { label: 'Workshop', href: '/workshop', icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
         history: { type: 'page', title: o.title || SITE_NAME },
         silentLogin: `${o.config.baseUrl}/auth/login?silent=1&next={url}`,
         sessionUrl: '/auth/me',
