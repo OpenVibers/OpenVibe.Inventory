@@ -60,11 +60,11 @@ function createWorkshopRoutes(ctx) {
     const notice = (req) => html`${req.query.done ? html`<p class="notice ok" role="status">${String(req.query.done).slice(0, 200)}</p>` : ''}${req.query.error ? html`<p class="notice bad" role="alert">${String(req.query.error).slice(0, 200)}</p>` : ''}`;
 
     // ── The Workshop ─────────────────────────────────────────
-    r.get('/workshop', async (req, res) => {
+    async function workshopPage() {
         const published = await inv.workshopItems({ status: 'published', limit: 200 });
-        page(req, res, {
+        return {
             // A public page in search, as the sitemap says (it was noindex by default).
-            title: 'The Workshop', index: true,
+            agent: true, title: 'The Workshop', index: true,
             description: 'Badges made by people in the OpenVibe community, reviewed by staff, given free by their makers.',
             body: html`<h1>The Workshop</h1>
 <p class="lede">Badges made by people in the community. Make one, staff review it, then you give it to the people you choose: your viewers, your server, the friends you played with. Every badge here is free: nothing in the Workshop is sold or traded.</p>
@@ -77,8 +77,9 @@ function createWorkshopRoutes(ctx) {
 </ol>
 <h2>Community badges <span class="muted small">${published.length}</span></h2>
 ${published.length ? html`<ul class="inv-grid">${published.map((d) => html`<li class="inv-card r-${d.rarity}"><a class="inv-card-link" href="/items/${d.id}"><span class="inv-art inv-art-md r-${d.rarity}">${img(d)}</span><span class="inv-card-body"><span class="inv-card-name">${d.name}</span><span class="inv-rarity r-${d.rarity}">${RARITY_LABEL[d.rarity]}</span></span></a>${d.credit && d.credit.name ? html`<p class="inv-card-meta">by @${d.credit.name} · ${d.supply.issued} given</p>` : ''}</li>`)}</ul>` : html`<p class="muted">None yet. Yours could be the first.</p>`}`,
-        });
-    });
+        };
+    }
+    r.get('/workshop', async (req, res) => page(req, res, await workshopPage()));
 
     // ── Make a badge ─────────────────────────────────────────
     r.get('/workshop/new', async (req, res) => {
@@ -265,6 +266,10 @@ ${live.length ? html`<ul class="ws-mine">${live.map((d) => html`<li class="ws-it
             throw err;
         }
     });
+
+    // The public Workshop page, for the agent layer's Markdown twin (server/agent-pages.js), rendered by the same
+    // builder. /workshop/new, /workshop/mine and /workshop/review are a signed-in person's and have no twin.
+    r.publicViews = { workshop: workshopPage };
 
     return r;
 }
