@@ -89,10 +89,10 @@ function createPageRoutes(ctx) {
     }
 
     // ── Home ─────────────────────────────────────────────────
-    r.get('/', async (req, res) => {
+    async function homePage({ signed = false } = {}) {
         const { kinds, defs, byKind } = await catalog();
         const featured = [...defs].sort((a, b) => RARITY.indexOf(b.rarity) - RARITY.indexOf(a.rarity) || a.name.localeCompare(b.name)).slice(0, 6);
-        const me = signedIn(req);
+        const me = signed;
         const hero = showcase.hero({
             eyebrow: `${SITE_NAME} · part of OpenVibe`,
             title: 'Your items,',
@@ -104,8 +104,8 @@ function createPageRoutes(ctx) {
             note: 'Items are earned or given, never sold here. Open source (AGPL-3.0).',
             aside: { html: html`<div class="inv-hero-panel" aria-label="A few of the rarest items"><p class="inv-hero-title">From the collection</p><ul class="inv-hero-grid">${featured.map((d) => html`<li><a href="/items/${d.id}" title="${d.name} · ${RARITY_LABEL[d.rarity]}">${art(d, { size: 'lg' })}<span class="inv-hero-name">${d.name}</span></a></li>`)}</ul></div>`.toString() },
         });
-        page(req, res, {
-            index: true, cache: me ? null : PUBLIC_CACHE,
+        return {
+            agent: true, index: true, cache: me ? null : PUBLIC_CACHE,
             jsonLd: homeJsonLd(config),
             styles: [showcase.STYLESHEET],
             body: html`${raw(hero)}
@@ -129,18 +129,18 @@ ${raw(showcase.steps({
             }))}
 ${raw(showcase.network({ service: 'inventory' }))}
 ${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something?', text: me ? 'Your items and what you are wearing, on one page.' : 'Sign in with your OpenVibe account to see your inventory and choose what to wear.', actions: me ? [{ label: 'Your inventory', href: '/me' }] : [{ label: 'Sign in with OpenVibe', href: '/auth/login?next=%2Fme' }, { label: 'The API', href: '/api/v1/kinds' }] }))}`,
-        });
-    });
+        };
+    }
+    r.get('/', async (req, res) => page(req, res, await homePage({ signed: !!signedIn(req) })));
 
     // ── The catalog ──────────────────────────────────────────
-    r.get('/items', async (req, res) => {
+    async function itemsPage(only = null, { signed = false } = {}) {
         const { kinds, defs, byKind } = await catalog();
-        const only = req.query.kind ? String(req.query.kind) : null;
-        if (only && !byKind.has(only)) return notFound(req, res, 'There is no such kind of item.');
+        if (only && !byKind.has(only)) return null;
         // All: the kinds that have items; one kind: that kind, even while it is empty.
         const shown = kinds.filter((k) => (only ? k.id === only : (byKind.get(k.id) || []).length));
-        page(req, res, {
-            index: !only, cache: signedIn(req) ? null : PUBLIC_CACHE,
+        return {
+            agent: true, index: !only, cache: signed ? null : PUBLIC_CACHE,
             title: only ? `${shown[0].name} items` : 'Every item',
             description: `${plural(defs.length, 'item', 'items')} you can earn and wear across OpenVibe, with their rarity.`,
             body: html`<h1>${only ? `${shown[0].name} items` : 'Every item'}</h1>
@@ -150,16 +150,22 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
   <h2 id="k-${k.id.replace(/\W/g, '-')}">${k.name} <span class="muted small">shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}</span></h2>
   ${(byKind.get(k.id) || []).length ? html`<ul class="inv-grid">${byKind.get(k.id).map((d) => card(d))}</ul>` : html`<p class="muted">No ${k.name.toLowerCase()} items yet.</p>`}
 </section>`)}`,
-        });
+        };
+    }
+    r.get('/items', async (req, res) => {
+        const only = req.query.kind ? String(req.query.kind) : null;
+        const out = await itemsPage(only, { signed: !!signedIn(req) });
+        if (!out) return notFound(req, res, 'There is no such kind of item.');
+        page(req, res, out);
     });
 
-    r.get('/items/:id', async (req, res) => {
-        const d = await inv.getDefinition(req.params.id);
-        if (!d || (d.status !== 'published' && d.status !== 'retired')) return notFound(req, res, 'There is no such item.');
+    async function itemPage(id, { signed = false } = {}) {
+        const d = await inv.getDefinition(id);
+        if (!d || (d.status !== 'published' && d.status !== 'retired')) return null;
         const k = await inv.getKind(d.kind);
         const issuer = d.issuer.startsWith('service:') ? `OpenVibe.${d.issuer.slice(8).replace(/^./, (c) => c.toUpperCase())}` : d.credit && d.credit.name ? d.credit.name : 'a creator';
-        page(req, res, {
-            index: d.status === 'published', cache: signedIn(req) ? null : PUBLIC_CACHE,
+        return {
+            agent: true, index: d.status === 'published', cache: signed ? null : PUBLIC_CACHE,
             title: `${d.name} · ${RARITY_LABEL[d.rarity]} ${k.name.toLowerCase()}`,
             // What the item is, how many people own it and how it is got; its flavor text alone ("Angelic") said none of that.
             description: itemDescription(d, k),
@@ -186,7 +192,12 @@ ${(d.grantors || []).includes('service:games') && d.status === 'published' ? htm
 <h2>Who gives it</h2>
 <p>${issuer}${(d.grantors || []).length ? ', and the services it names (see How to get it)' : ''}. ${(d.grantors || []).length ? 'Nobody else' : 'Only its issuer'} can give this item; it is never sold here.</p>
 <p class="muted small">Item <code>${d.id}</code>${(d.aliases || []).length ? html` · also known as <code>${d.aliases.join(', ')}</code>` : ''} · <a href="/api/v1/definitions/${d.id}">JSON</a></p>`,
-        });
+        };
+    }
+    r.get('/items/:id', async (req, res) => {
+        const out = await itemPage(req.params.id, { signed: !!signedIn(req) });
+        if (!out) return notFound(req, res, 'There is no such item.');
+        page(req, res, out);
     });
 
     // ── Your inventory ───────────────────────────────────────
@@ -262,11 +273,16 @@ ${!owned.length ? html`<p class="muted">Nothing to show yet.</p>` : ''}`,
     });
 
     // ── The update log ───────────────────────────────────────
-    r.get('/updates', (req, res) => page(req, res, {
-        index: true, cache: PUBLIC_CACHE,
+    const updatesPage = () => ({
+        agent: true, index: true, cache: PUBLIC_CACHE,
         title: `What shipped on ${SITE_NAME}`,
         body: raw(frame.updatesBody({ service: 'inventory', siteName: SITE_NAME }) + `<script src="${ovServe.url('shipped.js')}" defer></script>`),
-    }));
+    });
+    r.get('/updates', (req, res) => page(req, res, updatesPage()));
+
+    // The public pages the agent layer's Markdown twins (server/agent-pages.js) render with the same builders.
+    // /u/:subject is a person's page (noindex) and /me is their own: neither has a twin.
+    r.publicViews = { home: homePage, items: itemsPage, item: itemPage, updates: updatesPage };
 
     // ── Discovery: robots.txt, sitemap.xml, llms.txt, llms-full.txt ──
     r.use(createDiscoveryRoutes(ctx));
