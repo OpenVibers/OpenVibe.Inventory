@@ -53,7 +53,9 @@ button.sc-btn.sc-primary { border: 0; }
 .r-rare { --rar: #38bdf8; }
 .r-epic { --rar: #c084fc; }
 .r-legendary { --rar: #fbbf24; }
-.inv-rarity { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--rar); border: 1px solid color-mix(in srgb, var(--rar) 55%, transparent); background: color-mix(in srgb, var(--rar) 12%, transparent); border-radius: 999px; padding: 0 8px; line-height: 1.7; white-space: nowrap; }
+/* The word half the rarity's hue, half the theme's text: gold on white read at 1.7:1, and the mix holds on dark and
+   light themes alike (contrast probe, 2026-11-01). The border keeps the pure hue. */
+.inv-rarity { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: color-mix(in srgb, var(--rar) 50%, var(--text-primary, #e6edf7)); border: 1px solid color-mix(in srgb, var(--rar) 55%, transparent); background: color-mix(in srgb, var(--rar) 12%, transparent); border-radius: 999px; padding: 0 8px; line-height: 1.7; white-space: nowrap; }
 
 /* ── The item tile: its emoji or image on a rarity glow ── */
 .inv-art { display: inline-grid; place-items: center; flex: none; border-radius: 14px; line-height: 1; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--rar, #94a3b8) 30%, transparent), color-mix(in srgb, var(--rar, #94a3b8) 6%, var(--bg-secondary, #0f1729)) 70%); border: 1px solid color-mix(in srgb, var(--rar, #94a3b8) 40%, var(--border, #1f2d47)); }
