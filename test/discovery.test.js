@@ -58,13 +58,16 @@ const PRIVATE = ['/auth/', '/api/'];
             assert.match(r.headers.get('content-type'), /^text\/plain/);
             assert.match(r.headers.get('cache-control') || '', /public, max-age=\d+/);
             assert.ok(r.text.startsWith('# OpenVibe.Inventory'), 'no title');
-            assert.ok(r.text.includes('(https://inventory.openvibe.network/updates)'), 'no updates link');
+            // AGT-5: each of Inventory's own pages is linked at its Markdown twin, and the secondary links are Optional.
+            assert.ok(r.text.includes('(https://inventory.openvibe.network/index.md)'), 'the home link is not its twin');
+            assert.ok(r.text.includes('(https://inventory.openvibe.network/updates.md)'), 'no updates link');
+            assert.ok(r.text.includes('\n## Optional\n'), 'no ## Optional section');
             assert.ok(r.text.includes('(https://openvibe.services)'), 'no pointer to the developer platform');
             assert.ok(r.text.includes('https://inventory.openvibe.network/sitemap.xml'), 'sitemap not listed');
             assert.ok(r.text.includes('(https://inventory.openvibe.network/llms-full.txt)'), 'llms-full.txt not listed');
             // The catalog and the public read API are named for language models on purpose.
-            assert.ok(r.text.includes('(https://inventory.openvibe.network/items)'), 'no /items link');
-            assert.ok(r.text.includes('https://inventory.openvibe.network/items?kind=live.hat'), 'no kind link');
+            assert.ok(r.text.includes('(https://inventory.openvibe.network/items.md)'), 'no /items link');
+            assert.ok(r.text.includes('https://inventory.openvibe.network/items.md?kind=live.hat'), 'no kind link');
             assert.ok(r.text.includes('GET /api/v1/kinds'), 'the API section is missing');
             for (const p of ['/auth/']) assert.ok(!r.text.includes(`https://inventory.openvibe.network${p}`), `private path in llms.txt: ${p}`);
         });

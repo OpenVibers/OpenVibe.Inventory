@@ -95,6 +95,10 @@ function createDiscoveryRoutes(ctx) {
         const { kinds, defs, byKind } = await catalog(inv);
         res.type('text/plain').set('Cache-Control', TEXT).send(seo.llmsTxt({
             name: SITE_NAME,
+            // AGT-5: each of Inventory's own pages is linked at its Markdown twin (openvibe-shared 4.108.0; a kind's
+            // ?kind= filter twin is the same query with .md). /api/ paths and other sites' links keep their URL.
+            markdown: true,
+            base: site,
             summary: 'OpenVibe.Inventory: Your items, on every OpenVibe site.',
             details: 'One inventory for an OpenVibe account: items earned or given by sites, games and apps, worn in chat, on '
                 + 'stream overlays and on your profile. Nothing here is sold, bought, traded or converted. '
@@ -116,14 +120,15 @@ function createDiscoveryRoutes(ctx) {
                     { title: 'GET /api/v1/equipped?subjects=…', url: API_DOC, note: 'up to 100 equipped sets in one call' },
                 ] },
                 { title: 'Machine-readable', links: [
-                    { title: 'Sitemap', url: abs('/sitemap.xml') },
-                    { title: 'Full text for language models', url: abs('/llms-full.txt') },
                     { title: 'Release metadata (JSON)', url: abs('/release.json') },
                 ] },
-                { title: 'Elsewhere', links: [
-                    { title: 'OpenVibe.Network', url: 'https://openvibe.network', note: 'accounts, apps and grants' },
-                    { title: 'OpenVibe.Services', url: 'https://openvibe.services', note: 'apps, keys and capability grants' },
-                ] },
+            ],
+            // llmstxt.org's "## Optional": what an agent may skip when it needs a shorter context.
+            optional: [
+                { title: 'Sitemap', url: abs('/sitemap.xml') },
+                { title: 'Full text for language models', url: abs('/llms-full.txt') },
+                { title: 'OpenVibe.Network', url: 'https://openvibe.network', note: 'accounts, apps and grants' },
+                { title: 'OpenVibe.Services', url: 'https://openvibe.services', note: 'apps, keys and capability grants' },
             ],
         }));
     });
