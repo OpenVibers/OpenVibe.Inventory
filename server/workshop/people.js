@@ -9,7 +9,8 @@
  */
 const { serviceAuth } = require('openvibe-contracts');
 
-const NAME_RE = /^[A-Za-z0-9_]{3,24}$/;
+// Network's own rule for a name (server/identity/subjects.js resolveUsername): 1-40 of letters, digits, _ . and -.
+const NAME_RE = /^[A-Za-z0-9_.-]{1,40}$/;
 const SUBJECT_RE = /^usr_[0-9A-HJKMNP-TV-Z]{26}$/;
 
 function createPeople({ config, fetchImpl = globalThis.fetch }) {
@@ -33,7 +34,11 @@ function createPeople({ config, fetchImpl = globalThis.fetch }) {
         if (res.status === 404) return null;
         if (!res.ok) throw new Error(`OpenVibe.Network answered ${res.status}`);
         const body = await res.json().catch(() => ({}));
-        const subject = body.subject_id || (body.projection && body.projection.subject_id) || null;
+        // identity.subject-projection@1: subject is a subject-ref { type, id }; only a person (type user) can be given an item.
+        // (2026-11-06: this read subject_id, which Network never sends, so every @name answered "nobody by that name".)
+        const ref = body && body.subject;
+        const subject = ref && typeof ref === 'object' && ref.type === 'user' ? ref.id : null;
+        if (body && (body.banned || body.deleted)) return null;
         return SUBJECT_RE.test(String(subject || '')) ? subject : null;
     }
 
