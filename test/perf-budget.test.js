@@ -14,7 +14,7 @@ const { measure, check, format } = require('openvibe-shared/perf-budget');
 // Budgets are set from the numbers measured on 2026-10-08 (the real ones, fresh database), rounded up with about 10%
 // headroom; file counts are the measured counts and external files stay at 0.
 // 2026-11-08: openvibe-shared v4.150.0; CI measured JS 353.9 KB raw / 84.4 KB brotli.
-
+// 2026-11-08: openvibe-shared v4.149.0; CI measured JS 352.9 KB raw / 84.2 KB brotli.
 const BUDGETS = {
     htmlRawKB: 41,   // 40.2 with openvibe-shared 4.93.2: content labels, glyph fallback, footer counts (2026-11-01); 39.4 with openvibe-shared 4.66.0: the mark with depth and motion, ov-fx loaded on request (2026-10-31); 38.5 with openvibe-shared 4.53.0: the footer's columns fold on phones (2026-10-30); 33.3 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 27.6 with Shared 4.13.0 (2026-10-26: account links); measured 24.9 (the home page: hero, features, steps, cta, JSON-LD)
     htmlBrotliKB: 10,   // 8.2 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 6.2
