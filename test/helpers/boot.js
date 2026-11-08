@@ -43,7 +43,7 @@ async function boot(opts = {}) {
     const server = await new Promise((resolve) => { const s = http.createServer(built.app); s.listen(0, '127.0.0.1', () => resolve(s)); });
     const base = `http://127.0.0.1:${server.address().port}`;
 
-    const signIn = (user) => `inventory_at=${network.userToken(user)}`;
+    const signIn = (user) => `${new URL(config.baseUrl).pathname.replace(/\/+$/, '') ? 'inventory_ov_token' : 'inventory_at'}=${network.userToken(user)}`;
 
     async function get(p, o = {}) {
         const headers = { ...(o.headers || {}) };

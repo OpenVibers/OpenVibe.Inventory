@@ -22,6 +22,7 @@ const contracts = require('openvibe-contracts');
 const cache = require('openvibe-shared/cache-policy');
 
 const configLib = require('./config');
+const { urls, legacyPage } = require('./urls');
 const { openStore } = require('./db');
 const { createKeyStore } = require('./auth/keys');
 const { createSso } = require('./auth/sso');
@@ -95,6 +96,29 @@ async function createApp(opts = {}) {
     ctx.people = opts.people || createPeople({ config, fetchImpl: opts.fetchImpl });
 
     const app = express();
+    const url = urls(config);
+    app.use((req, res, next) => {
+        const scoped = url.prefix && (req.path === `${url.prefix}.md` || req.path === url.prefix || req.path.startsWith(`${url.prefix}/`));
+        req.inventoryScoped = !!scoped;
+        if (!scoped && url.prefix && config.redirectLegacyPages && ['GET', 'HEAD'].includes(req.method) && legacyPage(req.path)) {
+            return res.redirect(301, url.absolute(req.url));
+        }
+        if (scoped) {
+            req.url = req.url.slice(url.prefix.length) || '/';
+            if (req.url.startsWith('.md')) req.url = '/index' + req.url;
+            if (req.url.startsWith('?')) req.url = '/' + req.url;
+            // The existing page handlers stay shared with the original, unprefixed deployment.
+            req.url = req.url.replace(/^\/all(?=[?\/]|$)/, '/items')
+                .replace(/^\/(itd_[0-9A-HJKMNP-TV-Z]{26})(?=[.?]|$)/, '/items/$1');
+            if (/^\/(?:internal|metrics)(?:\/|$)/i.test(req.path)) return res.sendStatus(404);
+        }
+        const sendBody = res.send.bind(res);
+        res.send = (body) => sendBody(typeof body === 'string' && String(res.get('Content-Type')).includes('text/html') ? url.html(body) : body);
+        const redirect = res.redirect.bind(res);
+        res.redirect = (status, target) => typeof status === 'string'
+            ? redirect(url.path(status)) : redirect(status, url.path(target));
+        next();
+    });
     // GET /openapi.json (SEO-3): this service's public API as OpenAPI 3.1, generated from the contracts
     // (openvibe-contracts); the operations they mark internal-only are left out.
     app.get('/openapi.json', (_req, res) => {
@@ -139,7 +163,7 @@ async function createApp(opts = {}) {
                 scriptSrc: ["'self'", "'unsafe-inline'", 'https://openvibe.network', 'https://static.cloudflareinsights.com'],
                 styleSrc: ["'self'", "'unsafe-inline'", 'https://openvibe.network', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
                 fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-                imgSrc: ["'self'", 'data:', 'https://openvibe.network', 'https://openvibe.media'],
+                imgSrc: ["'self'", 'data:', 'https:'],
                 // The navbar's Messages count asks Chat (openvibe-shared 4.130.0).
                 connectSrc: ["'self'", 'https://openvibe.chat', 'https://openvibe.network', 'https://cloudflareinsights.com', 'https://openvibe.events'],
                 frameSrc: ["'self'", 'https://openvibe.network'],
@@ -155,6 +179,7 @@ async function createApp(opts = {}) {
         referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }));
     app.use(cookieParser());
+    app.use(require('./auth/scoped-session').scopedSession(config));
 
     // ── OpenVibe.Events → Inventory (loopback only: nginx answers 404 for /internal/) ──
     // network.account.export_requested and network.account.deleted, answered by openvibe-sdk/account-data's consumer,
@@ -171,6 +196,18 @@ async function createApp(opts = {}) {
 
     // ── Who is asking (verified offline; refreshed when expired) ──
     app.use(sso.middleware());
+    // A top-level silent authorization sees Network's SameSite cookies even when
+    // third-party iframe cookies are blocked. Guests return with sso=none once.
+    app.use((req, res, next) => {
+        if (req.inventoryScoped && req.method === 'GET' && legacyPage(req.path)
+            && String(req.get('accept') || '').includes('text/html')
+            && !/bot|crawl|spider|slurp/i.test(String(req.get('user-agent') || ''))
+            && req.viewer.kind !== 'user' && req.cookies.ov_sso_hint !== 'guest' && req.query.sso !== 'none') {
+            res.set('Cache-Control', 'private, no-store');
+            return res.redirect(302, url.path('/auth/login') + '?silent=1&next=' + encodeURIComponent(req.originalUrl));
+        }
+        next();
+    });
 
     // ── Sign-in (OAuth2 + PKCE client of OpenVibe.Network) ──
     // /auth/me is the navbar's who-is-signed-in read on every page, so it is not counted with sign-ins: 60 page views in 15 minutes made a signed-in visitor look signed out.
@@ -219,17 +256,21 @@ async function createApp(opts = {}) {
     // manifest and twin requests reach this mount; the pages advertise the twin themselves.
     const agentLayer = express();
     require('openvibe-shared/agent-layer').mount(agentLayer, {
-        descriptor: require('./agent-descriptor'),
+        descriptor: { ...require('./agent-descriptor'), home: url.absolute('/'), site: new URL(config.baseUrl).hostname,
+            api: 'https://inventory.openvibe.network/api/v1', openapi: 'https://inventory.openvibe.network/openapi.json',
+            llms: url.absolute('/llms.txt'), llmsFull: url.absolute('/llms-full.txt'), sitemap: url.absolute('/sitemap.xml') },
         render: require('./agent-pages').createAgentPages(ctx, { ...pageRoutes.publicViews, workshop: workshopRoutes.publicViews.workshop }).renderPublicPage,
     });
     app.use((req, res, next) => {
         const twin = req.path.endsWith('.md') || req.query.format === 'markdown' || String(req.headers.accept || '').includes('text/markdown');
         if (req.path !== '/.well-known/agent.json' && !twin) return next();
-        return agentLayer(req, res, next);
+        const routedUrl = req.url;
+        if (req.inventoryScoped) req.url = req.originalUrl;
+        return agentLayer(req, res, (err) => { req.url = routedUrl; next(err); });
     });
     app.use(workshopRoutes);
     app.use(pageRoutes);
-    app.use((req, res) => send(res, 404, { viewer: req.viewer, config, path: req.originalUrl, title: 'Not found', body: html`<h1>Not found</h1><p>No page here. Try <a href="/">the home page</a> or <a href="/updates">the update log</a>.</p>` }));
+    app.use((req, res) => send(res, 404, { viewer: req.viewer, config, path: req.originalUrl, title: 'Not found', body: html`<h1>Not found</h1><p>No page here. Try <a href="${url.path('/')}">the home page</a> or <a href="${url.path('/updates')}">the update log</a>.</p>` }));
 
     // eslint-disable-next-line no-unused-vars
     app.use((err, req, res, _next) => {

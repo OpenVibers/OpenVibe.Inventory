@@ -12,6 +12,7 @@
  * its image appears before that. Nothing is sold, bought or traded (ADR-054 §5).
  */
 const express = require('express');
+const { urls } = require('../urls');
 const Busboy = require('busboy');
 const { asyncRouter } = require('../http/router');
 const { sameOrigin } = require('../http/principal');
@@ -52,6 +53,7 @@ const img = (d, size = 64) => html`<img class="ws-img" src="https://openvibe.med
 function createWorkshopRoutes(ctx) {
     const { config, inv, workshopMedia, people } = ctx;
     const r = asyncRouter();
+    const url = urls(config).path;
     const page = (req, res, o, status = 200) => send(res, status, { viewer: req.viewer, config, path: req.originalUrl, ...o });
     const signedIn = (req) => (req.viewer && req.viewer.kind === 'user' && SUBJECT_RE.test(String(req.viewer.subject || '')) ? req.viewer.subject : null);
     const isStaff = (req) => !!(signedIn(req) && STAFF_ROLES.has(req.viewer.role));
@@ -68,7 +70,7 @@ function createWorkshopRoutes(ctx) {
             description: 'Badges made by people in the OpenVibe community, reviewed by staff, given free by their makers.',
             body: html`<h1>The Workshop</h1>
 <p class="lede">Badges made by people in the community. Make one, staff review it, then you give it to the people you choose: your viewers, your server, the friends you played with. Every badge here is free: nothing in the Workshop is sold or traded.</p>
-<p><a class="inv-btn primary" href="/workshop/new">Make a badge</a> <a class="inv-btn" href="/workshop/mine">Your badges</a></p>
+<p><a class="inv-btn primary" href="${url(`/workshop/new`)}">Make a badge</a> <a class="inv-btn" href="${url(`/workshop/mine`)}">Your badges</a></p>
 <h2>How it works</h2>
 <ol class="ws-steps">
   <li><strong>Make it.</strong> A square PNG or WebP, ${MIN_SIDE}–${MAX_SIDE} pixels, at most ${MAX_BYTES / 1024} KB, that you made or may use, a name, and how many may ever exist (up to ${WORKSHOP.maxCap.toLocaleString('en-US')}).</li>
@@ -76,7 +78,7 @@ function createWorkshopRoutes(ctx) {
   <li><strong>Give it.</strong> Type someone's name and it lands in their inventory, up to ${WORKSHOP.giftsPerDay} a day. They wear it before their name in chat and on their profile.</li>
 </ol>
 <h2>Community badges <span class="muted small">${published.length}</span></h2>
-${published.length ? html`<ul class="inv-grid">${published.map((d) => html`<li class="inv-card r-${d.rarity}"><a class="inv-card-link" href="/items/${d.id}"><span class="inv-art inv-art-md r-${d.rarity}">${img(d)}</span><span class="inv-card-body"><span class="inv-card-name">${d.name}</span><span class="inv-rarity r-${d.rarity}">${RARITY_LABEL[d.rarity]}</span></span></a>${d.credit && d.credit.name ? html`<p class="inv-card-meta">by @${d.credit.name} · ${d.supply.issued} given</p>` : ''}</li>`)}</ul>` : html`<p class="muted">None yet. Yours could be the first.</p>`}`,
+${published.length ? html`<ul class="inv-grid">${published.map((d) => html`<li class="inv-card r-${d.rarity}"><a class="inv-card-link" href="${url(`/items/${d.id}`)}"><span class="inv-art inv-art-md r-${d.rarity}">${img(d)}</span><span class="inv-card-body"><span class="inv-card-name">${d.name}</span><span class="inv-rarity r-${d.rarity}">${RARITY_LABEL[d.rarity]}</span></span></a>${d.credit && d.credit.name ? html`<p class="inv-card-meta">by @${d.credit.name} · ${d.supply.issued} given</p>` : ''}</li>`)}</ul>` : html`<p class="muted">None yet. Yours could be the first.</p>`}`,
         };
     }
     r.get('/workshop', async (req, res) => page(req, res, await workshopPage()));
@@ -89,13 +91,13 @@ ${published.length ? html`<ul class="inv-grid">${published.map((d) => html`<li c
             robots: 'noindex',
             body: html`<h1>Make a badge</h1>
 ${notice(req)}
-<form class="ws-form" method="post" action="/workshop/new" enctype="multipart/form-data">
+<form class="ws-form" method="post" action="${url(`/workshop/new`)}" enctype="multipart/form-data">
   <label>Image <input type="file" name="image" accept="image/png,image/webp" required></label>
   <p class="muted small">A square PNG or WebP, ${MIN_SIDE} to ${MAX_SIDE} pixels on a side, at most ${MAX_BYTES / 1024} KB. It shows small, before a name: keep it simple and readable.</p>
   <label>Name <input type="text" name="name" maxlength="80" required placeholder="OG Viewer"></label>
   <label>What it means (optional) <textarea name="description" maxlength="500" rows="2" placeholder="For everyone who was in chat for the first stream."></textarea></label>
   <label>How many may ever exist <input type="number" name="supply_cap" min="1" max="${WORKSHOP.maxCap}" value="100" required></label>
-  <label class="ws-check"><input type="checkbox" name="rights" value="yes" required> <span>I made this image, or I have the right to use it, and it follows the <a href="/terms">rules</a>.</span></label>
+  <label class="ws-check"><input type="checkbox" name="rights" value="yes" required> <span>I made this image, or I have the right to use it, and it follows the <a href="${url(`/terms`)}">rules</a>.</span></label>
   <button type="submit" class="inv-btn primary">Send for review</button>
 </form>
 <p class="muted small">Staff review every badge before anyone else sees it. At most ${WORKSHOP.inReview} in review at once and ${WORKSHOP.perDay} a day.</p>`,
@@ -140,19 +142,19 @@ ${notice(req)}
             robots: 'noindex',
             body: html`<h1>Your badges</h1>
 ${notice(req)}
-<p><a class="inv-btn primary" href="/workshop/new">Make a badge</a> <a class="inv-btn" href="/workshop">The Workshop</a></p>
+<p><a class="inv-btn primary" href="${url(`/workshop/new`)}">Make a badge</a> <a class="inv-btn" href="${url(`/workshop`)}">The Workshop</a></p>
 ${mine.length ? html`<ul class="ws-mine">${mine.map((d) => html`<li class="ws-item">
   <span class="inv-art inv-art-md r-${d.rarity}">${img(d)}</span>
   <div class="ws-item-body">
     <h2>${d.name} <span class="ws-state ws-${d.status}">${STATUS_LABEL[d.status] || d.status}</span></h2>
     ${d.status === 'draft' && d.review_note ? html`<p class="notice bad">Staff's reason: ${d.review_note}</p>` : ''}
-    ${d.status === 'draft' ? html`<form method="post" action="/workshop/${d.id}/resubmit" class="ws-give">
+    ${d.status === 'draft' ? html`<form method="post" action="${url(`/workshop/${d.id}/resubmit`)}" class="ws-give">
       <label>Name <input type="text" name="name" required maxlength="64" value="${d.name}"></label>
       <button type="submit" class="inv-btn primary">Send for review again</button>
     </form>` : ''}
     ${d.status === 'in_review' ? html`<p class="muted">Waiting for staff. Nobody else can see it yet.</p>` : ''}
-    ${d.status === 'published' ? html`<p class="muted">${d.supply.issued} of ${d.supply.cap} given · <a href="/items/${d.id}">its page</a></p>
-    ${d.supply.issued < d.supply.cap ? html`<form method="post" action="/workshop/${d.id}/give" class="ws-give">
+    ${d.status === 'published' ? html`<p class="muted">${d.supply.issued} of ${d.supply.cap} given · <a href="${url(`/items/${d.id}`)}">its page</a></p>
+    ${d.supply.issued < d.supply.cap ? html`<form method="post" action="${url(`/workshop/${d.id}/give`)}" class="ws-give">
       <label>Give it to <input type="text" name="to" required maxlength="25" placeholder="@username" pattern="@?[A-Za-z0-9_]{3,24}"></label>
       <button type="submit" class="inv-btn primary">Give</button>
     </form>` : html`<p class="muted">All ${d.supply.cap} have been given.</p>`}` : ''}
@@ -211,7 +213,7 @@ ${queue.length ? html`<ul class="ws-mine">${queue.map((d) => html`<li class="ws-
     <h2>${d.name}</h2>
     <p class="muted">by ${d.credit && d.credit.name ? html`@${d.credit.name}` : d.issuer} · cap ${d.supply.cap} · sent ${String(d.created_at).slice(0, 16).replace('T', ' ')} UTC</p>
     ${d.description ? html`<p>${d.description}</p>` : ''}
-    <form method="post" action="/workshop/${d.id}/review" class="ws-review">
+    <form method="post" action="${url(`/workshop/${d.id}/review`)}" class="ws-review">
       <label>Rarity <select name="rarity">${RARITY.map((x) => html`<option value="${x}"${x === 'common' ? ' selected' : ''}>${RARITY_LABEL[x]}</option>`)}</select></label>
       <button type="submit" name="decision" value="publish" class="inv-btn primary">Publish</button>
       <label class="ws-reason">Reason, if rejecting <input type="text" name="reason" maxlength="300" placeholder="The image is a brand's logo."></label>
@@ -226,7 +228,7 @@ ${live.length ? html`<ul class="ws-mine">${live.map((d) => html`<li class="ws-it
   <div class="ws-item-body">
     <h2>${d.name}</h2>
     <p class="muted">by ${d.credit && d.credit.name ? html`@${d.credit.name}` : d.issuer} · ${d.supply.issued} of ${d.supply.cap} given</p>
-    <form method="post" action="/workshop/${d.id}/takedown" class="ws-review">
+    <form method="post" action="${url(`/workshop/${d.id}/takedown`)}" class="ws-review">
       <label class="ws-reason">Reason <input type="text" name="reason" maxlength="300" required placeholder="A rights holder asked us to remove it."></label>
       <button type="submit" name="revoke" value="no" class="inv-btn">Retire</button>
       <button type="submit" name="revoke" value="yes" class="inv-btn">Retire and revoke every copy</button>

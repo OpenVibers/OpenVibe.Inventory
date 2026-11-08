@@ -48,11 +48,12 @@ function describe(row) {
 }
 
 function createSearchIndex({ config, s, outbox, log = console, indexnow = null }) {
+    const url = require('./urls').urls(config);
     const feed = createSearchFeed({
-        owner: 'inventory', db: s.db, outbox, baseUrl: config.baseUrl, now: s.now, log, indexnow,
+        owner: 'inventory', db: s.db, outbox, baseUrl: url.origin, now: s.now, log, indexnow,
         types: {
             definition: {
-                page: (row) => `/items/${row.id}`,
+                page: (row) => url.path(`/items/${row.id}`),
                 document: describe,
                 rows: (after, limit) => s.db.many(`${SELECT} WHERE d.id > $1 ORDER BY d.id LIMIT $2`, [after, limit]),
                 exists: async (ids) => (await s.db.many('SELECT id FROM inventory_definitions WHERE id = ANY($1)', [ids])).map((r) => r.id),

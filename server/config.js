@@ -14,7 +14,7 @@ function load(env = process.env) {
     const nodeEnv = env.NODE_ENV || 'development';
     const isProduction = nodeEnv === 'production';
     const port = int(env.PORT, 5030);
-    const baseUrl = trim(env.BASE_URL || (isProduction ? 'https://inventory.openvibe.network' : `http://localhost:${port}`));
+    const baseUrl = trim(env.PUBLIC_URL || env.BASE_URL || (isProduction ? 'https://inventory.openvibe.network' : `http://localhost:${port}`));
     const networkUrl = trim(env.OV_NETWORK_URL || 'https://openvibe.network');
 
     return {
@@ -24,6 +24,7 @@ function load(env = process.env) {
         nodeEnv,
         isProduction,
         baseUrl,
+        redirectLegacyPages: env.INVENTORY_REDIRECT_LEGACY === 'true',
         // IndexNow (openvibe-shared/indexnow): with a key, each page Search gains, changes or loses is sent to search
         // engines in one batch (openvibe-publishing/search-feed), and the key is served at /<key>.txt. Unset: off.
         indexnow: { key: String(env.INDEXNOW_KEY || '').trim() },

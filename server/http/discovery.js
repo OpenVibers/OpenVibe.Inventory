@@ -17,6 +17,7 @@ const { asyncRouter } = require('./router');
 
 const SITE_NAME = 'OpenVibe.Inventory';
 const DESCRIPTION = 'OpenVibe.Inventory — Your items, on every OpenVibe site.';
+const { urls } = require('../urls');
 const DISALLOW = ['/auth/', '/api/'];
 // The two routes that need a subject point at the API reference, not at a URL that answers 400.
 const API_DOC = 'https://github.com/OpenVibers/OpenVibe.Inventory#api-apiv1-problemjson-errors';
@@ -42,7 +43,7 @@ function homeJsonLd(config) {
     return [
         seo.jsonLd.website({ name: SITE_NAME, url: site, description: DESCRIPTION }),
         seo.jsonLd.softwareApp({ name: SITE_NAME, url: site, description: DESCRIPTION, category: 'BusinessApplication', keywords: 'openvibe' }),
-        seo.jsonLd.webPage({ name: SITE_NAME, url: `${site}/`, description: DESCRIPTION, siteUrl: site }),
+        seo.jsonLd.webPage({ name: SITE_NAME, url: urls(config).absolute('/'), description: DESCRIPTION, siteUrl: site }),
     ];
 }
 
@@ -81,14 +82,14 @@ function createDiscoveryRoutes(ctx) {
     const { config, inv } = ctx;
     const r = asyncRouter();
     const site = String(config.baseUrl).replace(/\/+$/, '');
-    const abs = (p) => `${site}${p}`;
+    const abs = urls(config).absolute;
     const TEXT = cache.htmlHeaders({ maxAge: 3600 });
 
     r.get('/robots.txt', (_req, res) => {
         res.type('text/plain').set('Cache-Control', TEXT).send(
             '# inventory.openvibe.network: the public pages are for search and AI crawlers; sign-in and the API are not.\n'
             + '# Agent manifest: https://inventory.openvibe.network/.well-known/agent.json; every public page has a .md twin.\n'
-            + seo.robotsTxt({ sitemaps: [abs('/sitemap.xml')], disallow: DISALLOW }));
+            + seo.robotsTxt({ sitemaps: [abs('/sitemap.xml')], disallow: DISALLOW.map(urls(config).path) }));
     });
 
     r.get('/llms.txt', async (_req, res) => {
@@ -135,12 +136,12 @@ function createDiscoveryRoutes(ctx) {
 
     r.get('/llms-full.txt', async (_req, res) => {
         const { kinds, defs, byKind } = await catalog(inv);
-        const pages = [...publicPages(), CATALOG_PAGE].map((e) => ({ url: e.path, title: PAGE_TEXT[e.path][0], text: PAGE_TEXT[e.path][1] }));
+        const pages = [...publicPages(), CATALOG_PAGE].map((e) => ({ url: abs(e.path), title: PAGE_TEXT[e.path][0], text: PAGE_TEXT[e.path][1] }));
         // Every published item, one line each (name, rarity, kind and URL), grouped by kind.
         const itemSections = kindsWithItems({ kinds, byKind }).map((k) => {
             const items = byKind.get(k.id);
-            pages.push({ url: kindPath(k.id), title: `${k.name} items`, text: `${plural(items.length, 'item', 'items')}, with their rarity.` });
-            return { title: k.name, pages: items.map((d) => ({ title: d.name, url: `/items/${d.id}`, text: `${RARITY_LABEL[d.rarity] || d.rarity} ${k.name}` })) };
+            pages.push({ url: abs(kindPath(k.id)), title: `${k.name} items`, text: `${plural(items.length, 'item', 'items')}, with their rarity.` });
+            return { title: k.name, pages: items.map((d) => ({ title: d.name, url: abs(`/items/${d.id}`), text: `${RARITY_LABEL[d.rarity] || d.rarity} ${k.name}` })) };
         });
         res.type('text/plain').set('Cache-Control', TEXT).send(seo.llmsFull({
             site: SITE_NAME,

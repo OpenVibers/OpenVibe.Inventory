@@ -9,6 +9,7 @@
  *   - the product's own script only where a page offers an in-browser convenience
  */
 const crypto = require('crypto');
+const { urls } = require('../urls');
 const ovServe = require('openvibe-shared/serve');
 const fs = require('fs');
 const path = require('path');
@@ -50,32 +51,34 @@ function setRelease(id) { if (id) RELEASE = String(id); }
  *    crumbs [{ label, href }], jsonLd [nodes] (serialised by openvibe-shared/seo), styles [openvibe-shared stylesheet names]
  */
 function renderPage(o) {
+    const { path: url, absolute, html: sharedHtml } = urls(o.config);
     const viewer = o.viewer || { kind: 'anonymous' };
     const signedIn = viewer.kind === 'user';
     const pathNow = o.path || '/';
     const loginNext = encodeURIComponent(pathNow);
-    const canonical = `${o.config.baseUrl}${pathNow.split('?')[0]}`;
+    const canonical = absolute(pathNow.split('?')[0]);
     const nav = {
         service: 'inventory',
         apiBase: NETWORK_URL,
-        links: NAV.map((l) => ({ label: l.label, href: l.href, ...(l.icon ? { icon: l.icon } : {}), ...(l.more ? { more: true } : {}), active: pathNow === l.href || pathNow.startsWith(`${l.href}/`) })),
-        appBar: [{ label: 'Home', href: '/', icon: 'fa-house' }, { label: 'Items', href: '/items', icon: 'fa-tag' }, { label: 'Yours', href: '/me', icon: 'fa-shirt' }, { label: 'Workshop', href: '/workshop', icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
+        links: NAV.map((l) => ({ label: l.label, href: url(l.href), ...(l.icon ? { icon: l.icon } : {}), ...(l.more ? { more: true } : {}), active: pathNow === url(l.href) || pathNow.startsWith(`${url(l.href)}/`) })),
+        appBar: [{ label: 'Home', href: url('/'), icon: 'fa-house' }, { label: 'Items', href: url('/items'), icon: 'fa-tag' }, { label: 'Yours', href: url('/me'), icon: 'fa-shirt' }, { label: 'Workshop', href: url('/workshop'), icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
         history: { type: 'page', title: o.title || SITE_NAME },
-        silentLogin: `${o.config.baseUrl}/auth/login?silent=1&next={url}`,
-        sessionUrl: '/auth/me',
-        loginUrl: '/auth/login?next={path}',           // filled from the current page (boost moves between pages)
-        logoutUrl: '/auth/logout?next={path}',   // Sign out in the shared navbar ends this site's session too
+        silentLogin: urls(o.config).prefix ? null : absolute('/auth/login') + '?silent=1&next={url}',
+        sessionUrl: url('/auth/me'),
+        fedcmLogin: url('/auth/fedcm'),
+        loginUrl: url('/auth/login?next={path}'),           // filled from the current page (boost moves between pages)
+        logoutUrl: url('/auth/logout?next={path}'),   // Sign out in the shared navbar ends this site's session too
         notificationsRealtime: true,             // the bell hears new notifications over OpenVibe.Events (Shared 1.22.0)
     };
-    const footer = { service: 'inventory', variant: 'full', mount: '#ov-footer', brandName: SITE_NAME, updates: '/updates' };
+    const footer = { service: 'inventory', variant: 'full', mount: '#ov-footer', brandName: SITE_NAME, updates: url('/updates') };
     const account = signedIn
-        ? html`Signed in as <strong>${viewer.displayName || viewer.username || 'you'}</strong> · <a href="/auth/logout?next=${loginNext}">Sign out</a>`
-        : html`<a href="/auth/login?next=${loginNext}">Sign in with OpenVibe</a>`;
+        ? html`Signed in as <strong>${viewer.displayName || viewer.username || 'you'}</strong> · <a href="${url(`/auth/logout?next=${loginNext}`)}">Sign out</a>`
+        : html`<a href="${url(`/auth/login?next=${loginNext}`)}">Sign in with OpenVibe</a>`;
     const crumbs = (o.crumbs || []).length
-        ? html`<nav class="crumbs" aria-label="Breadcrumbs">${o.crumbs.map((c, i) => html`${i ? ' / ' : ''}${c.href ? html`<a href="${c.href}">${c.label}</a>` : c.label}`)}</nav>`
+        ? html`<nav class="crumbs" aria-label="Breadcrumbs">${o.crumbs.map((c, i) => html`${i ? ' / ' : ''}${c.href ? html`<a href="${url(c.href)}">${c.label}</a>` : c.label}`)}</nav>`
         : '';
-    const scripts = (o.scripts || []).map((rel) => html`<script src="${asset(rel)}" defer></script>`);
-    return shell.page({
+    const scripts = (o.scripts || []).map((rel) => html`<script src="${url(asset(rel))}" defer></script>`);
+    return sharedHtml(shell.page({
         name: SITE_NAME,
         lang: 'en',
         title: o.title || `${SITE_NAME}: ${TAGLINE}`,
@@ -87,26 +90,26 @@ function renderPage(o) {
         // A page with a Markdown twin (o.agent) advertises it in the head and the Link header; the twin itself
         // is server/agent-pages.js.
         agentLayer: o.agent === true,
-        llms: `${String(o.config.baseUrl).replace(/\/+$/, '')}/llms.txt`,
+        llms: absolute('/llms.txt'),
         jsonLd: (o.jsonLd || []).filter(Boolean),
-        home: '/',
-        navLinks: NAV,
+        home: url('/'),
+        navLinks: NAV.map((l) => ({ ...l, href: url(l.href) })),
         navbar: nav,
         footer,
         head: `<meta name="referrer" content="${o.noReferrer ? 'no-referrer' : 'strict-origin-when-cross-origin'}">
-${appIcon.headTags({ site: 'inventory' })}
-<link rel="stylesheet" href="${asset('css/app.css')}">
-${(o.styles || []).map((name) => `<link rel="stylesheet" href="${esc(ovServe.url(name))}">`).join('\n')}
+${sharedHtml(appIcon.headTags({ site: 'inventory' }))}
+<link rel="stylesheet" href="${url(asset('css/app.css'))}">
+${(o.styles || []).map((name) => `<link rel="stylesheet" href="${esc(url(ovServe.url(name)))}">`).join('\n')}
 ${render(scripts)}
 <meta name="ov-boost" content="inventory@${esc(RELEASE)}">
-<script src="${ovServe.url('boost.js')}" data-main="#main" defer></script>`,
+<script src="${url(ovServe.url('boost.js'))}" data-main="#main" defer></script>`,
         body: `<a class="skip" href="#main">Skip to content</a>
 <div id="navbar-mount"></div>
 <noscript><div class="account-bar" role="navigation" aria-label="Account">${render(account)}</div></noscript>
 <main id="main" class="page">
 ${render(crumbs)}
 ${render(o.body)}
-${o.path === '/' ? frame.shipped({ service: 'inventory', title: `Recently shipped on ${SITE_NAME}` }) : ''}
+${o.path === '/' ? sharedHtml(frame.shipped({ service: 'inventory', title: `Recently shipped on ${SITE_NAME}` })) : ''}
 </main>
 <script>
 window.__OV_PAGE = ${JSON.stringify({ navbar: nav, footer }).replace(/</g, '\\u003c')};
@@ -114,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
   try { if (window.OpenVibeFooter) OpenVibeFooter.init(window.__OV_PAGE.footer); } catch (e) { /* the Frame is optional */ }
 });
 </script>`,
-    });
+    }));
 }
 
 function render(v) { return require('./html').render(v); }
@@ -126,8 +129,7 @@ function send(res, status, o) {
     if (!res.get('Cache-Control')) res.set('Cache-Control', !personal && o.cache ? o.cache : cache.htmlHeaders({ private: true }));
     res.set('Vary', 'Cookie');
     if (o.agent) {
-        const site = String(o.config.baseUrl).replace(/\/+$/, '');
-        res.set('Link', require('openvibe-shared/agent-layer').linkHeaderTags(`${site}${String(o.path || '/').split('?')[0]}`, `${site}/llms.txt`).header);
+        res.set('Link', require('openvibe-shared/agent-layer').linkHeaderTags(urls(o.config).absolute(String(o.path || '/').split('?')[0]), urls(o.config).absolute('/llms.txt')).header);
     }
     res.status(status).type('html').send(renderPage(o));
 }

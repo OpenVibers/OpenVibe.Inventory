@@ -11,6 +11,10 @@ function createAgentPages(ctx, publicViews) {
     const twin = (page, path) => (page && page.agent === true ? { html: renderPage({ ...page, viewer: { kind: 'anonymous' }, config: ctx.config, path }) } : null);
 
     async function renderPublicPage(path, { query } = {}) {
+        const prefix = require('./urls').urls(ctx.config).prefix;
+        if (prefix && path.startsWith(prefix)) path = path.slice(prefix.length) || '/';
+        if (path === '/all') path = '/items';
+        path = path.replace(/^\/(itd_[0-9A-HJKMNP-TV-Z]{26})$/, '/items/$1');
         if (path === '/') return twin(await publicViews.home({ signed: false }), path);
         if (path === '/items') return twin(await publicViews.items(query && query.get('kind') ? String(query.get('kind')) : null, { signed: false }), path);
         if (path === '/updates') return twin(publicViews.updates(), path);
