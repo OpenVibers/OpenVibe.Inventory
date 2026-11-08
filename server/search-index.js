@@ -49,8 +49,11 @@ function describe(row) {
 
 function createSearchIndex({ config, s, outbox, log = console, indexnow = null }) {
     const url = require('./urls').urls(config);
+    // Publishing's origin-based sitemap ping needs the same section prefix as pages.
+    const scopedIndexnow = indexnow && { enabled: indexnow.enabled,
+        pingSoon: (paths) => indexnow.pingSoon(paths.map((p) => p === `${url.origin}/sitemap.xml` ? url.absolute('/sitemap.xml') : p)) };
     const feed = createSearchFeed({
-        owner: 'inventory', db: s.db, outbox, baseUrl: url.origin, now: s.now, log, indexnow,
+        owner: 'inventory', db: s.db, outbox, baseUrl: url.origin, now: s.now, log, indexnow: scopedIndexnow,
         types: {
             definition: {
                 page: (row) => url.path(`/items/${row.id}`),

@@ -59,7 +59,7 @@ function renderPage(o) {
     const canonical = absolute(pathNow.split('?')[0]);
     const nav = {
         service: 'inventory',
-        brand: { href: url('/'), tld: 'inventory', name: 'Inventory' },
+        ...(urls(o.config).prefix ? { brand: { href: url('/'), tld: 'inventory', name: 'Inventory' } } : {}),
         apiBase: NETWORK_URL,
         links: NAV.map((l) => ({ label: l.label, href: url(l.href), ...(l.icon ? { icon: l.icon } : {}), ...(l.more ? { more: true } : {}), active: pathNow === url(l.href) || pathNow.startsWith(`${url(l.href)}/`) })),
         appBar: [{ label: 'Home', href: url('/'), icon: 'fa-house' }, { label: 'Items', href: url('/items'), icon: 'fa-tag' }, { label: 'Yours', href: url('/me'), icon: 'fa-shirt' }, { label: 'Workshop', href: url('/workshop'), icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
@@ -71,7 +71,7 @@ function renderPage(o) {
         logoutUrl: url('/auth/logout?next={path}'),   // Sign out in the shared navbar ends this site's session too
         notificationsRealtime: true,             // the bell hears new notifications over OpenVibe.Events (Shared 1.22.0)
     };
-    const footer = { service: 'inventory', variant: 'full', mount: '#ov-footer', brandName: SITE_NAME, updates: url('/updates'), sitemap: url('/sitemap.xml'), legalBase: absolute('/') };
+    const footer = { service: 'inventory', variant: 'full', mount: '#ov-footer', brandName: SITE_NAME, updates: url('/updates'), ...(urls(o.config).prefix ? { sitemap: url('/sitemap.xml'), legalBase: absolute('/') } : {}) };
     const account = signedIn
         ? html`Signed in as <strong>${viewer.displayName || viewer.username || 'you'}</strong> · <a href="${url(`/auth/logout?next=${loginNext}`)}">Sign out</a>`
         : html`<a href="${url(`/auth/login?next=${loginNext}`)}">Sign in with OpenVibe</a>`;
@@ -116,7 +116,7 @@ ${o.path === '/' ? sharedHtml(frame.shipped({ service: 'inventory', title: `Rece
 window.__OV_PAGE = ${JSON.stringify({ navbar: nav, footer }).replace(/</g, '\\u003c')};
 document.addEventListener('DOMContentLoaded', function () {
   try { if (window.OpenVibeFooter) OpenVibeFooter.init(window.__OV_PAGE.footer); } catch (e) { /* the Frame is optional */ }
-  // Shared 4.150 hardcodes the footer brand's home and rerenders it after loading
+${urls(o.config).prefix ? `  // Shared 4.150 hardcodes the footer brand's home and rerenders it after loading
   // Frame data. Keep that link inside this section on each render.
   var footer = document.getElementById('ov-footer');
   var home = ${JSON.stringify(url('/'))};
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var fixHome = function () { footer.querySelectorAll('a.ovf-brand').forEach(function (a) { if (a.getAttribute('href') !== home) a.setAttribute('href', home); }); };
     fixHome();
     new MutationObserver(fixHome).observe(footer, { childList: true, subtree: true });
-  }
+  }` : ''}
 });
 </script>`,
     }));

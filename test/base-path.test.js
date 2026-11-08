@@ -5,7 +5,8 @@ const { urls } = require('../server/urls');
 const { DEF_RE } = require('../server/inventory/store');
 const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
 (async () => {
-    const t = await boot({ env: { PUBLIC_URL: 'https://openvibe.my/inventory', INVENTORY_REDIRECT_LEGACY: 'true' } });
+    const pinged = [];
+    const t = await boot({ indexnow: { enabled: true, keyFile: (_req, _res, next) => next(), pingSoon: (paths) => pinged.push(...paths) }, env: { PUBLIC_URL: 'https://openvibe.my/inventory', INVENTORY_REDIRECT_LEGACY: 'true' } });
     const user = t.network.addUser('inventory-owner');
     const defs = await t.ctx.inv.listDefinitions({ limit: 2 });
     const id = defs[0].id;
@@ -42,6 +43,12 @@ const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0])
         assert.ok(markdown.text.includes('canonical: \"https://openvibe.my/inventory/all\"'));
         assert.strictEqual((await t.get('/inventory.md')).status, 200);
         for (const path of ['/inventory/internal/events', '/inventory/metrics']) assert.strictEqual((await t.get(path)).status, 404);
+    });
+    await check('search documents and IndexNow use the prefixed URLs', async () => {
+        await t.ctx.searchIndex.sweep();
+        assert.ok(pinged.includes('https://openvibe.my/inventory/sitemap.xml'));
+        assert.ok(pinged.includes(`https://openvibe.my/inventory/${id}`));
+        assert.ok(pinged.every((p) => p.startsWith('https://openvibe.my/inventory/')));
     });
     await check('legacy page 301 table preserves queries; machine endpoints stay', async () => {
         for (const [from, to] of [['/', ''], ['/items', '/all'], [`/items/${id}`, `/${id}`], ['/me', ''],
