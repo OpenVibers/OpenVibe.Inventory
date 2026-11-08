@@ -267,8 +267,11 @@ After review, deploy in this order:
    set it to `https://openvibe.my/inventory/auth/callback`. Leave legacy redirects disabled.
    Deploy with `/home/workstation/openvibe/work/tools/merge-deploy.sh 'OpenVibe.Inventory#<N>:inventory' < /dev/null`.
 3. Verify hub and Inventory sign-in together, silent entry from Network, refresh, sign-out,
-   Workshop forms, assets and API callers. Use `tools/site-signin.js` with the probe password
-   loaded inline on the host; never print credentials or cookies. The live check is pending
+   Workshop forms, assets and API callers. Use `networkToken()` from `tools/site-signin.js`
+   with the probe password loaded inline on the host, then follow the `/inventory` silent
+   flow in a browser with a path-aware cookie jar. That helper's `signIn()` assumes root
+   `/auth` and cannot test this prefix or hub cookie coexistence. Never print credentials
+   or cookies. The live check is pending
    until the reviewed callback and prefix are deployed. Then enable
    `INVENTORY_REDIRECT_LEGACY=true` and redeploy Inventory to activate the 301 table.
 

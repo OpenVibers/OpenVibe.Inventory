@@ -213,7 +213,19 @@ async function createApp(opts = {}) {
     // /auth/me is the navbar's who-is-signed-in read on every page, so it is not counted with sign-ins: 60 page views in 15 minutes made a signed-in visitor look signed out.
     app.use('/auth/', rateLimit({ windowMs: 15 * 60_000, limit: 60, skip: (req) => req.path === '/me', standardHeaders: true, legacyHeaders: false }));
     app.use('/auth', sso.routes());
-    { const legal = require('openvibe-shared/legal'); app.get(legal.PATHS, legal.handler({ id: 'inventory', service: 'inventory', host: 'inventory.openvibe.network', name: 'OpenVibe.Inventory', profile: 'ugc' })); }
+    {
+        const legal = require('openvibe-shared/legal');
+        const site = { id: 'inventory', service: 'inventory', host: new URL(config.baseUrl).host, name: 'OpenVibe.Inventory', profile: 'ugc' };
+        app.get(legal.PATHS, (req, res, next) => {
+            if (!url.prefix) return legal.handler(site)(req, res, next);
+            // Shared's standalone legal shell reads root ov_token. Use our scoped
+            // navbar and canonical while keeping its legal article unchanged.
+            const kind = req.path.replace(/^\/+|\/+$/g, '');
+            const doc = legal.build(kind, site);
+            return send(res, 200, { config, viewer: req.viewer, path: req.originalUrl,
+                title: doc.title, description: doc.description, body: require('./render/html').raw(legal.article(kind, site)) });
+        });
+    }
 
     // ── Static assets (content-hashed ?v= → immutable) ──────
     app.use('/shared', require('openvibe-shared/serve').handler());
