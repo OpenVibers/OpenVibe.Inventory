@@ -62,7 +62,11 @@ function renderPage(o) {
         ...(urls(o.config).prefix ? { brand: { href: url('/'), tld: 'inventory', name: 'Inventory' } } : {}),
         apiBase: NETWORK_URL,
         links: NAV.map((l) => ({ label: l.label, href: url(l.href), ...(l.icon ? { icon: l.icon } : {}), ...(l.more ? { more: true } : {}), active: pathNow === url(l.href) || pathNow.startsWith(`${url(l.href)}/`) })),
-        appBar: [{ label: 'Home', href: url('/'), icon: 'fa-house' }, { label: 'Items', href: url('/items'), icon: 'fa-tag' }, { label: 'Yours', href: url('/me'), icon: 'fa-shirt' }, { label: 'Workshop', href: url('/workshop'), icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
+        // On openvibe.my, Inventory is a section of the account hub: the first tab goes to the hub, and "Yours" is this
+        // section's home (/inventory), so two tabs never light up for the same page.
+        appBar: urls(o.config).prefix
+            ? [{ label: 'My', href: new URL('/', absolute('/')).href, icon: 'fa-house' }, { label: 'Yours', href: url('/me'), icon: 'fa-shirt' }, { label: 'Items', href: url('/items'), icon: 'fa-tag' }, { label: 'Workshop', href: url('/workshop'), icon: 'fa-screwdriver-wrench' }]
+            : [{ label: 'Home', href: url('/'), icon: 'fa-house' }, { label: 'Items', href: url('/items'), icon: 'fa-tag' }, { label: 'Yours', href: url('/me'), icon: 'fa-shirt' }, { label: 'Workshop', href: url('/workshop'), icon: 'fa-screwdriver-wrench' }],   // phones: the bottom tab bar (Shared 4.20)
         history: { type: 'page', title: o.title || SITE_NAME },
         silentLogin: urls(o.config).prefix ? null : absolute('/auth/login') + '?silent=1&next={url}',
         sessionUrl: url('/auth/me'),
