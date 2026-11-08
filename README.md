@@ -235,3 +235,44 @@ Part of the [OpenVibe network](https://openvibe.network). Built in the open by [
 - openvibe-shared: v4.150.0
 - openvibe-publishing: v1.4.0
 <!-- versions:end -->
+
+
+### Account hub deployment (review before merging)
+
+`PUBLIC_URL=https://openvibe.my/inventory` overrides `BASE_URL` for browser URLs and
+SSO's default callback. Without it, the existing unprefixed deployment is unchanged.
+Inventory uses `/inventory`, `/inventory/all`, `/inventory/<itd_id>`, `/inventory/workshop`,
+`/inventory/u/<subject>` and `/inventory/updates`. APIs and feeds on the original host stay available.
+`INVENTORY_REDIRECT_LEGACY=true` enables permanent redirects for the old page routes only,
+preserving query strings. Leave it unset until the new deployment is verified.
+
+Sign-in needs Opus review before either PR merges. SDK 0.94 hardcodes cookie names and paths;
+`server/auth/scoped-session.js` adapts its Express boundary. Under the prefix, session and
+flow and hint cookies use `inventory_ov_*`, host-only at `/inventory`.
+The hub's cookies at `/` are untouched. Browser page entry makes a top-level
+`prompt=none` round trip, so silent sign-in also works with third-party cookies blocked.
+Guests return with `sso=none`; Inventory's own sign-out hint prevents automatic re-entry.
+The adapter ignores the hub's root session and flow cookies. OAuth still uses SDK PKCE,
+state verification, refresh and error recovery. The original host keeps its existing cookies.
+
+After review, deploy in this order:
+
+1. Merge/deploy the companion Network PR with
+   `/home/workstation/openvibe/work/tools/merge-deploy.sh 'OpenVibe.Network#<N>:network' < /dev/null`.
+   Its boot seed merges the new callback into existing clients, keeping old callbacks.
+   Install Network's `deploy/nginx/parked-domains.conf` with `sudo ov-vhost-install`
+   using the host's installed filename. The `/inventory` proxy preserves the prefix.
+2. Back up `/etc/openvibe/inventory.env` with sudo before editing it (never print its contents).
+   Set `PUBLIC_URL=https://openvibe.my/inventory`; if `OV_OAUTH_REDIRECT_URI` is set,
+   set it to `https://openvibe.my/inventory/auth/callback`. Leave legacy redirects disabled.
+   Deploy with `/home/workstation/openvibe/work/tools/merge-deploy.sh 'OpenVibe.Inventory#<N>:inventory' < /dev/null`.
+3. Verify hub and Inventory sign-in together, silent entry from Network, refresh, sign-out,
+   Workshop forms, assets and API callers. Use `networkToken()` from `tools/site-signin.js`
+   with the probe password loaded inline on the host, then follow the `/inventory` silent
+   flow in a browser with a path-aware cookie jar. That helper's `signIn()` assumes root
+   `/auth` and cannot test this prefix or hub cookie coexistence. Never print credentials
+   or cookies. The live check is pending
+   until the reviewed callback and prefix are deployed. Then enable
+   `INVENTORY_REDIRECT_LEGACY=true` and redeploy Inventory to activate the 301 table.
+
+Local coverage: `npm test -- base-path auth-ops security-session workshop discovery search-index`.

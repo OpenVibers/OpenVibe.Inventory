@@ -43,7 +43,7 @@ function sameOrigin(req, baseUrl) {
     const site = String(req.get('sec-fetch-site') || '');
     if (site) return site === 'same-origin';
     const origin = req.get('origin');
-    if (origin) return origin === baseUrl || origin === `${req.protocol}://${req.get('host')}`;
+    if (origin) return origin === new URL(baseUrl).origin || origin === `${req.protocol}://${req.get('host')}`;
     return false;
 }
 

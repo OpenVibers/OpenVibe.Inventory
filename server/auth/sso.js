@@ -17,6 +17,7 @@
  * refresh writes ov_token / ov_refresh and clears them.
  */
 const express = require('express');
+const { urls } = require('../urls');
 const cache = require('openvibe-shared/cache-policy');
 const { createSsoClient } = require('openvibe-sdk/sso');
 
@@ -44,6 +45,7 @@ function pkcePair() {
 
 function createSso({ config, keys, fetchImpl = globalThis.fetch, now = () => Date.now(), log = console }) {
     const secure = config.cookies.secure;
+    const url = urls(config);
     const sso = createSsoClient({
         site: 'inventory',
         siteName: 'OpenVibe.Inventory',
@@ -159,7 +161,12 @@ function createSso({ config, keys, fetchImpl = globalThis.fetch, now = () => Dat
         // The shared navbar's silent sign-in sends the whole page address: keep its path before the SDK sees it.
         r.use((req, _res, next) => {
             if (req.method === 'GET' && req.path === '/login') {
-                const target = sanitizeNext(req.query.next);
+                let value = req.query.next;
+                // Shared passes an absolute current URL. Accept only this exact origin.
+                if (typeof value === 'string' && /^https?:/.test(value)) {
+                    try { const u = new URL(value); value = u.origin === url.origin ? u.pathname + u.search : '/'; } catch { value = '/'; }
+                }
+                const target = url.path(sanitizeNext(value));
                 if (target === '/') delete req.query.next; else req.query.next = target;
             }
             next();
@@ -179,8 +186,8 @@ function createSso({ config, keys, fetchImpl = globalThis.fetch, now = () => Dat
             res.set('Cache-Control', cache.htmlHeaders({ private: true }));
             const q = req.query.next ? `?next=${encodeURIComponent(sanitizeNext(req.query.next))}` : '';
             res.type('html').send(`<!doctype html><meta charset="utf-8"><title>Sign out</title><meta name="viewport" content="width=device-width,initial-scale=1">`
-                + `<form method="post" action="/auth/logout${q}" style="font:16px system-ui;margin:3em auto;max-width:24em;text-align:center">`
-                + `<p>Sign out of OpenVibe.Inventory?</p><button type="submit">Sign out</button> <a href="/">Cancel</a></form>`);
+                + `<form method="post" action="${url.path(`/auth/logout${q}`)}" style="font:16px system-ui;margin:3em auto;max-width:24em;text-align:center">`
+                + `<p>Sign out of OpenVibe.Inventory?</p><button type="submit">Sign out</button> <a href="${url.path('/')}">Cancel</a></form>`);
         });
         r.post('/logout', (req, res, next) => (sameOriginRequest(req) ? next() : res.status(403).type('text/plain').send('Sign-out must come from this site.')));
         r.all('/logout', async (req, res) => {

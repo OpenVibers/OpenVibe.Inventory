@@ -17,6 +17,7 @@ const frame = require('openvibe-shared/frame');
 const showcase = require('openvibe-shared/showcase');
 const cache = require('openvibe-shared/cache-policy');
 const express = require('express');
+const { urls } = require('../urls');
 const { asyncRouter } = require('./router');
 const { createDiscoveryRoutes, homeJsonLd } = require('./discovery');
 const { sameOrigin } = require('./principal');
@@ -49,7 +50,7 @@ function art(d, { size = 'md' } = {}) {
 }
 const rarityBadge = (r) => html`<span class="inv-rarity r-${r}">${RARITY_LABEL[r] || r}</span>`;
 
-function card(d, { href = `/items/${d.id}`, extra = '', owned = null, worn = false } = {}) {
+function renderCard(d, { url, href = url(`/items/${d.id}`), extra = '', owned = null, worn = false } = {}) {
     return html`<li class="inv-card r-${d.rarity}${worn ? ' is-worn' : ''}">
   <a class="inv-card-link" href="${href}">${art(d)}<span class="inv-card-body"><span class="inv-card-name">${d.name}</span>${rarityBadge(d.rarity)}</span></a>
   ${d.description ? html`<p class="inv-card-desc">${d.description}</p>` : ''}${owned ? html`<p class="inv-card-meta">${owned}</p>` : ''}${extra}
@@ -92,10 +93,12 @@ function itemDescription(d, k) {
 function createPageRoutes(ctx) {
     const { config, inv } = ctx;
     const r = asyncRouter();
+    const url = urls(config).path;
+    const card = (d, options = {}) => renderCard(d, { ...options, url });
     const PUBLIC_CACHE = cache.htmlHeaders({ maxAge: 300 });
     const page = (req, res, o, status = 200) => send(res, status, { viewer: req.viewer, config, path: req.originalUrl, ...o });
     const signedIn = (req) => (req.viewer && req.viewer.kind === 'user' && SUBJECT_RE.test(String(req.viewer.subject || '')) ? req.viewer.subject : null);
-    const notFound = (req, res, what) => page(req, res, { title: 'Not found', body: html`<h1>Not found</h1><p>${what} <a href="/items">Browse every item</a>.</p>` }, 404);
+    const notFound = (req, res, what) => page(req, res, { title: 'Not found', body: html`<h1>Not found</h1><p>${what} <a href="${url(`/items`)}">Browse every item</a>.</p>` }, 404);
 
     async function catalog() {
         const [kinds, defs] = await Promise.all([inv.listKinds(), inv.listDefinitions({ limit: 500 })]);
@@ -117,10 +120,10 @@ function createPageRoutes(ctx) {
             accent: 'on every OpenVibe site.',
             lede: 'One inventory for your whole OpenVibe account: name effects, particles, hats, voices and more. Earn them across the network, wear them in chat, on stream overlays and on your profile.',
             actions: me
-                ? [{ label: 'Your inventory', href: '/me', primary: true }, { label: 'Browse every item', href: '/items' }]
-                : [{ label: 'Browse every item', href: '/items', primary: true }, { label: 'Sign in to see yours', href: '/auth/login?next=%2Fme' }],
+                ? [{ label: 'Your inventory', href: url('/me'), primary: true }, { label: 'Browse every item', href: url('/items') }]
+                : [{ label: 'Browse every item', href: url('/items'), primary: true }, { label: 'Sign in to see yours', href: url('/auth/login?next=%2Fme') }],
             note: 'Items are earned or given, never sold here. Open source (AGPL-3.0).',
-            aside: { html: html`<div class="inv-hero-panel" aria-label="A few of the rarest items"><p class="inv-hero-title">From the collection</p><ul class="inv-hero-grid">${featured.map((d) => html`<li><a href="/items/${d.id}" title="${d.name} · ${RARITY_LABEL[d.rarity]}">${art(d, { size: 'lg' })}<span class="inv-hero-name">${d.name}</span></a></li>`)}</ul></div>`.toString() },
+            aside: { html: html`<div class="inv-hero-panel" aria-label="A few of the rarest items"><p class="inv-hero-title">From the collection</p><ul class="inv-hero-grid">${featured.map((d) => html`<li><a href="${url(`/items/${d.id}`)}" title="${d.name} · ${RARITY_LABEL[d.rarity]}">${art(d, { size: 'lg' })}<span class="inv-hero-name">${d.name}</span></a></li>`)}</ul></div>`.toString() },
         });
         return {
             agent: true, index: true, cache: me ? null : PUBLIC_CACHE,
@@ -133,7 +136,7 @@ ${raw(showcase.features({
                 // nor counted, so "in 4 kinds" sits over four cards.
                 lede: `${plural(defs.length, 'item', 'items')} in ${plural(kinds.filter((k) => (byKind.get(k.id) || []).length).length, 'kind', 'kinds')} today. Each kind knows where it shows, so a new kind is all it takes for a new site or game to join.`,
                 // Kinds that have items, the biggest first; an empty kind waits until an issuer defines something in it.
-                items: kinds.filter((k) => (byKind.get(k.id) || []).length).sort((a, b) => byKind.get(b.id).length - byKind.get(a.id).length).map((k) => ({ icon: KIND_ICON[k.id] || 'ov:ov', title: `${k.name} · ${(byKind.get(k.id) || []).length}`, text: `${k.description || ''} Shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}.`, href: `/items?kind=${encodeURIComponent(k.id)}` })),
+                items: kinds.filter((k) => (byKind.get(k.id) || []).length).sort((a, b) => byKind.get(b.id).length - byKind.get(a.id).length).map((k) => ({ icon: KIND_ICON[k.id] || 'ov:ov', title: `${k.name} · ${(byKind.get(k.id) || []).length}`, text: `${k.description || ''} Shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}.`, href: url(`/items?kind=${encodeURIComponent(k.id)}`) })),
             }))}
 ${raw(showcase.steps({
                 title: 'How items reach you',
@@ -142,14 +145,17 @@ ${raw(showcase.steps({
                     { title: 'Keep them in one place', text: 'Everything you own is here, with where it came from and when.' },
                     { title: 'Wear them everywhere', text: 'Equip one item per slot. Every site that shows that kind shows what you chose.' },
                     { title: 'Never for sale', text: 'Nothing here is bought, sold, traded or turned into money. Rarity is shown as it is.' },
-                    { title: 'Or make one', text: 'In the Workshop you make a badge, staff review it, and you give it to the people you choose.', href: '/workshop' },
+                    { title: 'Or make one', text: 'In the Workshop you make a badge, staff review it, and you give it to the people you choose.', href: url('/workshop') },
                 ],
             }))}
-${raw(showcase.network({ service: 'inventory' }))}
-${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something?', text: me ? 'Your items and what you are wearing, on one page.' : 'Sign in with your OpenVibe account to see your inventory and choose what to wear.', actions: me ? [{ label: 'Your inventory', href: '/me' }] : [{ label: 'Sign in with OpenVibe', href: '/auth/login?next=%2Fme' }, { label: 'The API', href: '/api/v1/kinds' }] }))}`,
+${raw(urls(config).html(showcase.network({ service: 'inventory' })))}
+${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something?', text: me ? 'Your items and what you are wearing, on one page.' : 'Sign in with your OpenVibe account to see your inventory and choose what to wear.', actions: me ? [{ label: 'Your inventory', href: url('/me') }] : [{ label: 'Sign in with OpenVibe', href: url('/auth/login?next=%2Fme') }, { label: 'The API', href: url('/api/v1/kinds') }] }))}`,
         };
     }
-    r.get('/', async (req, res) => page(req, res, await homePage({ signed: !!signedIn(req) })));
+    r.get('/', async (req, res, next) => {
+        if (urls(config).prefix && signedIn(req)) return ownPage(req, res);
+        return page(req, res, await homePage({ signed: !!signedIn(req) }));
+    });
 
     // ── The catalog ──────────────────────────────────────────
     async function itemsPage(only = null, { signed = false } = {}) {
@@ -163,7 +169,7 @@ ${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something
             description: `${plural(defs.length, 'item', 'items')} you can earn and wear across OpenVibe, with their rarity.`,
             body: html`<h1>${only ? `${shown[0].name} items` : 'Every item'}</h1>
 <p class="lede">${only ? shown[0].description : `${plural(defs.length, 'item', 'items')} in ${plural(kinds.length, 'kind', 'kinds')}. Rarity is shown as it is.`}</p>
-<nav class="inv-tabs" aria-label="Kinds"><a href="/items"${only ? '' : raw(' aria-current="page"')}>All <span class="muted">${defs.length}</span></a>${kinds.filter((k) => (byKind.get(k.id) || []).length || only === k.id).map((k) => html`<a href="/items?kind=${encodeURIComponent(k.id)}"${only === k.id ? raw(' aria-current="page"') : ''}>${k.name} <span class="muted">${(byKind.get(k.id) || []).length}</span></a>`)}</nav>
+<nav class="inv-tabs" aria-label="Kinds"><a href="${url(`/items`)}"${only ? '' : raw(' aria-current="page"')}>All <span class="muted">${defs.length}</span></a>${kinds.filter((k) => (byKind.get(k.id) || []).length || only === k.id).map((k) => html`<a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}"${only === k.id ? raw(' aria-current="page"') : ''}>${k.name} <span class="muted">${(byKind.get(k.id) || []).length}</span></a>`)}</nav>
 ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.replace(/\W/g, '-')}">
   <h2 id="k-${k.id.replace(/\W/g, '-')}">${k.name} <span class="muted small">${plural((byKind.get(k.id) || []).length, 'item', 'items')} · shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}</span></h2>
   ${(byKind.get(k.id) || []).length ? tiles(byKind.get(k.id), (d) => tile(d), { first: only ? Infinity : 12, more: `More ${k.name.toLowerCase()} items` }) : html`<p class="muted">No ${k.name.toLowerCase()} items yet.</p>`}
@@ -187,7 +193,7 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
             title: `${d.name} · ${RARITY_LABEL[d.rarity]} ${k.name.toLowerCase()}`,
             // What the item is, how many people own it and how it is got; its flavor text alone ("Angelic") said none of that.
             description: itemDescription(d, k),
-            body: html`<p class="crumbs"><a href="/items">Every item</a> › <a href="/items?kind=${encodeURIComponent(k.id)}">${k.name}</a></p>
+            body: html`<p class="crumbs"><a href="${url(`/items`)}">Every item</a> › <a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}">${k.name}</a></p>
 <div class="inv-detail r-${d.rarity}">
   ${art(d, { size: 'xl' })}
   <div>
@@ -209,7 +215,7 @@ ${(d.grantors || []).includes('service:games') && d.status === 'published' ? htm
 <p>${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ').replace(/^./, (c) => c.toUpperCase())}.</p>
 <h2>Who gives it</h2>
 <p>${issuer}${(d.grantors || []).length ? ', and the services it names (see How to get it)' : ''}. ${(d.grantors || []).length ? 'Nobody else' : 'Only its issuer'} can give this item; it is never sold here.</p>
-<p class="muted small">Item <code>${d.id}</code>${(d.aliases || []).length ? html` · also known as <code>${d.aliases.join(', ')}</code>` : ''} · <a href="/api/v1/definitions/${d.id}">JSON</a></p>`,
+<p class="muted small">Item <code>${d.id}</code>${(d.aliases || []).length ? html` · also known as <code>${d.aliases.join(', ')}</code>` : ''} · <a href="${url(`/api/v1/definitions/${d.id}`)}">JSON</a></p>`,
         };
     }
     r.get('/items/:id', async (req, res) => {
@@ -228,7 +234,7 @@ ${(d.grantors || []).includes('service:games') && d.status === 'published' ? htm
         return { kinds, byKind, worn, owned, more: !!list.next_cursor };
     }
 
-    r.get('/me', async (req, res) => {
+    async function ownPage(req, res) {
         const me = signedIn(req);
         if (!me) return res.redirect(303, '/auth/login?next=%2Fme');
         const { kinds, byKind, worn, owned, more } = await ownedView(me, { own: true });
@@ -245,20 +251,21 @@ ${owned.length ? html`<section class="inv-wearing" aria-labelledby="inv-wearing-
         const on = byKind.get(k.id).find(({ i }) => worn.has(i.id));
         return html`<li><a class="inv-slot${on ? '' : ' is-empty'}" href="#k-${k.id.replace(/\W/g, '-')}">${on ? art(on.d, { size: 'sm' }) : html`<span class="inv-art inv-art-sm inv-art-none" aria-hidden="true"></span>`}<span class="inv-slot-t"><small>${k.name}</small><b>${on ? on.d.name : 'Nothing worn'}</b></span></a></li>`;
     })}</ul></section>` : ''}
-<p class="inv-links"><a href="/u/${me}">Your public page</a> · <a href="/items">Every item</a></p>
+<p class="inv-links"><a href="${url(`/u/${me}`)}">Your public page</a> · <a href="${url(`/items`)}">Every item</a></p>
 ${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind" id="k-${k.id.replace(/\W/g, '-')}">
   <h2>${k.name} <span class="muted small">${plural(byKind.get(k.id).length, 'item', 'items')}${k.slots.length ? ' · tap one to wear it' : ''}</span></h2>
   ${tiles(byKind.get(k.id), ({ i, d }) => tile(d, {
         worn: worn.has(i.id),
         note: i.serial ? `#${i.serial}` : '',
-        form: k.slots.length ? (label) => html`<form method="post" action="/me/equip" class="inv-tile-form">
+        form: k.slots.length ? (label) => html`<form method="post" action="${url(`/me/equip`)}" class="inv-tile-form">
       <input type="hidden" name="kind" value="${k.id}"><input type="hidden" name="slot" value="${k.slots[0]}"><input type="hidden" name="instance_id" value="${worn.has(i.id) ? '' : i.id}">
       <button type="submit" class="inv-tile-main" aria-label="${worn.has(i.id) ? `Take off ${d.name}` : `Wear ${d.name}`}">${label}<span class="inv-tile-act">${worn.has(i.id) ? 'Wearing' : 'Wear'}</span></button></form>` : null,
     }), { first: 24, more: `More ${k.name.toLowerCase()} items` })}
 </section>`)}
-${more ? html`<p class="muted">Showing the newest 200. The full list is at <a href="/api/v1/me/items">/api/v1/me/items</a>.</p>` : ''}`,
+${more ? html`<p class="muted">Showing the newest 200. The full list is at <a href="${url(`/api/v1/me/items`)}">/api/v1/me/items</a>.</p>` : ''}`,
         });
-    });
+    }
+    r.get('/me', ownPage);
 
     r.post('/me/equip', express.urlencoded({ extended: false, limit: '4kb' }), async (req, res) => {
         const me = signedIn(req);
@@ -296,7 +303,7 @@ ${!owned.length ? html`<p class="muted">Nothing to show yet.</p>` : ''}`,
     const updatesPage = () => ({
         agent: true, index: true, cache: PUBLIC_CACHE,
         title: `What shipped on ${SITE_NAME}`,
-        body: raw(frame.updatesBody({ service: 'inventory', siteName: SITE_NAME }) + `<script src="${ovServe.url('shipped.js')}" defer></script>`),
+        body: raw(urls(config).html(frame.updatesBody({ service: 'inventory', siteName: SITE_NAME })) + `<script src="${url(ovServe.url('shipped.js'))}" defer></script>`),
     });
     r.get('/updates', (req, res) => page(req, res, updatesPage()));
 
