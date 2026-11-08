@@ -139,3 +139,51 @@ button.sc-btn.sc-primary { border: 0; }
     .table-wrap > table:has(thead th:nth-child(3)):has(td[data-label]) td[data-label]:not(:first-child)::before { content: attr(data-label); display: block; margin-bottom: 2px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted, #7386a3); }
     .table-wrap > table:has(thead th:nth-child(3)):has(td[data-label]) td:empty { display: none; }
 }
+
+/* ── Tiles (owner, 11-08: "improve the UI … more user friendly and better on mobile"): three to a row on a phone, the
+   picture on its rarity's glow, the name, the rarity in a word. In your inventory the tile is the wear button itself. ── */
+.inv-tiles { list-style: none; padding: 0; margin: 10px 0 4px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(104px, 30%), 1fr)); }
+@media (min-width: 760px) { .inv-tiles { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; } }
+.inv-tile { position: relative; min-width: 0; }
+.inv-tile-form { margin: 0; height: 100%; }
+.inv-tile-main { all: unset; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; height: 100%; padding: 12px 8px 10px; text-align: center; cursor: pointer;
+    border: 1px solid var(--border, #1f2d47); border-radius: 16px; background: linear-gradient(180deg, color-mix(in srgb, var(--rar) 9%, var(--bg-card, #131c2e)), var(--bg-card, #131c2e) 70%);
+    color: var(--text-primary, #e6edf7); -webkit-tap-highlight-color: transparent; transition: border-color .15s, transform .15s, box-shadow .2s; }
+.inv-tile-main:hover { border-color: color-mix(in srgb, var(--rar) 60%, var(--border, #1f2d47)); box-shadow: 0 10px 26px -16px color-mix(in srgb, var(--rar) 80%, transparent); }
+.inv-tile-main:active { transform: scale(.97); }
+.inv-tile-main:focus-visible { outline: 3px solid var(--accent, #3b82f6); outline-offset: 2px; }
+.inv-tile .inv-art-md { width: 52px; height: 52px; font-size: 27px; }
+.inv-tile-name { font-weight: 650; font-size: .86rem; line-height: 1.25; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.inv-tile-sub { font-size: .7rem; line-height: 1.2; color: var(--text-muted, #7386a3); }
+.inv-tile-rar { font-weight: 750; letter-spacing: .04em; text-transform: uppercase; color: color-mix(in srgb, var(--rar) 55%, var(--text-primary, #e6edf7)); }
+.inv-tile-act { margin-top: 2px; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 750; color: var(--accent-light, #60a5fa); background: color-mix(in srgb, var(--accent, #3b82f6) 12%, transparent); }
+.inv-tile.is-worn .inv-tile-main { border-color: var(--success, #22c55e); box-shadow: 0 0 0 1px var(--success, #22c55e), 0 12px 28px -18px var(--success, #22c55e); }
+.inv-tile.is-worn .inv-tile-act { color: var(--success-text, var(--success, #22c55e)); background: color-mix(in srgb, var(--success, #22c55e) 14%, transparent); }
+.inv-tile.is-worn .inv-tile-act::before { content: "✓ "; }
+.inv-tile-info { position: absolute; top: 6px; right: 6px; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 999px; font: 700 12px/1 Georgia, serif; font-style: italic;
+    color: var(--text-secondary, #96a7c2); text-decoration: none; background: color-mix(in srgb, var(--bg-primary, #0a0f1c) 60%, transparent); border: 1px solid var(--border, #1f2d47); }
+.inv-tile-info:hover { color: var(--text-primary, #e6edf7); border-color: var(--accent, #3b82f6); }
+.inv-more { margin: 4px 0 0; }
+.inv-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border-light, #2c3d5c); font-weight: 650; font-size: .9rem; list-style: none; }
+.inv-more > summary::-webkit-details-marker { display: none; }
+.inv-more > summary::after { content: "⌄"; font-size: 1rem; line-height: 1; transform: translateY(-2px); }
+.inv-more[open] > summary::after { transform: rotate(180deg) translateY(-2px); }
+
+/* ── What you wear: one slot per kind, a swipe on a phone ── */
+.inv-wearing { margin: 14px 0 6px; }
+.inv-slots { list-style: none; margin: 0; padding: 2px 2px 8px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(176px, 1fr); gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.inv-slots li { scroll-snap-align: start; min-width: 0; }
+.inv-slot { display: flex; align-items: center; gap: 10px; height: 100%; padding: 8px 12px 8px 8px; border-radius: 14px; border: 1px solid var(--border, #1f2d47); background: var(--bg-card, #131c2e); color: inherit; text-decoration: none; }
+.inv-slot:hover { border-color: var(--accent, #3b82f6); }
+.inv-slot.is-empty { border-style: dashed; }
+.inv-slot-t { display: grid; min-width: 0; line-height: 1.25; }
+.inv-slot-t small { font-size: .7rem; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted, #7386a3); }
+.inv-slot-t b { font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inv-slot.is-empty .inv-slot-t b { font-weight: 500; color: var(--text-secondary, #96a7c2); }
+.inv-art-sm { width: 40px; height: 40px; font-size: 21px; border-radius: 11px; }
+.inv-art-none { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--text-muted, #7386a3) 16%, transparent) 6px 7px); border: 1px dashed var(--border-light, #2c3d5c); }
+.inv-links { margin: 8px 0 0; font-size: .92rem; }
+.inv-kind { scroll-margin-top: 72px; }
+.inv-kind h2 { margin-top: 1.4rem; }
+@media (max-width: 520px) { .inv-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; } .inv-tabs::-webkit-scrollbar { display: none; } .inv-tabs a { flex: none; } }
+@media (prefers-reduced-motion: reduce) { .inv-tile-main { transition: none; } .inv-tile-main:active { transform: none; } }

@@ -57,6 +57,24 @@ function renderCard(d, { url, href = url(`/items/${d.id}`), extra = '', owned = 
 </li>`;
 }
 
+/**
+ * An item as a compact tile (the catalog and your inventory on a phone: three to a row, not one card a screen):
+ * its picture on its rarity's glow, its name, its rarity in a word. A link to the item, or (in your inventory) the
+ * wear / take-off button itself, with a small link to the item beside it.
+ */
+function tile(d, { href = `/items/${d.id}`, form = null, worn = false, note = '' } = {}) {
+    const label = html`${art(d)}<span class="inv-tile-name">${d.name}</span><span class="inv-tile-sub"><span class="inv-tile-rar">${RARITY_LABEL[d.rarity] || d.rarity}</span>${note ? html` · ${note}` : ''}</span>`;
+    if (!form) return html`<li class="inv-tile r-${d.rarity}"><a class="inv-tile-main" href="${href}">${label}</a></li>`;
+    return html`<li class="inv-tile r-${d.rarity}${worn ? ' is-worn' : ''}">${form(label)}<a class="inv-tile-info" href="${href}" aria-label="About ${d.name}" title="About ${d.name}">i</a></li>`;
+}
+/** A long list of tiles: the first `first` shown, the rest behind a counted fold ("More voice items (78)") when more than six would be behind it. */
+function tiles(list, render, { first = 12, more = 'More' } = {}) {
+    // A fold that would hide only a few is no fold: show them all.
+    const cut = list.length - first > 6 ? first : list.length;
+    const head = list.slice(0, cut), rest = list.slice(cut);
+    return html`<ul class="inv-tiles">${head.map(render)}</ul>${rest.length ? html`<details class="inv-more"><summary>${more} <span class="muted">(${rest.length})</span></summary><ul class="inv-tiles">${rest.map(render)}</ul></details>` : ''}`;
+}
+
 /** An item page's meta description (≤ 160 characters): its name, rarity and kind, its own words, how many own it, how it is got. */
 function itemDescription(d, k) {
     const what = `${d.name}, a ${RARITY_LABEL[d.rarity].toLowerCase()} ${k.name.toLowerCase()} on OpenVibe`;
@@ -151,10 +169,10 @@ ${raw(showcase.cta({ title: me ? 'See what you have' : 'Already earned something
             description: `${plural(defs.length, 'item', 'items')} you can earn and wear across OpenVibe, with their rarity.`,
             body: html`<h1>${only ? `${shown[0].name} items` : 'Every item'}</h1>
 <p class="lede">${only ? shown[0].description : `${plural(defs.length, 'item', 'items')} in ${plural(kinds.length, 'kind', 'kinds')}. Rarity is shown as it is.`}</p>
-<nav class="inv-tabs" aria-label="Kinds"><a href="${url(`/items`)}"${only ? '' : raw(' aria-current="page"')}>All</a>${kinds.map((k) => html`<a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}"${only === k.id ? raw(' aria-current="page"') : ''}>${k.name} <span class="muted">${(byKind.get(k.id) || []).length}</span></a>`)}</nav>
+<nav class="inv-tabs" aria-label="Kinds"><a href="${url(`/items`)}"${only ? '' : raw(' aria-current="page"')}>All <span class="muted">${defs.length}</span></a>${kinds.filter((k) => (byKind.get(k.id) || []).length || only === k.id).map((k) => html`<a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}"${only === k.id ? raw(' aria-current="page"') : ''}>${k.name} <span class="muted">${(byKind.get(k.id) || []).length}</span></a>`)}</nav>
 ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.replace(/\W/g, '-')}">
-  <h2 id="k-${k.id.replace(/\W/g, '-')}">${k.name} <span class="muted small">shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}</span></h2>
-  ${(byKind.get(k.id) || []).length ? html`<ul class="inv-grid">${byKind.get(k.id).map((d) => card(d))}</ul>` : html`<p class="muted">No ${k.name.toLowerCase()} items yet.</p>`}
+  <h2 id="k-${k.id.replace(/\W/g, '-')}">${k.name} <span class="muted small">${plural((byKind.get(k.id) || []).length, 'item', 'items')} · shows in ${k.surfaces.map((s) => surfaceLabel(s.surface)).join(', ')}</span></h2>
+  ${(byKind.get(k.id) || []).length ? tiles(byKind.get(k.id), (d) => tile(d), { first: only ? Infinity : 12, more: `More ${k.name.toLowerCase()} items` }) : html`<p class="muted">No ${k.name.toLowerCase()} items yet.</p>`}
 </section>`)}`,
         };
     }
@@ -225,22 +243,24 @@ ${(d.grantors || []).includes('service:games') && d.status === 'published' ? htm
         page(req, res, {
             title: 'Your inventory',
             body: html`<h1>Your inventory</h1>
-<p class="lede">${owned.length ? `${plural(owned.length, 'item', 'items')}. Choose one per slot to wear it on every site that shows it.` : 'Nothing yet. Items arrive as you take part across OpenVibe: streams, quests, games and events.'}</p>
+<p class="lede">${owned.length ? `${plural(owned.length, 'item', 'items')}. What you wear shows in chat, on stream overlays and on your profile, on every OpenVibe site.` : 'Nothing yet. Items arrive as you take part across OpenVibe: streams, quests, games and events.'}</p>
 ${done ? html`<p class="notice ok" role="status">${done === 'equipped' ? 'Equipped. It shows everywhere that kind is shown.' : 'Taken off.'}</p>` : ''}
 ${error ? html`<p class="notice bad" role="alert">${error}</p>` : ''}
-<p><a href="${url(`/u/${me}`)}">See your public page</a> · <a href="${url(`/items`)}">Browse every item</a></p>
-${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind">
-  <h2>${k.name} <span class="muted small">${plural(byKind.get(k.id).length, 'item', 'items')}</span></h2>
-  <ul class="inv-grid">${byKind.get(k.id).map(({ i, d }) => card(d, {
-        owned: `Since ${String(i.acquired_at).slice(0, 10)}${i.serial ? ` · #${i.serial}` : ''}`,
+${owned.length ? html`<section class="inv-wearing" aria-labelledby="inv-wearing-h"><h2 id="inv-wearing-h" class="sr-only">What you wear</h2>
+<ul class="inv-slots">${kinds.filter((k) => k.slots.length && byKind.get(k.id).length).map((k) => {
+        const on = byKind.get(k.id).find(({ i }) => worn.has(i.id));
+        return html`<li><a class="inv-slot${on ? '' : ' is-empty'}" href="#k-${k.id.replace(/\W/g, '-')}">${on ? art(on.d, { size: 'sm' }) : html`<span class="inv-art inv-art-sm inv-art-none" aria-hidden="true"></span>`}<span class="inv-slot-t"><small>${k.name}</small><b>${on ? on.d.name : 'Nothing worn'}</b></span></a></li>`;
+    })}</ul></section>` : ''}
+<p class="inv-links"><a href="${url(`/u/${me}`)}">Your public page</a> · <a href="${url(`/items`)}">Every item</a></p>
+${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind" id="k-${k.id.replace(/\W/g, '-')}">
+  <h2>${k.name} <span class="muted small">${plural(byKind.get(k.id).length, 'item', 'items')}${k.slots.length ? ' · tap one to wear it' : ''}</span></h2>
+  ${tiles(byKind.get(k.id), ({ i, d }) => tile(d, {
         worn: worn.has(i.id),
-        extra: k.slots.length ? html`<form method="post" action="${url(`/me/equip`)}" class="inv-equip">
-      <input type="hidden" name="kind" value="${k.id}"><input type="hidden" name="slot" value="${k.slots[0]}">
-      ${worn.has(i.id)
-        ? html`<input type="hidden" name="instance_id" value=""><span class="inv-worn">Wearing</span><button type="submit" class="inv-btn">Take off</button>`
-        : html`<input type="hidden" name="instance_id" value="${i.id}"><button type="submit" class="inv-btn primary" aria-label="Wear ${d.name}">Wear</button>`}
-    </form>` : '',
-    }))}</ul>
+        note: i.serial ? `#${i.serial}` : '',
+        form: k.slots.length ? (label) => html`<form method="post" action="${url(`/me/equip`)}" class="inv-tile-form">
+      <input type="hidden" name="kind" value="${k.id}"><input type="hidden" name="slot" value="${k.slots[0]}"><input type="hidden" name="instance_id" value="${worn.has(i.id) ? '' : i.id}">
+      <button type="submit" class="inv-tile-main" aria-label="${worn.has(i.id) ? `Take off ${d.name}` : `Wear ${d.name}`}">${label}<span class="inv-tile-act">${worn.has(i.id) ? 'Wearing' : 'Wear'}</span></button></form>` : null,
+    }), { first: 24, more: `More ${k.name.toLowerCase()} items` })}
 </section>`)}
 ${more ? html`<p class="muted">Showing the newest 200. The full list is at <a href="${url(`/api/v1/me/items`)}">/api/v1/me/items</a>.</p>` : ''}`,
         });
