@@ -16,6 +16,7 @@
 const { createAccountData, TOPICS } = require('openvibe-sdk/account-data');
 
 const TABLES = [
+    { table: 'inventory_store_purchases', subject: 'subject', file: 'purchases.json', columns: ['id', 'definition_id', 'currency', 'amount', 'name', 'instance_id', 'payment_id', 'created_at'], order: 'created_at', erase: { anonymize: {} } },
     // Equipped rows reference instances, so they go first.
     { table: 'inventory_equipped', subject: 'owner_subject', file: 'equipped.json', columns: ['kind', 'slot', 'instance_id', 'updated_at'], order: 'updated_at' },
     { table: 'inventory_instances', subject: 'owner_subject', file: 'items.json', columns: ['id', 'definition_id', 'origin', 'state', 'attributes', 'serial', 'acquired_at'], order: 'acquired_at' },
@@ -25,6 +26,8 @@ const TABLES = [
 
 /** A ledger row the person acted in (an equip they made) keeps the row and loses their name. */
 async function extraErase(t, subjects, counts) {
+    await t.exec("UPDATE inventory_store_listings SET reviewed_by = NULL WHERE reviewed_by = ANY($1::text[])", [subjects.map((x) => `user:${x}`)]);
+    await t.exec("UPDATE inventory_store_listings SET issuer = 'user:deleted', status = 'rejected' WHERE issuer = ANY($1::text[])", [subjects.map((x) => `user:${x}`)]);
     const people = subjects.map((x) => `user:${x}`);
     counts.add(counts.retained, 'tombstones', await t.exec("UPDATE inventory_ledger SET actor = 'user:deleted' WHERE actor = ANY($1::text[])", [people]));
     // Their Workshop items: the kind's issuer takes them over, retired, without the review note (ADR-054 §6).

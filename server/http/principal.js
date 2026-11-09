@@ -25,7 +25,7 @@ const PROJECT_RE = /^prj_[0-9A-HJKMNP-TV-Z]{26}$/;
 // route can never be guarded by a capability the service does not declare.
 const CAPABILITIES = [
     'inventory.item.read', 'inventory.item.list', 'inventory.equip.manage', 'inventory.item.grant', 'inventory.item.consume',
-    'inventory.definition.manage', 'inventory.definition.review',
+    'inventory.definition.manage', 'inventory.definition.review', 'inventory.store.list',
 ];
 
 function decodePayload(token) {
@@ -66,7 +66,7 @@ function createPrincipal({ config, keys }) {
             if (!v.ok) return { error: [401, v.expired ? 'token.expired' : 'token.invalid', v.reason] };
             if (v.claims.typ === 'fedcm' || v.claims.actor_type !== undefined) return { error: [401, 'token.invalid', 'not a person\'s token'] };
             if (!ids.isSubjectId('user', v.claims.subject_id)) return { error: [403, 'identity.no_subject', 'this account has no canonical subject yet; sign in again'] };
-            return { principal: { kind: 'user', requester: `user:${v.claims.subject_id}`, project: null, viaSession: false } };
+            return { principal: { kind: 'user', requester: `user:${v.claims.subject_id}`, role: v.claims.role, project: null, viaSession: false } };
         }
         const viewer = req.viewer;
         if (viewer && viewer.kind === 'user' && ids.isSubjectId('user', viewer.subject)) {

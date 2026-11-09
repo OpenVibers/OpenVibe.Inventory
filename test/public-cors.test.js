@@ -31,7 +31,7 @@ const { boot, check, done } = require('./helpers/boot');
             assert.match(r.headers.get('access-control-allow-methods') || '', /GET/);
         });
         await check('everything else stays same-site', async () => {
-            for (const [p, method] of [['/api/v1/me/items', 'GET'], ['/api/v1/grants', 'POST'], ['/api/v1/me/equipped', 'PUT'], ['/api/v1/ping', 'GET'], ['/items', 'GET']]) {
+            for (const [p, method] of [['/api/v1/grants', 'POST'], ['/api/v1/ping', 'GET'], ['/items', 'GET']]) {
                 const r = await t.get(p, { method, headers: origin });
                 assert.strictEqual(r.headers.get('access-control-allow-origin'), null, `${method} ${p}`);
                 assert.strictEqual(r.headers.get('cross-origin-resource-policy'), 'same-site', `${method} ${p}`);

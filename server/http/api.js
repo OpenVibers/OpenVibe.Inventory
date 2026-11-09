@@ -17,8 +17,8 @@
  *   POST /definitions, PATCH /definitions/:id    inventory.definition.manage  an issuer's definitions
  *
  * A person acts for themself (their token or this site's session). A service or app acting for a person sends that
- * person's subject in X-OV-Subject and holds the route's capability. Nothing here sells, buys, trades or converts an
- * item (ADR-054 §5). A refusal is an RFC 9457 problem+json with a stable code.
+ * person's subject in X-OV-Subject and holds the route's capability. Store purchases require the person's bearer
+ * and Billing authorizes every spend. A refusal is an RFC 9457 problem+json with a stable code.
  */
 const express = require('express');
 const { http } = require('openvibe-contracts');
@@ -111,6 +111,22 @@ function createApi(ctx) {
     }));
     r.patch('/definitions/:id', principal.requireCapability('inventory.definition.manage'), limits.budget('inventory.define'), wrap(async (req, res) => res.json({ definition: await inv.updateDefinition(issuerOf(req), req.params.id, req.body) })));
 
+    r.get('/store', read, limits.reads('inventory.item.read'), wrap(async (req, res) => res.json(await ctx.commerce.list(
+        req.principal.kind === 'user' ? req.principal.requester.slice(5) : null))));
+    const bearerPerson = (req, res, next) => {
+        if (req.principal.kind !== 'user' || req.principal.viaSession) return http.sendProblem(res, 401, 'inventory.person_bearer_required');
+        return next();
+    };
+    r.get('/store/purchases/:id', bearerPerson, limits.reads('inventory.item.list'), wrap(async (req, res) =>
+        res.json(await ctx.commerce.purchase(req.principal.requester.slice(5), req.params.id))));
+    r.post('/store/:id/buy', bearerPerson, limits.budget('inventory.define'), wrap(async (req, res) =>
+        res.json(await ctx.commerce.buy(req.principal.requester.slice(5), req.params.id, req.body || {}, req.get('authorization')))));
+    r.post('/store/:id/list', principal.requireCapability('inventory.store.list'), limits.budget('inventory.define'), wrap(async (req, res) =>
+        res.status(201).json(await ctx.commerce.submit(req.principal.requester, req.params.id, req.body || {}))));
+    r.post('/store/:id/review', bearerPerson, limits.budget('inventory.define'), wrap(async (req, res) => {
+        if (!['admin', 'global_mod'].includes(req.principal.role)) return http.sendProblem(res, 403, 'inventory.staff_only');
+        return res.json(await ctx.commerce.review(req.principal.requester, req.params.id, (req.body || {}).approve));
+    }));
     return r;
 }
 
