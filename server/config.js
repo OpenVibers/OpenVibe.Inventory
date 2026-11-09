@@ -43,6 +43,7 @@ function load(env = process.env) {
         valkey: { url: env.VALKEY_URL || '', prefix: env.VALKEY_PREFIX || 'ov:inventory:' },
 
         // OpenVibe.Network: SSO (OAuth2 authorization server with PKCE) and its JWKS.
+        billingUrl: trim(env.BILLING_URL || 'https://billing.openvibe.network'),
         networkUrl,
         networkInternalUrl: trim(env.OV_NETWORK_INTERNAL_URL || 'http://127.0.0.1:4000'),
         networkIssuer: trim(env.OV_NETWORK_ISSUER || networkUrl),

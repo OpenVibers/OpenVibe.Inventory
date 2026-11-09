@@ -91,6 +91,7 @@ async function createApp(opts = {}) {
         ? createNetworkSender({ networkInternalUrl: config.networkInternalUrl, clientId: config.oauth.clientId, clientSecret: config.oauth.clientSecret, fetch: fetchImpl })
         : async () => { throw new Error('OV_OAUTH_CLIENT_SECRET is not set: Inventory cannot answer account events'); });
     const ctx = { config, s, keys, sso, principal, log, outbox, inv, accountData, searchIndex };
+    ctx.commerce = require('./inventory/commerce').createCommerce(ctx, { fetchImpl });
     // The Workshop (ADR-054 §6): images in this service's own Media tenant, recipients by @name through the Network.
     ctx.workshopMedia = opts.workshopMedia || createWorkshopMedia({ config, fetchImpl: opts.fetchImpl, log });
     ctx.people = opts.people || createPeople({ config, fetchImpl: opts.fetchImpl });
@@ -165,7 +166,7 @@ async function createApp(opts = {}) {
                 fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
                 imgSrc: ["'self'", 'data:', 'https:'],
                 // The navbar's Messages count asks Chat (openvibe-shared 4.130.0).
-                connectSrc: ["'self'", 'https://openvibe.chat', 'https://openvibe.network', 'https://cloudflareinsights.com', 'https://openvibe.events'],
+                connectSrc: ["'self'", 'https://billing.openvibe.network', 'https://inventory.openvibe.network', 'https://openvibe.chat', 'https://openvibe.network', 'https://cloudflareinsights.com', 'https://openvibe.events'],
                 frameSrc: ["'self'", 'https://openvibe.network'],
                 frameAncestors: ["'none'"],
                 objectSrc: ["'none'"],
@@ -244,6 +245,7 @@ async function createApp(opts = {}) {
     // Public reads from any site: the catalog and anyone's items and equipped set answer every origin, without
     // credentials (openvibe-shared/items.js draws what people wear with them, on every OpenVibe site). Everything else
     // keeps the same-site resource policy and no CORS. A preflight is answered here.
+    app.use('/api/v1', require('./http/wallet-cors'));
     const PUBLIC_READ = /^\/(?:kinds(?:\/[^/]+)?|definitions(?:\/[^/]+)?|equipped|people\/[^/]+\/(?:items|equipped))$/;
     app.use('/api/v1', (req, res, next) => {
         if (!PUBLIC_READ.test(req.path) || !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();

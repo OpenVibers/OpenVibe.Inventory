@@ -1,0 +1,9 @@
+# Universal store
+
+GET /api/v1/store returns staff-reviewed cosmetics, issuer, prices in coins/vibes, preview, stock and ownership. POST /api/v1/store/:id/buy requires a personal bearer and {currency,idempotency_key}; price and buyer overrides are ignored. Existing /api/v1/me/items and PUT /api/v1/me/equipped support the shared sheet with first-party bearer CORS, no cookies.
+
+POST /api/v1/store/:id/list requires inventory.store.list and the definition issuer. It accepts positive integer prices and always enters review. Staff approve through POST /api/v1/store/:id/review with {approve:true}. Price edits require another review. No prices are invented and no products are automatically listed. The cosmetic store sells non-stackable items.
+
+A durable order snapshots the reviewed price and reserves one serial under the ordinary grant lock. Billing reads that order with the buyer's bearer before charging. Inventory matches Billing's payment id, purchase id, amount and currency before granting, then records a purchased ledger row and the ordinary grant event. Alternate keys cannot buy the same item twice. An uncertain response is recovered by retrying the same item/currency. Pending stock reservations never expire automatically: reconcile uncertain payments before releasing stock. Purchases export with the account and lose their subject on deletion.
+
+Rollout: pin the Contracts release containing inventory.store.list before enabling app submissions. BILLING_URL defaults to Billing's public origin. Billing needs Inventory's URL and Network's network.coins.debit grant scoped to billing. Issuers submit prices and staff approve before items appear. Consuming sites need Billing/Inventory connect-src entries when pinning the Shared wallet release. No production settings or deployments are changed here.

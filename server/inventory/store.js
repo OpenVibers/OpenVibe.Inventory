@@ -12,7 +12,7 @@
  *   inventory      a person's instances with their definitions (public: owned ones of published or retired items)
  *   equipped       many people's equipped sets in one query; equip, clear
  *
- * Nothing here sells, buys, trades or converts an item (ADR-054 §5): there is no price column and no such route.
+ * Reviewed sales and durable reservations live in commerce.js; Billing authorizes their payment.
  */
 const Ajv = require('ajv/dist/2020');
 
@@ -294,6 +294,8 @@ function createInventory({ s, outbox, log = console }) {
             const kind = await getKind(def.kind);
             if (b.attributes !== undefined) await checkAttributes(kind.id, { ...def.attributes, ...b.attributes });
             if (!kind.stackable) {
+                const buying = await db.maybe('SELECT id FROM inventory_store_purchases WHERE subject = $1 AND definition_id = $2 AND instance_id IS NULL', [b.subject, def.id]);
+                if (buying) fail(409, 'inventory.purchase_pending', 'This person has a pending store purchase; finish it before granting');
                 const have = await db.maybe("SELECT * FROM inventory_instances WHERE definition_id = $1 AND owner_subject = $2 AND state = 'owned' LIMIT 1", [def.id, b.subject]);
                 if (have) {
                     await db.exec('INSERT INTO inventory_grants (issuer, idempotency_key, instance_id, created_at) VALUES ($1, $2, $3, $4)', [requester, key, have.id, s.iso()]);
