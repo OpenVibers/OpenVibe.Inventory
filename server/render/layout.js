@@ -70,6 +70,7 @@ function renderPage(o) {
         history: { type: 'page', title: o.title || SITE_NAME },
         silentLogin: urls(o.config).prefix ? null : absolute('/auth/login') + '?silent=1&next={url}',
         sessionUrl: url('/auth/me'),
+        tokenUrl: url('/auth/navbar-token'),
         fedcmLogin: url('/auth/fedcm'),
         loginUrl: url('/auth/login?next={path}'),           // filled from the current page (boost moves between pages)
         logoutUrl: url('/auth/logout?next={path}'),   // Sign out in the shared navbar ends this site's session too
