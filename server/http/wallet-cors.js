@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
     res.vary('Origin');
     const origin = req.get('origin');
     if (origins.has(origin)) res.set({ 'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'GET, POST, PUT', 'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT', 'Access-Control-Allow-Headers': 'Authorization, Content-Type, Traceparent, X-OpenVibe-Request-Id',
         'Cross-Origin-Resource-Policy': 'cross-origin', 'Access-Control-Max-Age': '600' });
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     return next();

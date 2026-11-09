@@ -24,7 +24,10 @@ const { createCommerce } = require('../server/inventory/commerce');
     try {
         await check('unreviewed offers stay hidden; only the issuer submits and verified staff approve', async () => {
             await assert.rejects(t.ctx.commerce.submit('service:quest', rainbow.id, { prices: { vibes: 12 } }), (e) => e.status === 403);
-            await t.ctx.commerce.submit('service:live', rainbow.id, { prices: { vibes: 12, coins: 20 } });
+            const noCap = await api(`/store/${rainbow.id}/list`, { bearer: t.network.serviceToken('live', []), json: { prices: { vibes: 12 } } });
+            assert.strictEqual(noCap.status, 403);
+            const submitted = await api(`/store/${rainbow.id}/list`, { bearer: t.network.serviceToken('live', ['inventory.store.list']), json: { prices: { vibes: 12, coins: 20 } } });
+            assert.strictEqual(submitted.status, 201, submitted.text);
             assert.deepStrictEqual((await api('/store')).json().items, []);
             assert.strictEqual((await api(`/store/${rainbow.id}/review`, { bearer: token, json: { approve: true } })).status, 403);
             const r = await api(`/store/${rainbow.id}/review`, { bearer: t.network.userToken(staff), json: { approve: true } });
