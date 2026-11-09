@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use OpenVibe.Inventory in research or a product, cite it as below."
+title: openvibe-inventory
+type: software
+authors:
+  - name: OpenVibe
+    alias: OpenVibers
+    website: https://openvibe.network
+repository-code: https://github.com/OpenVibers/OpenVibe.Inventory
+url: https://openvibe.my/inventory
+license: AGPL-3.0-only
+abstract: "Items you earn and wear across OpenVibe sites, in your account at openvibe.my/inventory."
+keywords:
+  - openvibe
+  - achievements
+  - gaming
+  - inventory
+  - items

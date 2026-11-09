@@ -2,6 +2,9 @@
 
 > Your items, on every OpenVibe site.
 
+**Live site:** https://openvibe.my/inventory · **API docs:** https://openvibe.services · **For AI:** https://openvibe.my/inventory/llms.txt
+**Run it:** `npm ci && npm run dev` (Node 22 or newer) · **Tests:** `npm test`
+
 **Status:** alpha (ADR-054, plan track T21 step 2). The authority, its API, pages and Live's migration script are built
 and tested; Live switches to it next.
 **Domain:** `inventory.openvibe.network` · **Port:** 5030 · **Service id:** `inventory` · **Env prefix:** `INVENTORY`
