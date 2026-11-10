@@ -187,3 +187,24 @@ button.sc-btn.sc-primary { border: 0; }
 .inv-kind h2 { margin-top: 1.4rem; }
 @media (max-width: 520px) { .inv-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; } .inv-tabs::-webkit-scrollbar { display: none; } .inv-tabs a { flex: none; } }
 html[data-ov-motion=off] .inv-tile-main:active{transform: none}
+
+/* Your inventory, like a game's (ask 292, the owner: "like Steam inventory … feels more like a game"): square slots in
+   their rarity's frame and glow, the picture large, the name on one line, the count in a corner; what you wear has a
+   check and a green frame; pressing a slot wears it (the heading says so), so no "Wear" pill on every slot. The rarity
+   word and the action stay for screen readers. What you wear wraps as a grid instead of running off the screen. */
+.inv-tiles { gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(96px, 30%), 1fr)); }
+@media (min-width: 760px) { .inv-tiles { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; } }
+.inv-tile-main { aspect-ratio: 1 / 1.1; justify-content: center; gap: 8px; padding: 10px 6px 12px; border-radius: 16px; border: 1.5px solid color-mix(in srgb, var(--rar) 40%, var(--border, #1f2d47));
+    background: radial-gradient(110% 75% at 50% 8%, color-mix(in srgb, var(--rar) 20%, transparent), transparent 70%), var(--bg-card, #131c2e);
+    box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rar) 75%, transparent); transition: border-color .15s, box-shadow .2s, transform .12s; }
+.inv-tile-main:hover { border-color: color-mix(in srgb, var(--rar) 75%, transparent); box-shadow: inset 0 -3px 0 var(--rar), 0 12px 28px -14px color-mix(in srgb, var(--rar) 80%, transparent); }
+.inv-tile .inv-art-md { width: 64px; height: 64px; font-size: 36px; background: none; border: 0; box-shadow: none; }
+.inv-tile .inv-art-md img { filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--rar) 40%, transparent)); }
+.inv-tile-name { display: block; align-self: stretch; font-size: .78rem; line-height: 1.2; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-tile-sub, .inv-tile-act { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.inv-tile-n { position: absolute; z-index: 1; right: 7px; bottom: 9px; padding: 1px 6px; border-radius: 999px; font-size: .68rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary, #e6edf7); background: color-mix(in srgb, var(--bg-primary, #0b1220) 70%, transparent); pointer-events: none; }
+.inv-tile.is-worn .inv-tile-main { border-color: var(--success, #22c55e); box-shadow: inset 0 -3px 0 var(--success, #22c55e), 0 0 0 1px var(--success, #22c55e); }
+.inv-tile.is-worn::before { content: "✓"; position: absolute; z-index: 2; top: 7px; left: 7px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--success, #22c55e); color: #fff; font: 800 12px/1 system-ui, sans-serif; pointer-events: none; }
+.inv-tile-info { width: 22px; height: 22px; top: 7px; right: 7px; font-size: 11px; opacity: .8; }
+.r-legendary .inv-tile-main, .r-epic .inv-tile-main { box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--rar) 75%, transparent), 0 10px 26px -18px var(--rar); }
+.inv-slots { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(auto-fill, minmax(min(156px, 46%), 1fr)); overflow: visible; }
