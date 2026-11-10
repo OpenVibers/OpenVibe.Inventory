@@ -197,19 +197,6 @@ async function createApp(opts = {}) {
 
     // ── Who is asking (verified offline; refreshed when expired) ──
     app.use(sso.middleware());
-    // A top-level silent authorization sees Network's SameSite cookies even when
-    // third-party iframe cookies are blocked. Guests return with sso=none once.
-    app.use((req, res, next) => {
-        if (req.inventoryScoped && req.method === 'GET' && legacyPage(req.path)
-            && String(req.get('accept') || '').includes('text/html')
-            && !/bot|crawl|spider|slurp/i.test(String(req.get('user-agent') || ''))
-            && req.viewer.kind !== 'user' && req.cookies.ov_sso_hint !== 'guest' && req.query.sso !== 'none') {
-            res.set('Cache-Control', 'private, no-store');
-            return res.redirect(302, url.path('/auth/login') + '?silent=1&next=' + encodeURIComponent(req.originalUrl));
-        }
-        next();
-    });
-
     // ── Sign-in (OAuth2 + PKCE client of OpenVibe.Network) ──
     // /auth/me is the navbar's who-is-signed-in read on every page, so it is not counted with sign-ins: 60 page views in 15 minutes made a signed-in visitor look signed out.
     app.use('/auth/', rateLimit({ windowMs: 15 * 60_000, limit: 60, skip: (req) => req.path === '/me' || req.path === '/navbar-token', standardHeaders: true, legacyHeaders: false }));

@@ -2,6 +2,7 @@
 const assert = require('assert');
 const { boot, check, done } = require('./helpers/boot');
 const { urls } = require('../server/urls');
+const { signJwt } = require('./helpers/mocks');
 const { DEF_RE } = require('../server/inventory/store');
 const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
 (async () => {
@@ -61,17 +62,48 @@ const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0])
             assert.notStrictEqual((await t.get(path)).status, 301, path);
         }
     });
-    await check('browser entry silently checks Network without third-party cookies', async () => {
-        const r = await t.get('/inventory', { headers: { accept: 'text/html' } });
-        assert.strictEqual(r.status, 302);
-        assert.strictEqual(r.headers.get('location'), '/inventory/auth/login?silent=1&next=%2Finventory');
-        assert.strictEqual((await t.get('/inventory?sso=none', { headers: { accept: 'text/html' } })).status, 200);
-        assert.strictEqual((await t.get('/inventory', { cookie: 'inventory_ov_sso_hint=guest', headers: { accept: 'text/html' } })).status, 200);
+    await check('mounted pages share the verified hub viewer without a sign-in hop', async () => {
+        const other = t.network.addUser('previous-inventory-owner');
+        const hub = `ov_token=${t.network.userToken(user)}`;
+        for (const path of ['/inventory', '/inventory/me']) {
+            const r = await t.get(path, { cookie: `${hub}; ${t.signIn(other)}`, headers: { accept: 'text/html' } });
+            assert.strictEqual(r.status, 200);
+            assert.ok(!r.text.includes('Sign in to see yours'));
+            assert.strictEqual(r.headers.get('location'), null);
+        }
+        const me = await t.get('/inventory/auth/me', { cookie: hub });
+        assert.strictEqual(me.json().user.username, user.username);
+        assert.strictEqual(me.headers.get('set-cookie'), null, 'no second session created');
+        const { scopedSession } = require('../server/auth/scoped-session');
+        const req = { inventoryScoped: true, cookies: { ov_token: 'hub', ov_refresh: 'hub-refresh', inventory_ov_refresh: 'old-account-refresh' } };
+        scopedSession(t.config)(req, { cookie() {}, clearCookie() {} }, () => {});
+        assert.strictEqual(req.cookies.ov_refresh, undefined, 'never refresh the hub viewer as a previous Inventory account');
+    });
+    await check('guests and bots arrive without redirects, even with a stale hint', async () => {
+        for (const cookie of ['', 'ov_sso_hint=guest', 'ov_sso_hint=account', 'inventory_ov_sso_hint=guest']) {
+            for (const agent of ['Mozilla/5.0', 'Googlebot']) {
+                const r = await t.get('/inventory', { cookie, headers: { accept: 'text/html', 'user-agent': agent } });
+                assert.strictEqual(r.status, 200);
+                assert.match(r.text, /Sign in to see yours/);
+            }
+        }
+    });
+    await check('sharing the hub cookie does not relax session verification', async () => {
+        const now = Math.floor(Date.now() / 1000);
+        const claims = { iss: t.network.url, sub: user.id, id: user.id, subject_id: user.subject,
+            username: user.username, aud: 'openvibe.network', iat: now, exp: now + 300 };
+        for (const patch of [{ aud: 'openvibe.my' }, { exp: now - 300 }, { iss: 'https://wrong.example' },
+            { typ: 'fedcm' }, { actor_type: 'app', sub: 'app:bad' }]) {
+            const token = signJwt({ ...claims, ...patch }, t.network.privatePem);
+            const r = await t.get('/inventory/auth/me', { cookie: `ov_token=${token}` });
+            assert.strictEqual(r.json().user, null, JSON.stringify(patch));
+        }
+        assert.strictEqual((await t.get('/inventory/auth/me', { cookie: 'ov_token=invalid' })).json().user, null);
     });
     await check('silent PKCE callback uses isolated host-only Inventory cookies', async () => {
         const hub = `ov_token=${t.network.userToken(user)}; ov_refresh=hub-refresh; ov_oauth_state=hub-state`;
-        assert.strictEqual((await t.get('/inventory/auth/me', { cookie: hub })).json().user, null, 'hub session is not an Inventory session');
-        const login = await t.get('/inventory/auth/login?silent=1&next=' + encodeURIComponent('https://openvibe.my/inventory'), { cookie: hub });
+        assert.strictEqual((await t.get('/inventory/auth/me', { cookie: hub })).json().user.username, user.username);
+        const login = await t.get('/inventory/auth/login?silent=1&next=' + encodeURIComponent('https://openvibe.my/inventory'), { cookie: 'ov_refresh=hub-refresh; ov_oauth_state=hub-state' });
         const loc = new URL(login.headers.get('location'));
         assert.strictEqual(loc.searchParams.get('prompt'), 'none');
         assert.strictEqual(loc.searchParams.get('redirect_uri'), 'https://openvibe.my/inventory/auth/callback');
