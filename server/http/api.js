@@ -71,6 +71,11 @@ function createApi(ctx) {
     r.get('/people/:subject/items', read, limits.reads('inventory.item.read'), wrap(async (req, res) => res.json(await inv.inventory(req.params.subject, {
         cursor: req.query.cursor || null, limit: req.query.limit, kind: req.query.kind ? String(req.query.kind) : null,
     }))));
+    const holdingQuery = (req) => ({ ...req.query, cursor: req.query.cursor || null });
+    r.get('/people/:subject/holdings/count', read, limits.reads('inventory.item.read'), wrap(async (req, res) =>
+        res.json(await inv.holdings.count(req.params.subject, { ...req.query, own: false }))));
+    r.get('/people/:subject/holdings', read, limits.reads('inventory.item.read'), wrap(async (req, res) =>
+        res.json(await inv.holdings.page(req.params.subject, { ...holdingQuery(req), own: false }))));
     r.get('/people/:subject/equipped', read, limits.reads('inventory.item.read'), wrap(async (req, res) => {
         if (!SUBJECT_RE.test(req.params.subject)) return http.sendProblem(res, 404, 'inventory.unknown_subject', { detail: 'a usr_ subject', ctx: req.ov });
         return res.json((await inv.equipped([req.params.subject]))[0]);
@@ -86,6 +91,14 @@ function createApi(ctx) {
         const subject = personOf(req, res);
         if (!subject) return undefined;
         return res.json(await inv.inventory(subject, { own: true, cursor: req.query.cursor || null, limit: req.query.limit, kind: req.query.kind ? String(req.query.kind) : null }));
+    }));
+    r.get('/me/holdings/count', principal.requireCapability('inventory.item.list'), limits.reads('inventory.item.list'), wrap(async (req, res) => {
+        const subject = personOf(req, res);
+        if (subject) res.json(await inv.holdings.count(subject, { ...req.query, own: true }));
+    }));
+    r.get('/me/holdings', principal.requireCapability('inventory.item.list'), limits.reads('inventory.item.list'), wrap(async (req, res) => {
+        const subject = personOf(req, res);
+        if (subject) res.json(await inv.holdings.page(subject, { ...holdingQuery(req), own: true }));
     }));
     r.put('/me/equipped', principal.requireCapability('inventory.equip.manage'), limits.budget('inventory.equip'), wrap(async (req, res) => {
         const subject = personOf(req, res);

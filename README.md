@@ -103,12 +103,27 @@ every other route stays same-site.
 | `GET /kinds`, `/kinds/:id` | `inventory.item.read` (public) | the kinds |
 | `GET /definitions?kind=&issuer=`, `/definitions/:id` | `inventory.item.read` (public) | published items |
 | `GET /people/:subject/items`, `/people/:subject/equipped` | `inventory.item.read` (public) | a person's owned items and what they wear |
+| `GET /people/:subject/holdings`, `/people/:subject/holdings/count` | `inventory.item.read` (public) | stacked, filtered public holdings and their count |
 | `GET /equipped?subjects=a,b,…` | `inventory.item.read` (public) | up to 100 equipped sets in one call (chat renders) |
 | `GET /me/items` | `inventory.item.list` | the caller's own items, every state |
+| `GET /me/holdings`, `/me/holdings/count` | `inventory.item.list` | the caller's stacked owned holdings and their count |
 | `PUT /me/equipped` | `inventory.equip.manage` | equip or clear a slot |
 | `POST /grants` | `inventory.item.grant` | an issuer grants an instance (idempotent per key; 409 `inventory.supply_exhausted`) |
 | `POST /instances/:id/consume`, `/revoke` | `inventory.item.consume` | an issuer uses up or takes back an instance |
 | `POST /definitions`, `PATCH /definitions/:id` | `inventory.definition.manage` | an issuer's items |
+
+Holdings default to 60 stacks per page (maximum 200). Filters are `issuer` or `site` (a service name), `kind`,
+`rarity`, `equipped=true|false`, `tradable=true|false`, and `text` (a substring of the name). Sort with
+`sort=newest|name|rarity|count`. Pass `next_cursor` as `cursor` with the same filters and sort. The cursor pins the
+newest instance seen on the first page, so later grants do not move stacks during paging. `tradable=true` currently
+returns an empty set because Inventory has no trade or transfer operation. The count endpoint counts stacks after
+the same filters. The original `/items` routes still return individual instances, including non-owned states on `/me`.
+
+For example, `GET /api/v1/me/holdings?kind=live.hat&limit=1` answers:
+
+```json
+{"subject":"usr_…","holdings":[{"definition":{"id":"itd_…","kind":"live.hat","name":"Crown","rarity":"epic"},"instance":{"id":"inv_…","definition_id":"itd_…","state":"owned"},"count":3,"equipped":true,"tradable":false,"kind_slots":["hat"]}],"next_cursor":"…"}
+```
 
 Tokens are for audience `openvibe.inventory` (Network's rule: `openvibe.<service>`). A person acts for themself (their
 token or this site's session; a cookie write must come from this site). A service

@@ -45,7 +45,7 @@ function earnHow(d) {
 /** The item's picture: its emoji, or a Media image, in a square tile tinted by rarity. */
 function art(d, { size = 'md' } = {}) {
     const a = d.art || {};
-    if (a.media_id) return html`<span class="inv-art inv-art-${size} r-${d.rarity}"><img src="https://openvibe.media/o/${a.media_id}" alt="" loading="lazy" width="64" height="64"></span>`;
+    if (a.media_id) return html`<span class="inv-art inv-art-${size} r-${d.rarity}"><img src="https://openvibe.media/o/${a.media_id}?w=${size === 'xl' ? 512 : size === 'sm' ? 64 : 128}&fmt=webp" alt="" loading="lazy" width="64" height="64"></span>`;
     return html`<span class="inv-art inv-art-${size} r-${d.rarity}" aria-hidden="true">${a.emoji || '◆'}</span>`;
 }
 const rarityBadge = (r) => html`<span class="inv-rarity r-${r}">${RARITY_LABEL[r] || r}</span>`;
@@ -225,25 +225,26 @@ ${(d.grantors || []).includes('service:games') && d.status === 'published' ? htm
     });
 
     // ── Your inventory ───────────────────────────────────────
-    async function ownedView(subject, { own }) {
-        const [list, eq, kinds] = await Promise.all([inv.inventory(subject, { own, limit: 200 }), inv.equipped([subject]), inv.listKinds()]);
-        const worn = new Set(Object.values(eq[0] ? eq[0].slots : {}).map((x) => x.instance_id));
-        const owned = list.instances.filter((i) => i.state === 'owned');
+    async function ownedView(subject, { own, cursor = null }) {
+        const [list, eq, kinds, total] = await Promise.all([inv.holdings.page(subject, { own, cursor }), inv.equipped([subject]), inv.listKinds(), inv.holdings.count(subject, { own })]);
+        const worn = new Set([...Object.values(eq[0] ? eq[0].slots : {}).map((x) => x.instance_id),
+            ...list.holdings.filter((h) => h.equipped).map((h) => h.instance.id)]);
+        const owned = list.holdings.map((h) => h.instance);
         const byKind = new Map(kinds.map((k) => [k.id, []]));
-        for (const i of owned) { const d = list.definitions[i.definition_id]; if (d && byKind.has(d.kind)) byKind.get(d.kind).push({ i, d }); }
-        return { kinds, byKind, worn, owned, more: !!list.next_cursor };
+        for (const h of list.holdings) { const { instance: i, definition: d } = h; if (byKind.has(d.kind)) byKind.get(d.kind).push({ i, d, count: h.count }); }
+        return { kinds, byKind, worn, owned, more: !!list.next_cursor, cursor: list.next_cursor, total: total.count };
     }
 
     async function ownPage(req, res) {
         const me = signedIn(req);
         if (!me) return res.redirect(303, '/auth/login?next=%2Fme');
-        const { kinds, byKind, worn, owned, more } = await ownedView(me, { own: true });
+        const { kinds, byKind, worn, owned, more, cursor, total } = await ownedView(me, { own: true, cursor: req.query.cursor || null });
         const done = req.query.done ? String(req.query.done) : null;
         const error = req.query.error ? String(req.query.error).slice(0, 200) : null;
         page(req, res, {
             title: 'Your inventory',
             body: html`<h1>Your inventory</h1>
-<p class="lede">${owned.length ? `${plural(owned.length, 'item', 'items')}. What you wear shows in chat, on stream overlays and on your profile, on every OpenVibe site.` : 'Nothing yet. Items arrive as you take part across OpenVibe: streams, quests, games and events.'}</p>
+<p class="lede">${total ? `${plural(total, 'item', 'items')}. What you wear shows in chat, on stream overlays and on your profile, on every OpenVibe site.` : 'Nothing yet. Items arrive as you take part across OpenVibe: streams, quests, games and events.'}</p>
 ${done ? html`<p class="notice ok" role="status">${done === 'equipped' ? 'Equipped. It shows everywhere that kind is shown.' : 'Taken off.'}</p>` : ''}
 ${error ? html`<p class="notice bad" role="alert">${error}</p>` : ''}
 ${owned.length ? html`<section class="inv-wearing" aria-labelledby="inv-wearing-h"><h2 id="inv-wearing-h" class="sr-only">What you wear</h2>
@@ -252,17 +253,17 @@ ${owned.length ? html`<section class="inv-wearing" aria-labelledby="inv-wearing-
         return html`<li><a class="inv-slot${on ? '' : ' is-empty'}" href="#k-${k.id.replace(/\W/g, '-')}">${on ? art(on.d, { size: 'sm' }) : html`<span class="inv-art inv-art-sm inv-art-none" aria-hidden="true"></span>`}<span class="inv-slot-t"><small>${k.name}</small><b>${on ? on.d.name : 'Nothing worn'}</b></span></a></li>`;
     })}</ul></section>` : ''}
 <p class="inv-links"><a href="${url(`/u/${me}`)}">Your public page</a> · <a href="${url(`/items`)}">Every item</a></p>
-${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind" id="k-${k.id.replace(/\W/g, '-')}">
-  <h2>${k.name} <span class="muted small">${plural(byKind.get(k.id).length, 'item', 'items')}${k.slots.length ? ' · tap one to wear it' : ''}</span></h2>
-  ${tiles(byKind.get(k.id), ({ i, d }) => tile(d, {
+<div id="inventory-holdings" data-kind-names="${JSON.stringify(Object.fromEntries(kinds.map((k) => [k.id, k.name])))}">${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind" id="k-${k.id.replace(/\W/g, '-')}">
+  <h2>${k.name} <span class="muted small">${k.slots.length ? 'tap one to wear it' : ''}</span></h2>
+  ${tiles(byKind.get(k.id), ({ i, d, count }) => tile(d, {
         worn: worn.has(i.id),
-        note: i.serial ? `#${i.serial}` : '',
+        note: count > 1 ? `×${count}` : i.serial ? `#${i.serial}` : '',
         form: k.slots.length ? (label) => html`<form method="post" action="${url(`/me/equip`)}" class="inv-tile-form">
       <input type="hidden" name="kind" value="${k.id}"><input type="hidden" name="slot" value="${k.slots[0]}"><input type="hidden" name="instance_id" value="${worn.has(i.id) ? '' : i.id}">
       <button type="submit" class="inv-tile-main" aria-label="${worn.has(i.id) ? `Take off ${d.name}` : `Wear ${d.name}`}">${label}<span class="inv-tile-act">${worn.has(i.id) ? 'Wearing' : 'Wear'}</span></button></form>` : null,
     }), { first: 24, more: `More ${k.name.toLowerCase()} items` })}
-</section>`)}
-${more ? html`<p class="muted">Showing the newest 200. The full list is at <a href="${url(`/api/v1/me/items`)}">/api/v1/me/items</a>.</p>` : ''}`,
+</section>`)}</div>
+${more ? html`<div id="inventory-next" data-endpoint="${url('/api/v1/me/holdings')}" data-cursor="${cursor}" data-own="true"><a href="${url(`/me?cursor=${encodeURIComponent(cursor)}`)}">Next items</a></div><script src="${url('/holdings.js')}" defer></script>` : ''}`,
         });
     }
     r.get('/me', ownPage);
@@ -285,17 +286,18 @@ ${more ? html`<p class="muted">Showing the newest 200. The full list is at <a hr
     r.get('/u/:subject', async (req, res) => {
         const subject = String(req.params.subject);
         if (!SUBJECT_RE.test(subject)) return notFound(req, res, 'There is no such person.');
-        const { kinds, byKind, worn, owned } = await ownedView(subject, { own: false });
+        const { kinds, byKind, worn, owned, more, cursor, total } = await ownedView(subject, { own: false, cursor: req.query.cursor || null });
         const mine = signedIn(req) === subject;
         const wornItems = owned.filter((i) => worn.has(i.id));
         page(req, res, {
             index: false, cache: signedIn(req) ? null : PUBLIC_CACHE,
             title: mine ? 'Your public inventory' : 'An OpenVibe inventory',
             body: html`<h1>${mine ? 'Your public inventory' : 'An OpenVibe inventory'}</h1>
-<p class="lede">${plural(owned.length, 'item', 'items')}${wornItems.length ? `, ${wornItems.length} worn` : ''}.${mine ? ' This is what anyone sees.' : ''}</p>
-${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind"><h2>${k.name}</h2>
-  <ul class="inv-grid">${byKind.get(k.id).map(({ i, d }) => card(d, { worn: worn.has(i.id), extra: worn.has(i.id) ? html`<p class="inv-worn">Wearing</p>` : '' }))}</ul></section>`)}
-${!owned.length ? html`<p class="muted">Nothing to show yet.</p>` : ''}`,
+<p class="lede">${plural(total, 'item', 'items')}${wornItems.length ? `, ${wornItems.length} worn` : ''}.${mine ? ' This is what anyone sees.' : ''}</p>
+<div id="inventory-holdings" data-kind-names="${JSON.stringify(Object.fromEntries(kinds.map((k) => [k.id, k.name])))}">${kinds.filter((k) => byKind.get(k.id).length).map((k) => html`<section class="inv-kind" data-kind="${k.id}"><h2>${k.name}</h2>
+  <ul class="inv-grid">${byKind.get(k.id).map(({ i, d, count }) => card(d, { worn: worn.has(i.id), owned: count > 1 ? `×${count}` : null, extra: worn.has(i.id) ? html`<p class="inv-worn">Wearing</p>` : '' }))}</ul></section>`)}</div>
+${!total ? html`<p class="muted">Nothing to show yet.</p>` : ''}
+${more ? html`<div id="inventory-next" data-endpoint="${url(`/api/v1/people/${subject}/holdings`)}" data-cursor="${cursor}"><a href="${url(`/u/${subject}?cursor=${encodeURIComponent(cursor)}`)}">Next items</a></div><script src="${url('/holdings.js')}" defer></script>` : ''}`,
         });
     });
 
