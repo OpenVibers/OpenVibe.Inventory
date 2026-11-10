@@ -264,14 +264,14 @@ Inventory uses `/inventory`, `/inventory/all`, `/inventory/<itd_id>`, `/inventor
 `INVENTORY_REDIRECT_LEGACY=true` enables permanent redirects for the old page routes only,
 preserving query strings. Leave it unset until the new deployment is verified.
 
-Sign-in needs Opus review before either PR merges. SDK 0.94 hardcodes cookie names and paths;
-`server/auth/scoped-session.js` adapts its Express boundary. Under the prefix, session and
-flow and hint cookies use `inventory_ov_*`, host-only at `/inventory`.
-The hub's cookies at `/` are untouched. Browser page entry makes a top-level
-`prompt=none` round trip, so silent sign-in also works with third-party cookies blocked.
-Guests return with `sso=none`; Inventory's own sign-out hint prevents automatic re-entry.
-The adapter ignores the hub's root session and flow cookies. OAuth still uses SDK PKCE,
-state verification, refresh and error recovery. The original host keeps its existing cookies.
+`server/auth/scoped-session.js` adapts the SDK's Express boundary. Inventory's own
+session, flow and hint cookies use `inventory_ov_*`, host-only at `/inventory`.
+Mounted requests prefer the hub's root `ov_token`, verified by the same SDK verifier
+against Inventory's configured issuer and audience (`openvibe.network` by default).
+No audience is added or bypassed. Hub refresh and OAuth flow cookies are never borrowed
+or written, and a previous Inventory refresh token cannot replace the hub viewer.
+Guests render without an automatic OAuth redirect. Explicit Inventory OAuth still uses
+SDK PKCE, state verification and error recovery. The original host is unchanged.
 
 After review, deploy in this order:
 
