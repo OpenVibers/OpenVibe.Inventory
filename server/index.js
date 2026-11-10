@@ -8,7 +8,6 @@ const { createApp } = require('./app');
 const { gracefulStop } = require('openvibe-sdk/service');
 const { startTelemetryRetention } = require('openvibe-sdk/telemetry');
 const { startSubscriptions, TOPICS: ACCOUNT_TOPICS } = require('openvibe-sdk/account-data');
-const subjectMerge = require('./inventory/subject-merge');
 
 /**
  * The process stop (openvibe-sdk/service): the HTTP drain runs, then the timers clear, the Events subscriptions and the
