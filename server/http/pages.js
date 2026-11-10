@@ -96,7 +96,7 @@ function createPageRoutes(ctx) {
     const url = urls(config).path;
     const card = (d, options = {}) => renderCard(d, { ...options, url });
     const PUBLIC_CACHE = cache.htmlHeaders({ maxAge: 300 });
-    const page = (req, res, o, status = 200) => send(res, status, { viewer: req.viewer, config, path: req.originalUrl, ...o });
+    const page = (req, res, o, status = 200) => send(res, status, { viewer: req.viewer, config, path: req.originalUrl, ssoHint: req.cookies?.ov_sso_hint, ...o });
     const signedIn = (req) => (req.viewer && req.viewer.kind === 'user' && SUBJECT_RE.test(String(req.viewer.subject || '')) ? req.viewer.subject : null);
     const notFound = (req, res, what) => page(req, res, { title: 'Not found', body: html`<h1>Not found</h1><p>${what} <a href="${url(`/items`)}">Browse every item</a>.</p>` }, 404);
 
