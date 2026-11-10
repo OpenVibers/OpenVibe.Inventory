@@ -85,6 +85,7 @@ const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0])
                 const r = await t.get('/inventory', { cookie, headers: { accept: 'text/html', 'user-agent': agent } });
                 assert.strictEqual(r.status, 200);
                 assert.match(r.text, /Sign in to see yours/);
+                if (cookie === 'inventory_ov_sso_hint=guest') assert.match(r.text, /"silentLogin":null/, 'a scoped sign-out disables the browser arrival flow');
             }
         }
     });
