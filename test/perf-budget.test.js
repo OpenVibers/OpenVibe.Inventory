@@ -20,8 +20,8 @@ const BUDGETS = {
     htmlRawKB: 43.8, // 43.8: measured 41.8 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
     htmlBrotliKB: 10,   // 8.2 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 6.2
     jsFiles: 5,   // 5 (theme-loader, web-runtime, navbar, footer, boost: openvibe-shared/shell)
-    jsRawKB: 375.1, // 375.1: measured 367.1 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
-    jsBrotliKB: 89.5, // 89.5: measured 87.5 with openvibe-shared 4.163.0, plus room for 4.162.0–4.163.0, 2026-11-09
+    jsRawKB: 376.4, // 376.4: measured 376.3 KB raw with openvibe-shared 4.186.0 (2026-11-10: the mark's Working and Thinking states, the Dock and the menu as one sheet, bare controls styled by the loader); 375.1: measured 367.1 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
+    jsBrotliKB: 89.8, // 89.8: measured 89.7 KB brotli with openvibe-shared 4.186.0 (2026-11-10: the mark's Working and Thinking states, the Dock and the menu as one sheet, bare controls styled by the loader); 89.5: measured 87.5 with openvibe-shared 4.163.0, plus room for 4.162.0–4.163.0, 2026-11-09
     cssFiles: 2,   // 2 (app.css + the cached /shared/showcase.css)
     cssRawKB: 52.8, // 52.8: measured 47.8 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
     cssBrotliKB: 10,   // 9.7 with the tiles, the slots and the counted folds (2026-11-08, the owner: better on a phone); 8.5 with 2026-11-01: phone table cards (2026-11-01); 8.2 with openvibe-shared 4.48.0 (the site switcher on the mark, the menu's Start tab and quick tools; Kit's touch hit areas and the phone navbar fix, 4.44-4.47.3); 6.4 with Shared 4.13.0 (2026-10-26: account links); 4.9
