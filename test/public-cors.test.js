@@ -13,7 +13,7 @@ const { boot, check, done } = require('./helpers/boot');
     const origin = { origin: 'https://openvibe.community' };
     try {
         await check('the public reads answer every origin', async () => {
-            for (const p of ['/api/v1/kinds', '/api/v1/kinds/live.hat', '/api/v1/definitions?kind=live.hat', `/api/v1/equipped?subjects=${A}`, `/api/v1/people/${A}/items`, `/api/v1/people/${A}/equipped`]) {
+            for (const p of ['/api/v1/kinds', '/api/v1/kinds/live.hat', '/api/v1/definitions?kind=live.hat', `/api/v1/equipped?subjects=${A}`, `/api/v1/people/${A}/items`, `/api/v1/people/${A}/holdings`, `/api/v1/people/${A}/holdings/count`, `/api/v1/people/${A}/equipped`]) {
                 const r = await t.get(p, { headers: origin });
                 assert.strictEqual(r.status, 200, p);
                 assert.strictEqual(r.headers.get('access-control-allow-origin'), '*', p);

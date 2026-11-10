@@ -71,6 +71,7 @@ function decodeCursor(c) {
 
 function createInventory({ s, outbox, log = console }) {
     const db = s.db;
+    const holdings = require('./holdings').createHoldings(db);
     const ajv = new Ajv({ strict: false, allErrors: false });
     const validators = new Map();   // kind id + updated_at → compiled attribute schema
 
@@ -470,7 +471,7 @@ function createInventory({ s, outbox, log = console }) {
 
     return {
         listKinds, getKind, upsertKind, listDefinitions, getDefinition, byAlias, createDefinition, updateDefinition,
-        grant, consume, inventory, equipped, equip, ledger, review, workshopItems, takedown, checkWorkshopQuota,
+        grant, consume, inventory, holdings, equipped, equip, ledger, review, workshopItems, takedown, checkWorkshopQuota,
     };
 }
 

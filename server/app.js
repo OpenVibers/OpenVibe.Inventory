@@ -246,7 +246,7 @@ async function createApp(opts = {}) {
     // credentials (openvibe-shared/items.js draws what people wear with them, on every OpenVibe site). Everything else
     // keeps the same-site resource policy and no CORS. A preflight is answered here.
     app.use('/api/v1', require('./http/wallet-cors'));
-    const PUBLIC_READ = /^\/(?:kinds(?:\/[^/]+)?|definitions(?:\/[^/]+)?|equipped|people\/[^/]+\/(?:items|equipped))$/;
+    const PUBLIC_READ = /^\/(?:kinds(?:\/[^/]+)?|definitions(?:\/[^/]+)?|equipped|people\/[^/]+\/(?:items|equipped|holdings(?:\/count)?))$/;
     app.use('/api/v1', (req, res, next) => {
         if (!PUBLIC_READ.test(req.path) || !['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
         res.setHeader('Access-Control-Allow-Origin', '*');
