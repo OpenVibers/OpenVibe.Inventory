@@ -186,4 +186,4 @@ button.sc-btn.sc-primary { border: 0; }
 .inv-kind { scroll-margin-top: 72px; }
 .inv-kind h2 { margin-top: 1.4rem; }
 @media (max-width: 520px) { .inv-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; } .inv-tabs::-webkit-scrollbar { display: none; } .inv-tabs a { flex: none; } }
-@media (prefers-reduced-motion: reduce) { .inv-tile-main { transition: none; } .inv-tile-main:active { transform: none; } }
+html[data-ov-motion=off] .inv-tile-main:active{transform: none}
