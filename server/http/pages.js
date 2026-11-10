@@ -63,7 +63,7 @@ function renderCard(d, { url, href = url(`/items/${d.id}`), extra = '', owned = 
  * wear / take-off button itself, with a small link to the item beside it.
  */
 function tile(d, { href = `/items/${d.id}`, form = null, worn = false, note = '' } = {}) {
-    const label = html`${art(d)}<span class="inv-tile-name">${d.name}</span><span class="inv-tile-sub"><span class="inv-tile-rar">${RARITY_LABEL[d.rarity] || d.rarity}</span>${note ? html` · ${note}` : ''}</span>`;
+    const label = html`${art(d)}<span class="inv-tile-name">${d.name}</span><span class="inv-tile-sub"><span class="inv-tile-rar">${RARITY_LABEL[d.rarity] || d.rarity}</span></span>${note ? html`<span class="inv-tile-n">${note}</span>` : ''}`;
     if (!form) return html`<li class="inv-tile r-${d.rarity}"><a class="inv-tile-main" href="${href}">${label}</a></li>`;
     return html`<li class="inv-tile r-${d.rarity}${worn ? ' is-worn' : ''}">${form(label)}<a class="inv-tile-info" href="${href}" aria-label="About ${d.name}" title="About ${d.name}">i</a></li>`;
 }

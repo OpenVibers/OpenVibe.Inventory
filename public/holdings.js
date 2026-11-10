@@ -28,7 +28,10 @@
         const li = el('li', own ? `inv-tile r-${d.rarity}${h.equipped ? ' is-worn' : ''}` : `inv-card r-${d.rarity}${h.equipped ? ' is-worn' : ''}`);
         const label = document.createDocumentFragment();
         label.append(artwork(d), el('span', own ? 'inv-tile-name' : 'inv-card-name', d.name));
-        label.append(el('span', own ? 'inv-tile-sub' : 'inv-rarity', `${d.rarity}${h.count > 1 ? ` · ×${h.count}` : ''}`));
+        if (own) {
+            const sub = el('span', 'inv-tile-sub'); sub.append(el('span', 'inv-tile-rar', d.rarity)); label.append(sub);
+            if (h.count > 1) label.append(el('span', 'inv-tile-n', `×${h.count}`));
+        } else label.append(el('span', 'inv-rarity', `${d.rarity}${h.count > 1 ? ` · ×${h.count}` : ''}`));
         if (own && h.kind_slots.length) {
             const form = el('form', 'inv-tile-form');
             form.method = 'post'; form.action = pagePath('/me/equip');
