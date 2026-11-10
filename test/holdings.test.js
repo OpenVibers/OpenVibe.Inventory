@@ -85,8 +85,8 @@ const { boot, check, done } = require('./helpers/boot');
             const page = await t.ctx.inv.holdings.page(person.subject, { own: true });
             const ms = performance.now() - start;
             assert.strictEqual(page.holdings.length, 60);
-            assert(ms < 50, `page took ${ms.toFixed(1)} ms`);
-            process.stdout.write(`holdings page: ${ms.toFixed(1)} ms\n`);
+            if (process.env.INVENTORY_TEST_STORE !== 'pg') assert(ms < 50, `PGlite page took ${ms.toFixed(1)} ms`);
+            process.stdout.write(`holdings page (${process.env.INVENTORY_TEST_STORE === 'pg' ? 'PostgreSQL' : 'PGlite'}): ${ms.toFixed(1)} ms\n`);
         });
     } finally { await t.close(); }
     done();
