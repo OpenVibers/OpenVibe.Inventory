@@ -101,6 +101,8 @@ const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0])
         assert.strictEqual((await t.get('/inventory/auth/me', { cookie: 'ov_token=invalid' })).json().user, null);
     });
     await check('silent PKCE callback uses isolated host-only Inventory cookies', async () => {
+        const page = await t.get('/inventory');
+        assert.match(page.text, /"silentLogin":"https:\/\/openvibe\.my\/inventory\/auth\/login\?silent=1&next=\{url\}"/);
         const hub = `ov_token=${t.network.userToken(user)}; ov_refresh=hub-refresh; ov_oauth_state=hub-state`;
         assert.strictEqual((await t.get('/inventory/auth/me', { cookie: hub })).json().user.username, user.username);
         const login = await t.get('/inventory/auth/login?silent=1&next=' + encodeURIComponent('https://openvibe.my/inventory'), { cookie: 'ov_refresh=hub-refresh; ov_oauth_state=hub-state' });
