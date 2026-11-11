@@ -30,7 +30,7 @@ const cookieHeader = (r) => r.headers.getSetCookie().map((c) => c.split(';')[0])
             assert.deepStrictEqual(links.filter((s) => !/^\/inventory(?:[/?#]|$)/.test(s)), [], path);
             assert.ok(!r.text.includes('/inventory/inventory'), 'no double prefix');
             assert.ok(r.text.includes(`rel=\"canonical\" href=\"https://openvibe.my${path.split('?')[0]}\"`), path + ': canonical');
-            assert.match(r.headers.get('content-security-policy'), /img-src 'self' data: https:;/);
+            assert.match(r.headers.get('content-security-policy'), /img-src 'self' data: blob: https:;/);
             if (path === '/inventory' && as) assert.match(r.text, /<h1>Your inventory<\/h1>/);
         }
         const asset = await t.get('/inventory/css/app.css');
