@@ -89,10 +89,14 @@ ${published.length ? html`<ul class="inv-grid">${published.map((d) => html`<li c
         page(req, res, {
             title: 'Make a badge',
             robots: 'noindex',
+            styles: ['ov-upload.css'],
+            scripts: ['js/workshop-upload.js'],
+            uploadKit: true,
             body: html`<h1>Make a badge</h1>
 ${notice(req)}
 <form class="ws-form" method="post" action="${url(`/workshop/new`)}" enctype="multipart/form-data">
-  <label>Image <input type="file" name="image" accept="image/png,image/webp" required></label>
+  <label>Image <input type="file" name="image" accept="image/png,image/webp" required data-workshop-image></label>
+  <div data-workshop-picker data-max-bytes="${MAX_BYTES}"></div><p role="alert" data-workshop-error hidden></p>
   <p class="muted small">A square PNG or WebP, ${MIN_SIDE} to ${MAX_SIDE} pixels on a side, at most ${MAX_BYTES / 1024} KB. It shows small, before a name: keep it simple and readable.</p>
   <label>Name <input type="text" name="name" maxlength="80" required placeholder="OG Viewer"></label>
   <label>What it means (optional) <textarea name="description" maxlength="500" rows="2" placeholder="For everyone who was in chat for the first stream."></textarea></label>

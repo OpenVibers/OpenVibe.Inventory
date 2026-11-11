@@ -52,6 +52,14 @@ function multipart(fields, file) {
     const form = (who, path, fields) => t.get(path, { as: who, method: 'POST', form: fields, headers: origin });
     const inv = t.ctx.inv;
     try {
+        await check('badge form offers the shared picker, its limit and a no-script multipart input', async () => {
+            const page = (await t.get('/workshop/new', { as: alice })).text;
+            assert.match(page, /ov-upload\.css/);
+            assert.match(page, /ov-upload\.js/);
+            assert.match(page, /data-workshop-picker data-max-bytes="204800"/);
+            assert.match(page, /name="image" accept="image\/png,image\/webp" required/);
+            assert.match(page, /role="alert" data-workshop-error/);
+        });
         await check('images are judged by their own bytes: square PNG or WebP, 64 to 512 pixels, at most 200 KB', async () => {
             assert.deepStrictEqual(inspect(png(128, 128)), { type: 'image/png', width: 128, height: 128 });
             assert.deepStrictEqual(inspect(webp(64, 64)), { type: 'image/webp', width: 64, height: 64 });
