@@ -53,9 +53,11 @@ function multipart(fields, file) {
     const inv = t.ctx.inv;
     try {
         await check('badge form offers the shared picker, its limit and a no-script multipart input', async () => {
-            const page = (await t.get('/workshop/new', { as: alice })).text;
+            const response = await t.get('/workshop/new', { as: alice });
+            const page = response.text;
             assert.match(page, /ov-upload\.css/);
             assert.match(page, /ov-upload\.js/);
+            assert.match(response.headers.get('content-security-policy'), /img-src[^;]*blob:/, 'badge image previews are allowed');
             assert.match(page, /data-workshop-picker data-max-bytes="204800"/);
             assert.match(page, /name="image" accept="image\/png,image\/webp" required/);
             assert.match(page, /role="alert" data-workshop-error/);

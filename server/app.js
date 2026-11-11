@@ -163,7 +163,7 @@ async function createApp(opts = {}) {
                 scriptSrc: ["'self'", "'unsafe-inline'", 'https://openvibe.network', 'https://static.cloudflareinsights.com'],
                 styleSrc: ["'self'", "'unsafe-inline'", 'https://openvibe.network', 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
                 fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
-                imgSrc: ["'self'", 'data:', 'https:'],
+                imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
                 // The navbar's Messages count asks Chat (openvibe-shared 4.130.0).
                 connectSrc: ["'self'", 'https://billing.openvibe.network', 'https://inventory.openvibe.network', 'https://openvibe.chat', 'https://openvibe.network', 'https://cloudflareinsights.com', 'https://openvibe.events'],
                 frameSrc: ["'self'", 'https://openvibe.network'],
