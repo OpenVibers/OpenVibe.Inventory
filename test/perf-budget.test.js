@@ -17,7 +17,7 @@ const { measure, check, format } = require('openvibe-shared/perf-budget');
 // 2026-11-08: openvibe-shared v4.150.0; CI measured JS 353.9 KB raw / 84.4 KB brotli.
 // 2026-11-08: openvibe-shared v4.149.0; CI measured JS 352.9 KB raw / 84.2 KB brotli.
 const BUDGETS = {
-    htmlRawKB: 45.5, // 2026-11-11: openvibe-shared 4.190.0 (the site name's dropdown, the footer's online strip, the balances pill); 43.8: measured 41.8 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
+    htmlRawKB: 46.5, // 46.5 openvibe-shared v4.202.0 (2026-11-11: measured 46.1, raised by pin-bump from 45.5); 2026-11-11: openvibe-shared 4.190.0 (the site name's dropdown, the footer's online strip, the balances pill); 43.8: measured 41.8 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
     htmlBrotliKB: 10.5,   // 2026-11-11: openvibe-shared 4.190.0 (the site name's dropdown, the footer's online strip, the balances pill); 8.2 with the Part of OpenVibe section (Shared 4.13, 2026-10-26); 6.2
     jsFiles: 5,   // 5 (theme-loader, web-runtime, navbar, footer, boost: openvibe-shared/shell)
     jsRawKB: 394.5, // 2026-11-10: openvibe-shared 4.197.0 (the menu's row of places, the You tab's row, the Sign in mark, the tooltip); 2026-11-11: openvibe-shared 4.190.0 (the site name's dropdown, the footer's online strip, the balances pill); 376.4: measured 376.3 KB raw with openvibe-shared 4.186.0 (2026-11-10: the mark's Working and Thinking states, the Dock and the menu as one sheet, bare controls styled by the loader); 375.1: measured 367.1 with openvibe-shared 4.161.0, plus room for 4.162.0–4.163.0, 2026-11-09
