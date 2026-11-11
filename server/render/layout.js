@@ -107,6 +107,7 @@ function renderPage(o) {
 ${sharedHtml(appIcon.headTags({ site: 'inventory' }))}
 <link rel="stylesheet" href="${url(asset('css/app.css'))}">
 ${(o.styles || []).map((name) => `<link rel="stylesheet" href="${esc(url(ovServe.url(name)))}">`).join('\n')}
+${o.uploadKit ? `<script src="${esc(url(ovServe.url('ov-upload.js')))}" defer></script>` : ''}
 ${render(scripts)}
 <meta name="ov-boost" content="inventory@${esc(RELEASE)}">
 <script src="${url(ovServe.url('boost.js'))}" data-main="#main" defer></script>`,
