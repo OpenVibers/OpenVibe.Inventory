@@ -1,0 +1,365 @@
+{
+  "_about": "Live's items drawn in OpenVibe.Design's house item style (server/vectors/item-style.js, 2026-11-16), stored in OpenVibe.Media as public SVG assets of Inventory's tenant. The boot seed sets each as the definition's art.media_id (server/inventory/seed.js); the emoji and CSS token stay beside it. Redraw one on openvibe.design/vectors/make?kind=item and replace its id here.",
+  "art": {
+    "fx_rainbow": {
+      "media_id": "med_01M7HRYT3EGGC44SXYJBND319C"
+    },
+    "fx_fire": {
+      "media_id": "med_01M7HRYT5NA1EERF8N5021FDA4"
+    },
+    "fx_ice": {
+      "media_id": "med_01M7HRYT7CASCM8ZZZMMNF1HTP"
+    },
+    "fx_golden": {
+      "media_id": "med_01M7HRYT8PMVN8D6WPXJGTR9KW"
+    },
+    "fx_neon": {
+      "media_id": "med_01M7HRYTA63MHDV5MN44SHCD9B"
+    },
+    "fx_galaxy": {
+      "media_id": "med_01M7HRYTB8WTDARC0BWC5GJ5G0"
+    },
+    "fx_void": {
+      "media_id": "med_01M7HRYTCJH3CC3BW7GBAC5R54"
+    },
+    "fx_toxic": {
+      "media_id": "med_01M7HRYTDSEM05K51750YGW1MH"
+    },
+    "fx_blood": {
+      "media_id": "med_01M7HRYTETEDKHYJV253XMKBRB"
+    },
+    "fx_shadow": {
+      "media_id": "med_01M7HRYTG0WJ5JXYR757QTBJR5"
+    },
+    "fx_glitch": {
+      "media_id": "med_01M7HRYTH1B5JVYDXQWDGEHGZG"
+    },
+    "fx_hologram": {
+      "media_id": "med_01M7HRYTJ1YVW6YKSWGCJGHAFY"
+    },
+    "fx_divine": {
+      "media_id": "med_01M7HRYTK5XFF28D4PNCJ22E90"
+    },
+    "fx_vegas": {
+      "media_id": "med_01M7HRYTM2QZZSMZP9APK6FKE4"
+    },
+    "px_vegas": {
+      "media_id": "med_01M7HRYTN03VW1KVJH1VWJE5BC"
+    },
+    "hat_vegas": {
+      "media_id": "med_01M7HRYTP77229SDM105Y1N08X"
+    },
+    "voice_vegas": {
+      "media_id": "med_01M7HRYTQ9YKM1CVMGJ61FSAQW"
+    },
+    "fx_twofat": {
+      "media_id": "med_01M7HRYTRASJCDWQXBESKMXFBC"
+    },
+    "px_twofat": {
+      "media_id": "med_01M7HRYTT08HGRW09CV73386C6"
+    },
+    "hat_twofat": {
+      "media_id": "med_01M7HRYTV6PV41WDQ39P3WEKYR"
+    },
+    "voice_twofat": {
+      "media_id": "med_01M7HRYTW8SGJKTK4SZKGJHGA2"
+    },
+    "px_sparkle": {
+      "media_id": "med_01M7HRYTX7RGN2CGNHMP68CNVS"
+    },
+    "px_hearts": {
+      "media_id": "med_01M7HRYTYFQM65X3NW2H013GQ6"
+    },
+    "px_flames": {
+      "media_id": "med_01M7HRYV080RAZN61BFE81W78D"
+    },
+    "px_stars": {
+      "media_id": "med_01M7HRYV1KF8PXFB3BWSQNMCJA"
+    },
+    "px_void": {
+      "media_id": "med_01M7HRYV2XHK0XV36Z55F9KQVJ"
+    },
+    "hat_basic_cap": {
+      "media_id": "med_01M7HRYV3V4S8GY82V6X76XNKJ"
+    },
+    "hat_cowboy": {
+      "media_id": "med_01M7HRYV4V0DQZRAFXAHH19YHN"
+    },
+    "hat_wizard": {
+      "media_id": "med_01M7HRYV5W0P3H8R5JWNA88F9D"
+    },
+    "hat_crown": {
+      "media_id": "med_01M7HRYV74J1X5JHJXFHZD4Y0V"
+    },
+    "hat_halo": {
+      "media_id": "med_01M7HS0CDQEFSY2VG36D6T455Z"
+    },
+    "hat_void_crown": {
+      "media_id": "med_01M7HS0CF6YBM3RZMF87AMYKHW"
+    },
+    "voice_default": {
+      "media_id": "med_01M7HS0CGC8T3FE865C228NPW0"
+    },
+    "voice_deep": {
+      "media_id": "med_01M7HS0CHFXAQG4KYW2W8SARPB"
+    },
+    "voice_chipmunk": {
+      "media_id": "med_01M7HS0CJGA33DCVEAXFAGQ8ET"
+    },
+    "voice_robot": {
+      "media_id": "med_01M7HS0CKMT0TY8H6TFH18AKXV"
+    },
+    "voice_whisper": {
+      "media_id": "med_01M7HS0CMPE3TXRFNDZEQCG0N0"
+    },
+    "voice_demon": {
+      "media_id": "med_01M7HS0CNPGCPHG3SWDX6YS4BE"
+    },
+    "gary": {
+      "media_id": "med_01M7HS0CPJT4JBFSKRT7TD086E"
+    },
+    "brenda": {
+      "media_id": "med_01M7HS0CQFNKSJ0QQQB9WNRVKM"
+    },
+    "chadbot": {
+      "media_id": "med_01M7HS0CRMS1K9C8HNKGR7GPK1"
+    },
+    "karen": {
+      "media_id": "med_01M7HS0CSKBE2X9GYWATBTA53B"
+    },
+    "squeakmaster": {
+      "media_id": "med_01M7HS0CTVE9H9DJ3D4QS9F1M9"
+    },
+    "bigchungus": {
+      "media_id": "med_01M7HS0CWW14W391PWMR0QJQ1F"
+    },
+    "tweaker": {
+      "media_id": "med_01M7HS0CYBA9SF04NY92P7G5F5"
+    },
+    "grandpa": {
+      "media_id": "med_01M7HS0CZTSC9YDY8Q4D2CXV0X"
+    },
+    "crackhead": {
+      "media_id": "med_01M7HS0D1CQWCZT9TXPE9JZZQF"
+    },
+    "ghostgirl": {
+      "media_id": "med_01M7HS0D2QHMNQGBSVS6SGHYKV"
+    },
+    "robotoverlord": {
+      "media_id": "med_01M7HS0D3TJBJR2J2TMQSCDHKW"
+    },
+    "sassybitch": {
+      "media_id": "med_01M7HS0D55PT4XETNWKSFQ1JX7"
+    },
+    "demon": {
+      "media_id": "med_01M7HS0D67ZFY8HVYM6ZV4SG5C"
+    },
+    "helium": {
+      "media_id": "med_01M7HS0D78VYN5K7Z585J80JN3"
+    },
+    "britbong": {
+      "media_id": "med_01M7HS0D8EGK4MEFTYDNDE03BV"
+    },
+    "yeehaw": {
+      "media_id": "med_01M7HS0D9TT25G3AE14AF9HWQK"
+    },
+    "nyc": {
+      "media_id": "med_01M7HS0DASWWKHR338SE849NCC"
+    },
+    "french": {
+      "media_id": "med_01M7HS0DBT2222H9S5P0GM89SA"
+    },
+    "chatterbox": {
+      "media_id": "med_01M7HS0DCTFBKQZ8J3RH3WTHRH"
+    },
+    "fisherman": {
+      "media_id": "med_01M7HS0DEBGBK1BEQD6K86P3T9"
+    },
+    "gc_smooth_operator": {
+      "media_id": "med_01M7HS0DFP7W51KH7GP326VEDK"
+    },
+    "gc_silicon_sally": {
+      "media_id": "med_01M7HS0DGSGWQ9KW84MA4T5TN9"
+    },
+    "gc_brit_butler": {
+      "media_id": "med_01M7HS276SS63ZPRZDNHCA6J4D"
+    },
+    "gc_lady_london": {
+      "media_id": "med_01M7HS2785AJNAKHWF6N0FNJA2"
+    },
+    "gc_mumbai_mike": {
+      "media_id": "med_01M7HS27ACS2V1C7CYF6EY7Z0V"
+    },
+    "gc_down_under": {
+      "media_id": "med_01M7HS27C6S12JJPJT6JE80XQS"
+    },
+    "gc_sheila": {
+      "media_id": "med_01M7HS27EEXEEQCCSBXGAEYP7K"
+    },
+    "gc_studio_f": {
+      "media_id": "med_01M7HS27G0QE2WHHMMBE66M9W8"
+    },
+    "gc_studio_m": {
+      "media_id": "med_01M7HS27HCDXPS2BGJEBCZH0RD"
+    },
+    "pl_joanna_std": {
+      "media_id": "med_01M7HS27KD4KNW9VMMXB3TTVGC"
+    },
+    "pl_matthew_std": {
+      "media_id": "med_01M7HS27N5KVAPDHGVGZ5P372E"
+    },
+    "pl_amy_std": {
+      "media_id": "med_01M7HS27P68K7K2S0G1H0XWYT2"
+    },
+    "pl_brian_std": {
+      "media_id": "med_01M7HS27QM2RKF7FK7NAHT814D"
+    },
+    "pl_olivia_std": {
+      "media_id": "med_01M7HS27RVHPJMEMQATDKAXTFF"
+    },
+    "pl_danielle_long": {
+      "media_id": "med_01M7HS27T17TKAN6VGSBXN2VGR"
+    },
+    "pl_gregory_long": {
+      "media_id": "med_01M7HS27V79A9JWY9JTHXMAWMD"
+    },
+    "pl_gregory_neural": {
+      "media_id": "med_01M7HS27WXX04V1GWE1T37CV1S"
+    },
+    "pl_ruth_long": {
+      "media_id": "med_01M7HS27YM7F8SD7V5N161QG25"
+    },
+    "pl_arthur_neural": {
+      "media_id": "med_01M7HS28034VWHN7RJ8THHNNX5"
+    },
+    "vs_mine_dwarf_lord": {
+      "media_id": "med_01M7HS281EXX0HN6RE2P5ZH5C6"
+    },
+    "neckbeard": {
+      "media_id": "med_01M7HS282HEA4FW89Z86RCQN6C"
+    },
+    "crybaby": {
+      "media_id": "med_01M7HS283DGCVGG0G96GRNHKD0"
+    },
+    "scotsman": {
+      "media_id": "med_01M7HS284BFC44ERQB3X4DNM8X"
+    },
+    "alien": {
+      "media_id": "med_01M7HS285F59ZEPKPS3176N27W"
+    },
+    "gigachad": {
+      "media_id": "med_01M7HS287NBE4GCQH1TQAAHG63"
+    },
+    "uwu": {
+      "media_id": "med_01M7HS2891QX971SB0WA9BAJN3"
+    },
+    "german": {
+      "media_id": "med_01M7HS28AAXPP6Y95KBPQXAGBK"
+    },
+    "russian": {
+      "media_id": "med_01M7HS28BKZX6X8JWW734KK8M0"
+    },
+    "japanese": {
+      "media_id": "med_01M7HS28CYGXXEJAV9RVJWX2XN"
+    },
+    "slowmo": {
+      "media_id": "med_01M7HS28EETAXHRFK355NFS73J"
+    },
+    "glitch": {
+      "media_id": "med_01M7HS28FW746FPX278PBPTTR2"
+    },
+    "void": {
+      "media_id": "med_01M7HS28HNMX17Q758HWJQA26D"
+    },
+    "ascended": {
+      "media_id": "med_01M7HS427Z8J3KTBEA5R3DCXXN"
+    },
+    "omega": {
+      "media_id": "med_01M7HS42940BQPS3V2YM7QGFB7"
+    },
+    "warlord": {
+      "media_id": "med_01M7HS42AFJ8C6CXEBRCDHMKVN"
+    },
+    "degenking": {
+      "media_id": "med_01M7HS42BZY8R6AWZSMBRS5NFC"
+    },
+    "coinlord": {
+      "media_id": "med_01M7HS42D1P7AGMHM2NWXP0X44"
+    },
+    "gc_news_anchor": {
+      "media_id": "med_01M7HS42E88YHK9SNTKN1SSFQX"
+    },
+    "gc_podcast_girl": {
+      "media_id": "med_01M7HS42F6CAQYDKQQ960JFCPG"
+    },
+    "gc_wave_daddy": {
+      "media_id": "med_01M7HS42GCKPJXVWMW5DKXWFXB"
+    },
+    "gc_wave_queen": {
+      "media_id": "med_01M7HS42HDER8S466CQG64Z623"
+    },
+    "gc_wave_brit": {
+      "media_id": "med_01M7HS42K1P2J1NF7WQS8H0D4F"
+    },
+    "gc_wave_aussie": {
+      "media_id": "med_01M7HS42MMFGVV2DH6WVXQ6ZGZ"
+    },
+    "gc_neural_chad": {
+      "media_id": "med_01M7HS42NWZSHS3GENDTZ5X6W0"
+    },
+    "gc_neural_diva": {
+      "media_id": "med_01M7HS42QDD11YFQ8GXDT0E9NW"
+    },
+    "gc_neural_brit_f": {
+      "media_id": "med_01M7HS42RQX5G31YFWW4HESDCA"
+    },
+    "gc_neural_aussie_f": {
+      "media_id": "med_01M7HS42T5ZYWMCYBD82SJE8YK"
+    },
+    "gc_journey_sage": {
+      "media_id": "med_01M7HS42VTE0AZB4YS3MXGBMSZ"
+    },
+    "gc_journey_oracle": {
+      "media_id": "med_01M7HS42X5NQJ9079MZ0DVPWJ3"
+    },
+    "gc_journey_whisper": {
+      "media_id": "med_01M7HS42ZCFQ8YHCMRBE1A7N2C"
+    },
+    "pl_ivy_std": {
+      "media_id": "med_01M7HS430GEE1AV86GKT3HQZ3K"
+    },
+    "pl_joey_std": {
+      "media_id": "med_01M7HS431N5Z6PB7FW9D237JW5"
+    },
+    "pl_kendra_std": {
+      "media_id": "med_01M7HS432Y83N71JVSNEZ5YC28"
+    },
+    "pl_joanna_neural": {
+      "media_id": "med_01M7HS43478R933DQMBR71YYAF"
+    },
+    "pl_matthew_neural": {
+      "media_id": "med_01M7HS435D5JDCPW8Y3GEKQJM6"
+    },
+    "pl_ruth_neural": {
+      "media_id": "med_01M7HS436RD5MSRAYSK6KCBEVY"
+    },
+    "pl_stephen_neural": {
+      "media_id": "med_01M7HS437VM0B5V8HW26KHCBEM"
+    },
+    "pl_amy_neural": {
+      "media_id": "med_01M7HS43945ZKP6A1KBXC06HGR"
+    },
+    "pl_danielle_neural": {
+      "media_id": "med_01M7HS43APC3R8GJX3426KSXQW"
+    },
+    "pl_kevin_neural": {
+      "media_id": "med_01M7HS43C46MAHJZN8XK2HHCSR"
+    },
+    "pl_matthew_gen": {
+      "media_id": "med_01M7HS43D91C9T3S0NKJRF7797"
+    },
+    "pl_ruth_gen": {
+      "media_id": "med_01M7HS43E8P3QYPKFD6ASZB5HZ"
+    }
+  }
+}

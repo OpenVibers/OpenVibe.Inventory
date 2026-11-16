@@ -37,7 +37,7 @@ const { boot, check, done } = require('./helpers/boot');
             assert.strictEqual(crown.rarity, 'epic');
             // A second boot on the same database seeds nothing again.
             const { seed } = require('../server/inventory/seed');
-            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 6, definitions: 0, grantors: 0 });
+            assert.deepStrictEqual(await seed(t.ctx.inv, { log: { log() {} } }), { kinds: 6, definitions: 0, grantors: 0, art: 0 });
         });
 
         await check('an issuer grants within its namespace, idempotently; a non-stackable item already owned answers the one held', async () => {
