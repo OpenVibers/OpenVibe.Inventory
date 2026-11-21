@@ -201,13 +201,15 @@ async function createApp(opts = {}) {
     {
         const legal = require('openvibe-shared/legal');
         const site = { id: 'inventory', service: 'inventory', host: new URL(config.baseUrl).host, name: 'OpenVibe.Inventory', profile: 'ugc' };
-        app.get(legal.PATHS, (req, res, next) => {
-            if (!url.prefix) return legal.handler(site)(req, res, next);
+        // /tos is the footer's Terms link on every site (31 pages linked /inventory/tos, a 404: the SEO crawl, 11-21):
+        // the terms, with /terms as the canonical.
+        app.get([...legal.PATHS, '/tos'], (req, res, next) => {
+            if (!url.prefix) return req.path === '/tos' ? res.redirect(301, '/terms') : legal.handler(site)(req, res, next);
             // Shared's standalone legal shell reads root ov_token. Use our scoped
             // navbar and canonical while keeping its legal article unchanged.
-            const kind = req.path.replace(/^\/+|\/+$/g, '');
+            const kind = req.path === '/tos' ? 'terms' : req.path.replace(/^\/+|\/+$/g, '');
             const doc = legal.build(kind, site);
-            return send(res, 200, { config, viewer: req.viewer, path: req.originalUrl,
+            return send(res, 200, { config, viewer: req.viewer, index: true, path: req.originalUrl.replace(/\/tos(?=[?#]|$)/, '/terms'),
                 title: doc.title, description: doc.description, body: require('./render/html').raw(legal.article(kind, site)) });
         });
     }
