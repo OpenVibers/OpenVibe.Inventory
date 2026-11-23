@@ -193,7 +193,7 @@ ${shown.map((k) => html`<section class="inv-kind" aria-labelledby="k-${k.id.repl
             title: `${d.name} · ${RARITY_LABEL[d.rarity]} ${k.name.toLowerCase()}`,
             // What the item is, how many people own it and how it is got; its flavor text alone ("Angelic") said none of that.
             description: itemDescription(d, k),
-            body: html`<p class="crumbs"><a href="${url(`/items`)}">Every item</a> › <a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}">${k.name}</a></p>
+            body: html`<p class="crumbs"><a href="${url(`/items`)}">Every item</a> <i data-ov-icon="chevron" aria-hidden="true"></i> <a href="${url(`/items?kind=${encodeURIComponent(k.id)}`)}">${k.name}</a></p>
 <div class="inv-detail r-${d.rarity}">
   ${art(d, { size: 'xl' })}
   <div>
